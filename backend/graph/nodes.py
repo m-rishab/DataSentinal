@@ -56,54 +56,150 @@ JSON_ONLY = (
 async def ingest_node(state: dict) -> dict:
     url = state["dataset_url"]
     logger.info("ingest: %s", url)
+
     evidence = [f"Source dataset URL: {url}"]
     errors = []
+
     try:
-        meta = await asyncio.to_thread(get_or_scrape, url, scrape_kaggle_dataset, scrape_huggingface_dataset, is_huggingface_url)
-        cache_note = " (served from cache)" if meta.pop("_cache", None) == "hit" else ""
-        evidence.append(f"Source page scraped{cache_note}.")
+        meta = await asyncio.to_thread(
+            get_or_scrape,
+            url,
+            scrape_kaggle_dataset,
+            scrape_huggingface_dataset,
+            is_huggingface_url,
+        )
+
+        cache_note = (
+            " (served from cache)"
+            if meta.pop("_cache", None) == "hit"
+            else ""
+        )
+
+        evidence.append(
+            f"Source page scraped{cache_note}."
+        )
+
         if is_huggingface_url(url):
-            evidence.append("Source identified as Hugging Face — audited via the public Hub API.")
+            evidence.append(
+                "Source identified as Hugging Face — audited via the public Hub API."
+            )
+
         evidence.append(
             f"Ingested metadata: title='{meta.get('title')}', "
-            f"license={meta.get('license') or 'MISSING'}, files={len(meta.get('files') or [])}, "
+            f"license={meta.get('license') or 'MISSING'}, "
+            f"files={len(meta.get('files') or [])}, "
             f"columns={len(meta.get('columns') or [])}"
         )
+
     except (KaggleScrapeError, HFDatasetError) as exc:
         logger.warning("ingest degraded: %s", exc)
         errors.append(f"Ingestion warning: {exc}")
+
         meta = {
-            "title": url.rstrip("/").split("/datasets/")[-1].replace("-", " ").title(),
+            "title": (
+                url.rstrip("/")
+                .split("/datasets/")[-1]
+                .replace("-", " ")
+                .title()
+            ),
             "description": None,
             "license": None,
             "tags": [],
             "upload_date": None,
             "files": [],
             "columns": [],
-            "source": "huggingface" if is_huggingface_url(url) else "kaggle",
+            "source": (
+                "huggingface"
+                if is_huggingface_url(url)
+                else "kaggle"
+            ),
         }
-        evidence.append("Source page scrape failed; metadata derived from URL slug only.")
 
-    inspection = await asyncio.to_thread(inspect_dataset, meta)
+        evidence.append(
+            "Source page scrape failed; metadata derived from URL slug only."
+        )
+
+    # Static metadata inspection.
+    inspection = await asyncio.to_thread(
+        inspect_dataset,
+        meta,
+    )
+
     for check in inspection.get("checks", []):
-        icon = {"pass": "PASS", "warning": "WARN", "mismatch": "WARN", "skipped": "SKIP"}.get(check.get("result"), "INFO")
-        evidence.append(f"[{icon}] {check['check']}: {check['detail']}")
+        icon = {
+            "pass": "PASS",
+            "warning": "WARN",
+            "mismatch": "WARN",
+            "skipped": "SKIP",
+        }.get(
+            check.get("result"),
+            "INFO",
+        )
+
+        evidence.append(
+            f"[{icon}] {check['check']}: {check['detail']}"
+        )
 
     # Real content profiling — download rows and compute actual stats.
-    profile = await asyncio.to_thread(profile_dataset, url, meta)
+    profile = await asyncio.to_thread(
+        profile_dataset,
+        url,
+        meta,
+    )
+
     if profile:
-        inspection["checks"] = (inspection.get("checks") or []) + profile.get("profile_checks", [])
+        inspection["checks"] = (
+            inspection.get("checks") or []
+        ) + profile.get(
+            "profile_checks",
+            [],
+        )
+
         for check in profile.get("profile_checks", []):
-            icon = {"pass": "PASS", "warning": "WARN", "skipped": "SKIP"}.get(check.get("result"), "INFO")
-            evidence.append(f"[{icon}] {check['check']}: {check['detail']}")
+            icon = {
+                "pass": "PASS",
+                "warning": "WARN",
+                "skipped": "SKIP",
+            }.get(
+                check.get("result"),
+                "INFO",
+            )
+
+            evidence.append(
+                f"[{icon}] {check['check']}: {check['detail']}"
+            )
+
+        # Kaggle can return 0 columns even when the actual dataset was
+        # successfully downloaded and profiled. Use the profiler's real
+        # columns as the metadata fallback.
+        profiled_columns = profile.get("columns_profiled") or []
+
+        if not meta.get("columns") and profiled_columns:
+            meta["columns"] = list(profiled_columns)
+
+            evidence.append(
+                "Column metadata was populated from the actual profiled dataset."
+            )
+
+            logger.info(
+                "Using profiled columns as metadata fallback: %d columns",
+                len(meta["columns"]),
+            )
 
     # Sample rows are inspection input only — never shipped in the report.
     meta.pop("sample_rows", None)
+
     return {
-        "metadata": {k: v for k, v in meta.items() if k != "source"},
+        "metadata": {
+            k: v
+            for k, v in meta.items()
+            if k != "source"
+        },
         "file_inspection": inspection,
         "data_profile": {
-            k: v for k, v in (profile or {}).items() if k != "profile_checks"
+            k: v
+            for k, v in (profile or {}).items()
+            if k != "profile_checks"
         },
         "evidence_log": evidence,
         "errors": errors,
