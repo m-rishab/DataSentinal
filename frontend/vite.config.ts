@@ -11,4 +11,7 @@ export default defineConfig({
       '/runs': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },
+  preview: {
+    allowedHosts: ['datasentinal-production-b265.up.railway.app'],
+  },
 })
