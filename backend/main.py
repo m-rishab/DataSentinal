@@ -329,6 +329,16 @@ class AuditRequest(BaseModel):
         return value
 
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "DataSentinel API"}
+
+
+@app.get("/health")
+def health():
+    return {"status": "healthy"}
+
+
 @app.post("/audit", status_code=202)
 async def start_audit(request: AuditRequest) -> dict:
     run_id = uuid.uuid4().hex[:12]
@@ -494,3 +504,4 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", "8000")),
         reload=False,
     )
+
