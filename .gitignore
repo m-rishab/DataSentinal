@@ -1,0 +1,8 @@
+myenv/
+frontend/node_modules/
+frontend/dist/
+__pycache__/
+*.pyc
+.env
+datasentinel.db
+.DS_Store

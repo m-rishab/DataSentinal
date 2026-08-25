@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0e7490;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #111827;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: rgba(14, 116, 144, 0.18);
+}
+
+/* Slim, unobtrusive scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fadeInUp 0.55s ease forwards;
+}
+
+@keyframes nodePop {
+  0% { opacity: 0; transform: scale(0.55); }
+  70% { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.node-pop {
+  animation: nodePop 0.48s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+/* Draw each edge exactly once — the base path never changes after mount,
+   so status updates can't re-trigger this animation (no re-link flicker). */
+@keyframes drawEdge {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+.edge-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: drawEdge 0.6s ease-out forwards;
+}
+
+/* Continuous signal flow along active edges */
+@keyframes dashFlow {
+  to { stroke-dashoffset: -28; }
+}
+.edge-flow {
+  stroke-dasharray: 10 18;
+  animation: dashFlow 0.9s linear infinite;
+}
+
+/* Retry-loop edge: gentle breathing pulse instead of marching dashes —
+   dashes racing around the long arc read as flicker/blinking. */
+@keyframes retryPulse {
+  0%, 100% { opacity: 0.95; }
+  50% { opacity: 0.4; }
+}
+.retry-active {
+  animation: retryPulse 1.6s ease-in-out infinite;
+}
+
+/* Soft halo behind the currently-running nodes */
+@keyframes runHalo {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.16), 0 2px 12px rgba(6, 182, 212, 0.18); }
+  50% { box-shadow: 0 0 0 6px rgba(6, 182, 212, 0.26), 0 4px 20px rgba(6, 182, 212, 0.30); }
+}
+.node-running {
+  animation: runHalo 1.6s ease-in-out infinite;
+}
+
+@keyframes slideCardIn {
+  from { transform: translateX(48px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.slide-card-in {
+  animation: slideCardIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Light, minimalist canvas: white base + faint blueprint grid */
+.graph-canvas {
+  background-color: #ffffff;
+  background-image:
+    radial-gradient(ellipse 70% 55% at 18% 8%, rgba(6, 182, 212, 0.06), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 92% 92%, rgba(99, 102, 241, 0.05), transparent 50%),
+    linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
+  background-size: auto, auto, 30px 30px, 30px 30px;
+}
+
+/* Hover previews fade in after a short delay, so sweeping the mouse
+   across the graph doesn't flash cards everywhere. */
+@keyframes previewIn {
+  from { opacity: 0; transform: translate(0, calc(-50% + 4px)); }
+  to { opacity: 1; transform: translate(0, -50%); }
+}
+.preview-in {
+  opacity: 0;
+  animation: previewIn 0.16s ease-out 0.18s forwards;
+}
+
+/* Print / PDF: show only the report, cleanly on white. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 8px;
+    animation: none !important;
+  }
+  .no-print,
+  header,
+  footer {
+    display: none !important;
+  }
+}
