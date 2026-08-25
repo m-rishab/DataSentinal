@@ -7,9 +7,6 @@ with an evidence-backed report.
 
 🔗 **Live demo:** [dataasentinal.onrender.com](https://dataasentinal.onrender.com)
 
-> Note: the demo runs on Render's free tier, so the first request may take
-> ~30–60s to wake the instance.
-
 ## What it checks
 
 - **Ingest** — scrapes Kaggle/HF page metadata (title, license, tags, files, columns)
