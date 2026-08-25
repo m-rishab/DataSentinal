@@ -5,6 +5,11 @@ license, consent signals, citing papers (with retraction checks), duplication
 markers, and profiles the **actual data**, then gives you a 0–100 trust score
 with an evidence-backed report.
 
+🔗 **Live demo:** [dataasentinal.onrender.com](https://dataasentinal.onrender.com)
+
+> Note: the demo runs on Render's free tier, so the first request may take
+> ~30–60s to wake the instance.
+
 ## What it checks
 
 - **Ingest** — scrapes Kaggle/HF page metadata (title, license, tags, files, columns)
@@ -54,6 +59,8 @@ cd frontend && npm install && npm run dev
 ```
 
 Open the app, paste a `kaggle.com/datasets/*` or `huggingface.co/datasets/*` URL, run audit.
+
+Or skip the setup and just try the [live demo](https://dataasentinal.onrender.com).
 
 ## API
 
