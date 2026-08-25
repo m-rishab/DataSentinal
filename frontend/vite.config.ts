@@ -8,6 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/audit': { target: 'http://localhost:8000', changeOrigin: true },
+      '/runs': { target: 'http://localhost:8000', changeOrigin: true },
     },
   },
 })

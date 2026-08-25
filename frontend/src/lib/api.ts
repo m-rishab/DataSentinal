@@ -1,6 +1,6 @@
 import type { AuditReport, LiveMetadataResponse, RunSummary, SSEEvent } from './types'
 
-const BASE = ''  // relative URLs — Vite proxy in dev, same-origin in production
+const BASE = import.meta.env.VITE_API_URL ?? ''
 
 export async function startAudit(url: string, failUnder?: number | null): Promise<{ run_id: string; fail_under?: number | null }> {
   const res = await fetch(`${BASE}/audit`, {
