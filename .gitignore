@@ -6,3 +6,6 @@ __pycache__/
 .env
 datasentinel.db
 .DS_Store
+
+.env
+frontend/.env.production
