@@ -176,6 +176,7 @@ async def ingest_node(state: dict) -> dict:
 
         if not meta.get("columns") and profiled_columns:
             meta["columns"] = list(profiled_columns)
+            inspection["columns_detected"] = len(profiled_columns)
 
             evidence.append(
                 "Column metadata was populated from the actual profiled dataset."

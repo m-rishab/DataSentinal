@@ -188,7 +188,8 @@ def _result_for(node: str, payload: Any) -> Optional[str]:
             ins = payload.get("file_inspection") or {}
             prof = payload.get("data_profile") or {}
             files = ins.get("files_checked", len(md.get("files") or []))
-            chip = f"{files} files · {ins.get('columns_detected', 0)} cols"
+            cols = len(md.get("columns") or []) or ins.get("columns_detected", 0) or len(prof.get("columns_profiled") or [])
+            chip = f"{files} files · {cols} cols"
             if prof.get("rows_profiled"):
                 chip += f" · {prof['rows_profiled']} rows profiled"
             return chip
