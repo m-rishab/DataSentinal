@@ -1150,6 +1150,119 @@ def _metadata_is_thin(
     )
 
 
+def _kaggle_api_metadata(
+    url: str,
+) -> dict[str, Any] | None:
+    """Fetch dataset metadata from the Kaggle public REST API.
+
+    The ``/api/v1/datasets/view/{owner}/{dataset}`` endpoint returns
+    structured JSON **without authentication** for public datasets.
+    It is the most reliable source of license, title, description,
+    tags and file list — immune to bot-challenge HTML pages.
+    """
+
+    slug = (
+        url.rstrip("/")
+        .split("/datasets/")[-1]
+        .strip("/")
+    )
+
+    if not slug or "/" not in slug:
+        return None
+
+    api_url = (
+        f"https://www.kaggle.com/api/v1/datasets/view/{slug}"
+    )
+
+    try:
+        resp = requests.get(
+            api_url,
+            headers={
+                "User-Agent": "DataSentinel/1.0 (dataset provenance audit)",
+            },
+            timeout=20.0,
+        )
+
+        if resp.status_code != 200:
+            logger.info(
+                "Kaggle API returned %s for %s",
+                resp.status_code,
+                slug,
+            )
+            return None
+
+        data = resp.json()
+
+    except (
+        requests.RequestException,
+        json.JSONDecodeError,
+        ValueError,
+    ) as exc:
+        logger.info(
+            "Kaggle API request failed for %s: %s",
+            slug,
+            exc,
+        )
+        return None
+
+    license_name = data.get("licenseName")
+
+    tags = [
+        t.get("name", "")
+        for t in (data.get("tags") or [])
+        if isinstance(t, dict) and t.get("name")
+    ]
+
+    # The /view endpoint may not include file names; fetch them from
+    # the /list endpoint which always returns datasetFiles.
+    files: list[str] = [
+        f.get("name", "")
+        for f in (data.get("files") or [])
+        if isinstance(f, dict) and f.get("name")
+    ]
+
+    if not files:
+        try:
+            list_resp = requests.get(
+                f"https://www.kaggle.com/api/v1/datasets/list/{slug}",
+                headers={
+                    "User-Agent": "DataSentinel/1.0 (dataset provenance audit)",
+                },
+                timeout=15.0,
+            )
+
+            if list_resp.status_code == 200:
+                list_data = list_resp.json()
+                files = [
+                    f.get("name", "")
+                    for f in (list_data.get("datasetFiles") or [])
+                    if isinstance(f, dict) and f.get("name")
+                ]
+
+        except (
+            requests.RequestException,
+            json.JSONDecodeError,
+            ValueError,
+        ):
+            pass
+
+    columns = [
+        c.get("name", "")
+        for c in (data.get("columns") or [])
+        if isinstance(c, dict) and c.get("name")
+    ]
+
+    return {
+        "title": data.get("title"),
+        "description": data.get("description"),
+        "license": license_name,
+        "upload_date": data.get("lastUpdated"),
+        "tags": tags[:15],
+        "files": files[:50],
+        "columns": columns[:60],
+    }
+
+
 def _normalise_metadata(
     meta: dict[str, Any],
 ) -> dict[str, Any]:
@@ -1333,6 +1446,43 @@ def scrape_kaggle_dataset(
                 "Unexpected Kaggle headless-render error: %s",
                 exc,
             )
+
+    # ==============================================================
+    # PASS 2a: KAGGLE PUBLIC API — always works, no auth needed,
+    # returns structured JSON.  Used as a reliable fallback when HTML
+    # scraping yields incomplete metadata (common on Render where
+    # Chromium is unavailable and Kaggle serves challenge pages).
+    # ==============================================================
+
+    if _metadata_is_thin(meta) or not meta.get("license"):
+        api_meta = _kaggle_api_metadata(url)
+        if api_meta:
+            meta["title"] = (
+                meta.get("title")
+                or api_meta.get("title")
+            )
+            meta["description"] = (
+                meta.get("description")
+                or api_meta.get("description")
+            )
+            meta["license"] = (
+                meta.get("license")
+                or api_meta.get("license")
+            )
+            meta["upload_date"] = (
+                meta.get("upload_date")
+                or api_meta.get("upload_date")
+            )
+            meta["tags"] = list(
+                dict.fromkeys(
+                    (meta.get("tags") or [])
+                    + (api_meta.get("tags") or [])
+                )
+            )[:15]
+            if not meta.get("files") and api_meta.get("files"):
+                meta["files"] = api_meta["files"]
+            if not meta.get("columns") and api_meta.get("columns"):
+                meta["columns"] = api_meta["columns"]
 
     # ==============================================================
     # PASS 2b: RETRY HTTP when headless browser unavailable and
