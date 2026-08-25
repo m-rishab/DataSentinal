@@ -46,9 +46,10 @@ export default function ReportView({
 }) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [copied, setCopied] = useState(false)
-  const { data: report, isLoading, error } = useQuery({
+  const { data: report, isLoading, isFetching, error } = useQuery({
     queryKey: ['report', runId],
     queryFn: () => fetchReport(runId),
+    retry: Infinity,
     retryDelay: 1000,
   })
 
@@ -63,7 +64,7 @@ export default function ReportView({
     }
   }
 
-  if (isLoading) {
+  if (isLoading || (isFetching && !report)) {
     return (
       <div className="flex flex-col items-center gap-2 py-20">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-slate-800" />
