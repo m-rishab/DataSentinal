@@ -90,6 +90,9 @@ export default function ReportView({
   const breakdown = report.score_breakdown ?? {}
   const gate = report.gate
   const licenseInfo = explainLicense(report.metadata.license)
+  const effectiveColumns = report.metadata.columns?.length
+    ? report.metadata.columns
+    : report.data_profile?.columns_profiled ?? []
 
   return (
     <div className="w-full space-y-8 fade-in-up print-area">
@@ -288,8 +291,8 @@ export default function ReportView({
                   Columns
                   <Info text="Column (field) names detected on the dataset page — tells you what each record contains." />
                 </span>
-                <p className={`text-sm font-bold mt-1 ${(report.metadata.columns?.length ?? 0) > 0 ? 'text-slate-900' : 'text-amber-600'}`}>
-                  {(report.metadata.columns?.length ?? 0)} detected
+                <p className={`text-sm font-bold mt-1 ${effectiveColumns.length > 0 ? 'text-slate-900' : 'text-amber-600'}`}>
+                  {effectiveColumns.length} detected
                 </p>
               </div>
             </div>
@@ -309,7 +312,7 @@ export default function ReportView({
                 <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1">
                   <span className="text-[11px] font-bold uppercase tracking-widest text-slate-600">File Inspection</span>
                   <span className="font-mono text-[10.5px] text-slate-400">
-                    {report.file_inspection.files_checked ?? 0} files · {report.file_inspection.columns_detected ?? 0} cols
+                    {report.file_inspection.files_checked ?? 0} files · {effectiveColumns.length} cols
                     {report.file_inspection.rows_sampled != null ? ` · ${report.file_inspection.rows_sampled} rows sampled` : ''}
                     {report.file_inspection.headers_verified ? ' · headers verified' : ''}
                   </span>
@@ -433,11 +436,11 @@ export default function ReportView({
               </div>
             )}
 
-            {(report.metadata.columns?.length ?? 0) > 0 && (
+            {effectiveColumns.length > 0 && (
               <div>
                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-2">Dataset Columns</span>
                 <div className="flex flex-wrap gap-1.5">
-                  {report.metadata.columns!.map((col) => (
+                  {effectiveColumns.map((col) => (
                     <span key={col} className="font-mono text-[10px] font-medium text-slate-600 bg-slate-50 border border-slate-200 px-2 py-1 rounded-md">
                       {col}
                     </span>
