@@ -9,12 +9,16 @@ Extraction strategy, in order:
 5. Regex-based file / license / column extraction.
 6. Headless Chromium rendering when the HTTP response is incomplete,
    blocked, or otherwise does not expose files/columns.
-7. URL-slug fallback for the dataset title.
+7. Second HTTP attempt when the first yielded nothing (challenge page)
+   and headless rendering is unavailable.
+8. URL-slug fallback for the dataset title.
 
 Important deployment behavior:
 - Kaggle may return 403/404/challenge HTML to a normal HTTP client.
 - Those responses are NOT treated as an immediate fatal scraper error.
 - The scraper attempts the headless browser fallback before giving up.
+- If headless rendering is unavailable (e.g. on Render), a single HTTP
+  retry is attempted before falling back to the URL slug.
 - Headless browser failures are logged so deployment problems are visible.
 """
 
@@ -1328,6 +1332,25 @@ def scrape_kaggle_dataset(
             logger.exception(
                 "Unexpected Kaggle headless-render error: %s",
                 exc,
+            )
+
+    # ==============================================================
+    # PASS 2b: RETRY HTTP when headless browser unavailable and
+    # the first attempt yielded nothing (likely a Kaggle challenge page).
+    # ==============================================================
+
+    if _metadata_is_thin(meta) and not meta.get("license"):
+        logger.info(
+            "Kaggle metadata still incomplete after headless attempt. "
+            "Retrying HTTP request once."
+        )
+
+        retry_resp = _http_get(url)
+
+        if retry_resp is not None and retry_resp.text:
+            meta = _merge_plain_http_metadata(
+                meta,
+                retry_resp.text,
             )
 
     # ==============================================================
