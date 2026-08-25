@@ -88,7 +88,7 @@ async def llm_json(system_prompt: str, user_prompt: str, fallback: Any) -> Any:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.1,
+            temperature=0.0,
             max_tokens=1500,
         )
         content = response.choices[0].message.content

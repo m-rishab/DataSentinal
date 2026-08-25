@@ -49,5 +49,8 @@ def get_or_scrape(
         hit["_cache"] = "hit"
         return hit
     meta = hf_scraper(url) if is_huggingface(url) else kaggle_scraper(url)
-    _put(url, meta)
+    # Only cache complete results — partial scrapes (missing title or both
+    # files and columns) would lock in bad data for 30 minutes.
+    if meta.get("title") and (meta.get("files") or meta.get("columns")):
+        _put(url, meta)
     return meta
