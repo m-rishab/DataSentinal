@@ -470,11 +470,6 @@ async def get_verdict(run_id: str):
     }
 
 
-@app.get("/")
-def root() -> dict:
-    return {"status": "ok", "service": "DataSentinel API"}
-
-
 @app.get("/health")
 def health() -> dict:
     return {"status": "healthy"}
