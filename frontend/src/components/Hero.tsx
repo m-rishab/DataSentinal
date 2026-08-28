@@ -1,86 +1,91 @@
-import { useState } from 'react'
-import AuditForm, { EXAMPLE } from './AuditForm'
-import HeroDemo from './HeroDemo'
-
-const EXAMPLES = [
-  { label: 'Iris', url: 'https://www.kaggle.com/datasets/uciml/iris' },
-  { label: 'Titanic', url: 'https://www.kaggle.com/datasets/yasserh/titanic-dataset' },
-  { label: 'IMDb', url: 'https://huggingface.co/datasets/imdb' },
-]
+import { useEffect, useState } from 'react'
+import AuditForm from './AuditForm'
+import ProvenanceViz from './ProvenanceViz'
+import { DEMOS, DEFAULT_DEMO, type DemoDataset } from '../lib/demo'
+import { usePrefersReducedMotion, useScrollProgress } from '../hooks'
 
 export default function Hero({ onStart }: { onStart: (url: string, runId: string) => void }) {
-  const [url, setUrl] = useState(EXAMPLE)
+  const [url, setUrl] = useState(DEFAULT_DEMO.url)
+  const [demo, setDemo] = useState<DemoDataset>(DEFAULT_DEMO)
+  const [heads, setHeads] = useState(false)
+  const reduced = usePrefersReducedMotion()
+
+  /* Masked headline reveal on load. */
+  useEffect(() => {
+    const t = window.setTimeout(() => setHeads(true), reduced ? 0 : 60)
+    return () => window.clearTimeout(t)
+  }, [reduced])
+
+  /* Scroll-linked: hero gently compresses/tilts as the next section arrives. */
+  const { ref, progress } = useScrollProgress<HTMLElement>()
+  const leaving = Math.min(1, Math.max(0, (progress - 0.82) / 0.18))
+
+  const pickDemo = (d: DemoDataset) => {
+    setUrl(d.url)
+    setDemo(d)
+  }
 
   return (
-    <section id="top" className="relative overflow-hidden px-6 pb-14 pt-28">
-      {/* Restrained backdrop: extremely low-opacity radial washes, no grid, no particles */}
+    <section ref={ref} id="top" className={`relative overflow-hidden px-6 pb-10 pt-24 sm:pt-28 ${heads ? 'fade-in' : ''}`}>
+      {/* Motion-ramp from the hero into the agents section: stretches the scene. */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="relative transition-transform duration-700"
         style={{
-          background:
-            'radial-gradient(ellipse 60% 42% at 50% -8%, rgba(107,150,196,0.10), transparent 62%), radial-gradient(ellipse 40% 32% at 82% 18%, rgba(53,194,179,0.06), transparent 60%), radial-gradient(ellipse 44% 34% at 14% 20%, rgba(107,150,196,0.05), transparent 60%)',
+          transform: `scale(${1 - leaving * 0.055}) translateY(${leaving * 34}px)`,
+          opacity: 1 - leaving * 0.9,
         }}
-        aria-hidden="true"
-      />
-      {/* Horizontal hairline seat at the bottom of the hero */}
-      <div className="rule-fade relative mx-auto mt-14 max-w-4xl" />
+      >
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="eyebrow justify-center">
+            <span className="h-px w-6" style={{ background: 'var(--color-info)' }} aria-hidden="true" />
+            Dataset Provenance Watchdog
+            <span className="h-px w-6" style={{ background: 'var(--color-info)' }} aria-hidden="true" />
+          </p>
 
-      <div className="relative mx-auto w-full max-w-3xl fade-in-up">
-        <p className="eyebrow justify-center">
-          <span className="h-px w-6" style={{ background: 'var(--color-info)' }} aria-hidden="true" />
-          Dataset Provenance Watchdog
-          <span className="h-px w-6" style={{ background: 'var(--color-info)' }} aria-hidden="true" />
-        </p>
-
-        <h1
-          className="mt-5 text-center font-display text-[clamp(2.1rem,5.4vw,3.6rem)] font-semibold leading-[1.06] tracking-tight"
-          style={{ color: 'var(--color-primary)' }}
-        >
-          Before you build on a dataset,
-          <br className="hidden sm:block" /> know what you're{' '}
-          <em
-            className="font-editorial font-semibold italic not-italic"
-            style={{
-              color: 'var(--color-accent)',
-              fontStyle: 'italic',
-            }}
-          >
-            trusting.
-          </em>
-        </h1>
-
-        <p className="mx-auto mt-5 max-w-xl text-center text-[0.9375rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
-          Audit Kaggle and Hugging Face datasets for licensing, consent, citations, duplication and data quality — then
-          get an evidence-backed trust score.
-        </p>
-
-        <div className="mx-auto mt-8 max-w-xl">
-          <AuditForm onStart={onStart} url={url} onUrlChange={setUrl} cta="Audit Dataset" id="audit" />
-
-          {/* Secondary example actions */}
-          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
-            <span className="font-mono text-[0.6875rem] uppercase tracking-[0.16em]" style={{ color: 'var(--color-muted)' }}>
-              Try
+          <h1 className="mt-5 font-display text-[clamp(2.4rem,7vw,4.9rem)] font-semibold leading-[1.02] tracking-[-0.02em]">
+            <span className={`mask-line ${heads ? 'is-visible' : ''}`}>
+              <span style={{ transitionDelay: heads ? '60ms' : '0ms' }}>Before you build on a dataset,</span>
             </span>
-            {EXAMPLES.map((ex) => (
-              <button
-                key={ex.url}
-                type="button"
-                onClick={() => setUrl(ex.url)}
-                className="chip transition-colors"
-                style={{ color: url === ex.url ? 'var(--color-accent)' : undefined, borderColor: url === ex.url ? 'color-mix(in srgb, var(--color-accent) 45%, transparent)' : undefined }}
-              >
-                {ex.label}
-              </button>
-            ))}
+            <span className={`mask-line ${heads ? 'is-visible' : ''}`}>
+              <span style={{ transitionDelay: heads ? '160ms' : '0ms' }}>
+                know what you're <em className="not-italic" style={{ color: 'var(--color-accent)', fontStyle: 'normal' }}>trusting</em>.
+              </span>
+            </span>
+          </h1>
+
+          <p className="mx-auto mt-5 max-w-xl text-[0.9375rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
+            Audit Kaggle and Hugging Face datasets for licensing, consent, citations, duplication and data quality — then
+            get an evidence-backed trust score.
+          </p>
+
+          <div className="mx-auto mt-7 max-w-lg">
+            <AuditForm onStart={onStart} url={url} onUrlChange={setUrl} cta="Audit Dataset →" id="audit" />
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+              <span className="font-mono text-[0.6875rem] uppercase tracking-[0.16em]" style={{ color: 'var(--color-muted)' }}>
+                Try
+              </span>
+              {DEMOS.map((d) => (
+                <button
+                  key={d.url}
+                  type="button"
+                  onClick={() => pickDemo(d)}
+                  className="chip transition-colors"
+                  style={demo.label === d.label ? { color: 'var(--color-accent)', borderColor: 'color-mix(in srgb, var(--color-accent) 45%, transparent)' } : undefined}
+                  aria-pressed={demo.label === d.label}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Live miniature of the actual product, not a decoration */}
-        <div className="mx-auto mt-9 max-w-2xl">
-          <HeroDemo />
+        <div className="mt-8">
+          <ProvenanceViz dataset={demo} />
         </div>
       </div>
+
+      <div className="rule-fade relative mx-auto mt-10 max-w-4xl" />
     </section>
   )
 }

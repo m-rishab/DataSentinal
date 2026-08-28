@@ -57,3 +57,58 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(threshold = 0.
 
   return { ref, visible }
 }
+
+export function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReduced(mq.matches)
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return reduced
+}
+
+/**
+ * Fractional scroll progress (0..1) of `ref` through the viewport, driven by
+ * a passive scroll listener + rAF. `pin` returns progress through the section's
+ * pinned window when the top of the track crosses the viewport.
+ */
+export function useScrollProgress<T extends HTMLElement = HTMLDivElement>() {
+  const ref = useRef<T | null>(null)
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const rect = el.getBoundingClientRect()
+      const vh = window.innerHeight
+      if (rect.bottom <= 0) {
+        setProgress(1)
+        return
+      }
+      if (rect.top >= vh) {
+        setProgress(0)
+        return
+      }
+      setProgress(Math.min(1, Math.max(0, (vh - rect.top) / (rect.height + vh))))
+    }
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  return { ref, progress }
+}
