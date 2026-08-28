@@ -1,6 +1,8 @@
 """DataSentinel FastAPI backend.
 
 Endpoints:
+    GET  /                     — root endpoint (status check)
+    GET  /health               — health probe
     POST /audit                — start an audit run, returns {"run_id": ...}
     GET  /audit/{id}/stream    — SSE live progress events for the run
     GET  /audit/{id}/report    — final JSON report (SQLite-backed cache)
@@ -330,6 +332,21 @@ class AuditRequest(BaseModel):
         return value
 
 
+@app.get("/")
+def root() -> dict:
+    return {
+        "status": "ok",
+        "service": "DataSentinel API"
+    }
+
+
+@app.get("/health")
+def health() -> dict:
+    return {
+        "status": "healthy"
+    }
+
+
 @app.post("/audit", status_code=202)
 async def start_audit(request: AuditRequest) -> dict:
     run_id = uuid.uuid4().hex[:12]
@@ -500,3 +517,4 @@ if __name__ == "__main__":
         port=int(os.getenv("PORT", "8000")),
         reload=False,
     )
+
