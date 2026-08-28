@@ -54,31 +54,33 @@ export default function Hero({ onStart }: { onStart: (url: string, runId: string
       />
 
       <div className="relative mx-auto w-full max-w-3xl">
-        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.25)]">
+        <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3.5 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.25)]">
           <span className="relative flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-300" />
           </span>
-          LangGraph + NVIDIA Nemotron
+          LangGraph · NVIDIA Nemotron
         </div>
 
-        <h1 className="font-display max-w-3xl text-[clamp(2.1rem,5.4vw,3.5rem)] font-bold leading-[1.1] tracking-tight text-slate-50">
-          Know the{' '}
-          <span className="bg-gradient-to-r from-cyan-300 via-teal-300 to-indigo-300 bg-clip-text text-transparent">
-            truth behind
-          </span>{' '}
-          every dataset.
+        <h1 className="font-editorial max-w-3xl text-[clamp(2.7rem,6.2vw,4.6rem)] font-medium leading-[1.02] tracking-[-0.015em] text-[#f2edd8]">
+          Know the <em className="text-glow font-semibold not-italic">truth</em> behind{' '}
+          <em className="font-black italic text-slate-50">every dataset.</em>
         </h1>
 
-        <p className="mt-3 max-w-xl text-[15.5px] leading-relaxed text-slate-400">
+        <p className="mt-5 max-w-xl text-[16.5px] font-normal leading-[1.7] text-slate-400">
           Audit license compliance, citation trails, and originality for any public dataset — live, in one pass.
         </p>
 
-        <div className="mt-6">
+        <div className="mt-7">
           <AuditForm onStart={onStart} />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="rule-fade mt-8 flex items-center justify-between gap-3 pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+          <span>07 parallel agents · live stream</span>
+          <span className="hidden text-slate-400 sm:inline">OpenAlex · NVIDIA Nemotron</span>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {steps.map((s) => (
             <div
               key={s.n}
@@ -99,6 +101,26 @@ export default function Hero({ onStart }: { onStart: (url: string, runId: string
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Scroll hint — the editorial nudge to keep going down. */}
+      <div className="pointer-events-none absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 sm:flex">
+        <span className="scroll-hint font-mono text-[9px] uppercase tracking-[0.22em] text-slate-500">
+          Scroll
+        </span>
+        <svg
+          className="scroll-hint text-cyan-300"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
       </div>
     </section>
   )

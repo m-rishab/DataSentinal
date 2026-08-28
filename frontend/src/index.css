@@ -4,6 +4,7 @@
   --color-primary: #22d3ee;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-editorial: "Fraunces", "Space Grotesk", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -23,6 +24,10 @@ body {
 .font-display {
   font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.01em;
+}
+
+.font-editorial {
+  font-family: "Fraunces", "Space Grotesk", ui-serif, Georgia, serif;
 }
 
 ::selection {
@@ -266,6 +271,7 @@ input:-webkit-autofill:focus {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.35));
 }
 
 @keyframes orbDrift {
@@ -274,6 +280,58 @@ input:-webkit-autofill:focus {
 }
 .orb-drift {
   animation: orbDrift 9s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Landing page — editorial touches from the Kombai inspirations.      */
+/* ------------------------------------------------------------------ */
+
+/* Fixed scroll-progress bar (Midnight Studio style). */
+@keyframes barSheen {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(18deg); }
+}
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  z-index: 60;
+  background: linear-gradient(90deg, #67e8f9 0%, #2dd4bf 50%, #a5b4fc 100%);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.55);
+  transform-origin: 0 50%;
+  will-change: transform;
+  animation: barSheen 6s ease-in-out infinite;
+}
+
+/* Soft gradient hairline for section separators (no hard borders). */
+.rule-fade {
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.28) 20%, rgba(148, 163, 184, 0.28) 80%, transparent) 1;
+}
+
+@keyframes scrollHint {
+  0%, 100% { transform: translateY(0); opacity: 0.85; }
+  50% { transform: translateY(6px); opacity: 0.35; }
+}
+.scroll-hint {
+  animation: scrollHint 2.2s ease-in-out infinite;
+}
+
+/* Editorial pipeline rows: arrow nudges right on hover.
+   Numbers are mono; titles use the display face. */
+.pipeline-row {
+  cursor: pointer;
+}
+.pipeline-row .pipeline-arrow {
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pipeline-row:hover .pipeline-arrow {
+  transform: translateX(6px);
+}
+.pipeline-row:hover .pipeline-arrow-svg {
+  color: #22d3ee;
 }
 
 /* ------------------------------------------------------------------ */

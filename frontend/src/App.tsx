@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import Header from './components/Header'
 import Hero from './components/Hero'
 import LiveStepper from './components/LiveStepper'
+import PipelineStrip from './components/PipelineStrip'
 import ReportView from './components/ReportView'
 import RunHistory from './components/RunHistory'
 import Footer from './components/Footer'
@@ -14,6 +15,20 @@ export default function App() {
   const [phase, setPhase] = useState<Phase>('landing')
   const [runId, setRunId] = useState<string | null>(null)
   const [datasetUrl, setDatasetUrl] = useState('')
+  const [scrollPct, setScrollPct] = useState(0)
+
+  /* Fixed gradient progress bar on the landing page (Kombai-inspired). */
+  useEffect(() => {
+    const onScroll = () => {
+      const doc = document.documentElement
+      const max = doc.scrollHeight - doc.clientHeight
+      setScrollPct(max > 0 ? Math.min(1, window.scrollY / max) : 0)
+    }
+    if (phase !== 'landing') return
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [phase])
 
   const runsQuery = useQuery({
     queryKey: ['runs'],
@@ -66,10 +81,19 @@ export default function App() {
     >
       <Header compact={phase !== 'landing'} onHome={goHome} />
 
+      {phase === 'landing' && (
+        <div
+          className="scroll-progress"
+          style={{ transform: `scaleX(${scrollPct})` }}
+          aria-hidden="true"
+        />
+      )}
+
       <main className={`flex-1 ${phase === 'running' || phase === 'graph' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         {phase === 'landing' && (
           <>
             <Hero onStart={startRun} />
+            <PipelineStrip />
             <RunHistory
               runs={runsQuery.data ?? []}
               isLoading={runsQuery.isLoading}

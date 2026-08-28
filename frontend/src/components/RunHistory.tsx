@@ -30,11 +30,13 @@ export default function RunHistory({
 
   return (
     <section className="mx-auto w-full max-w-5xl px-6 pb-20">
-      <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="text-[13px] font-bold uppercase tracking-[0.14em] text-slate-500">
-          Recent Audits
-        </h2>
-        <span className="font-mono text-[11px] text-slate-500">{runs.length} stored</span>
+      <div className="rule-fade mb-5 pt-8">
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+            ✦ Recent Audits
+          </h2>
+          <span className="font-mono text-[11px] text-slate-500">{runs.length} stored</span>
+        </div>
       </div>
 
       {runs.length === 0 ? (

@@ -2,8 +2,9 @@ export default function Footer({ compact = false }: { compact?: boolean }) {
   const iconClass = 'text-slate-500 hover:text-cyan-300 transition-colors'
 
   return (
-    <footer className={`border-t border-slate-800/80 bg-[#0a0f1a] ${compact ? 'px-5 py-3' : 'px-5 py-6'}`}>
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
+    <footer className={`bg-[#0a0f1a] ${compact ? 'px-5 py-3' : 'px-5 py-6'}`}>
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 pt-4">
         <div className="flex items-center gap-2">
           <span className="rounded-[5px] bg-gradient-to-br from-cyan-400 to-teal-500 p-[2px] shadow-[0_0_12px_rgba(34,211,238,0.3)]">
             <svg width="15" height="15" viewBox="0 0 32 32" fill="none">
