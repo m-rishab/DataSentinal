@@ -1,37 +1,48 @@
 /**
- * DataSentinel Design System
+ * DataSentinel Design System — TS mirror of the CSS tokens in index.css.
  *
- * Minimal, flat, eye-comfortable dark theme.
- * NO gradients, NO neon glow, NO pure black/white.
- * Saturated colors only on borders/text/small accents, never large fills.
+ * Visual direction: deep charcoal surfaces, blue-gray hairlines, soft white
+ * text, muted gray-blue secondary text, ONE teal accent. Status colors are
+ * desaturated so they read as evidence, not neon. Technical, not cyberpunk.
  */
 
 export const colors = {
-  // Surface layers
-  page: '#0d0f12',
-  card: '#14171b',
-  elevated: '#1a1e23',
+  // Surfaces
+  page: '#0b0e13',
+  surface: '#10141b',
+  panel: '#141a24',
+  panel2: '#182030',
+  elevated: '#1b2333',
 
   // Text hierarchy
   text: {
-    primary: '#e4e6eb',
-    secondary: '#8b9099',
-    disabled: '#5a5f68',
+    primary: '#e8ecf3',
+    secondary: '#9aa3b2',
+    disabled: '#5f6a7a',
   },
 
-  // Borders
+  // Hairlines
   border: {
-    default: 'rgba(255, 255, 255, 0.08)',
-    strong: 'rgba(255, 255, 255, 0.15)',
+    default: 'rgba(141, 155, 178, 0.14)',
+    strong: 'rgba(141, 155, 178, 0.28)',
   },
 
-  // Status colors (desaturated, muted)
+  // Status (desaturated, muted)
   status: {
-    running: '#6b96c4',      // desaturated blue-gray
-    success: '#4a9d7f',      // muted sage-teal
-    error: '#c4645f',        // dusty red
-    pending: '#3a3f47',      // neutral gray
+    accent: '#35c2b3', // DataSentinel teal
+    running: '#6b96c4', // neutral info / running
+    success: '#4a9d7f', // completed / verified
+    warning: '#c9a14a', // caution
+    error: '#c4645f', // failed / critical
+    pending: '#3a414d', // waiting
   },
+} as const
+
+export const fonts = {
+  sans: `'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`,
+  display: `'Space Grotesk', 'Inter', system-ui, sans-serif`,
+  mono: `'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace`,
+  editorial: `'Fraunces', Georgia, serif`,
 } as const
 
 export const transitions = {
@@ -41,12 +52,11 @@ export const transitions = {
 } as const
 
 export const animation = {
-  // Running node pulse: opacity only, no glow
   pulse: {
     duration: '1.5s',
     keyframes: {
       '0%, 100%': { opacity: 1 },
-      '50%': { opacity: 0.6 },
+      '50%': { opacity: 0.55 },
     },
   },
 } as const

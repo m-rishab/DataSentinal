@@ -4,8 +4,27 @@ import { startAudit } from '../lib/api'
 
 const EXAMPLE = 'https://www.kaggle.com/datasets/uciml/iris'
 
-export default function AuditForm({ onStart }: { onStart: (url: string, runId: string) => void }) {
-  const [url, setUrl] = useState('')
+interface AuditFormProps {
+  onStart: (url: string, runId: string) => void
+  /** Controlled URL — lets parent components inject example URLs. */
+  url?: string
+  onUrlChange?: (url: string) => void
+  cta?: string
+  size?: 'lg' | 'md'
+  id?: string
+}
+
+export default function AuditForm({
+  onStart,
+  url: externalUrl,
+  onUrlChange,
+  cta = 'Audit Dataset',
+  size = 'lg',
+  id,
+}: AuditFormProps) {
+  const [internalUrl, setInternalUrl] = useState('')
+  const url = externalUrl !== undefined ? externalUrl : internalUrl
+  const setUrl = onUrlChange ?? setInternalUrl
 
   const mutation = useMutation({
     mutationFn: (targetUrl: string) => startAudit(targetUrl),
@@ -18,10 +37,23 @@ export default function AuditForm({ onStart }: { onStart: (url: string, runId: s
   }
 
   return (
-    <div id="audit" className="w-full">
+    <div id={id} className="w-full">
       <form
         onSubmit={submit}
-        className="flex flex-col gap-2 rounded-2xl border border-slate-800 bg-[#0a0f1a]/90 p-2 shadow-[0_14px_44px_rgba(2,6,16,0.5)] backdrop-blur transition-all focus-within:border-cyan-400/60 focus-within:shadow-[0_14px_48px_rgba(34,211,238,0.16)] sm:flex-row sm:items-center"
+        className="flex flex-col rounded-xl border p-1.5 shadow-[0_14px_44px_rgba(2,6,16,0.5)] sm:flex-row sm:items-center"
+        style={{
+          background: 'var(--color-panel)',
+          borderColor: mutation.isError ? 'color-mix(in srgb, var(--color-error) 60%, transparent)' : 'var(--color-line)',
+          transition: 'border-color 160ms cubic-bezier(0.4,0,0.2,1)',
+        }}
+        onFocusCapture={(e) => {
+          if (!mutation.isError) {
+            e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-accent) 50%, transparent)'
+          }
+        }}
+        onBlurCapture={(e) => {
+          if (!mutation.isError) e.currentTarget.style.borderColor = 'var(--color-line)'
+        }}
       >
         <input
           type="url"
@@ -29,28 +61,43 @@ export default function AuditForm({ onStart }: { onStart: (url: string, runId: s
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.kaggle.com/datasets/owner/dataset-slug"
-          className="min-w-0 flex-1 rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-slate-100 placeholder:text-slate-500 outline-none"
+          aria-label="Dataset URL"
+          className="min-w-0 flex-1 rounded-lg bg-transparent px-4 font-medium outline-none placeholder:text-muted"
+          style={{
+            color: 'var(--color-primary)',
+            fontSize: size === 'lg' ? '0.9375rem' : '0.875rem',
+            paddingTop: size === 'lg' ? '0.925rem' : '0.75rem',
+            paddingBottom: size === 'lg' ? '0.925rem' : '0.75rem',
+          }}
         />
         <button
           type="submit"
-          disabled={mutation.isPending}
-          className="shrink-0 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 px-6 py-3 text-sm font-bold text-[#04121c] shadow-[0_6px_18px_rgba(34,211,238,0.35)] transition-all hover:brightness-110 hover:shadow-[0_8px_26px_rgba(34,211,238,0.5)] active:scale-[0.98] disabled:opacity-50 disabled:hover:brightness-100"
+          disabled={mutation.isPending || !url.trim()}
+          className="btn shrink-0"
+          style={{
+            background: 'var(--color-accent)',
+            borderColor: 'var(--color-accent)',
+            color: '#06201d',
+            fontSize: size === 'lg' ? '0.9375rem' : '0.875rem',
+            padding: size === 'lg' ? '0.875rem 1.75rem' : '0.7rem 1.4rem',
+          }}
         >
-          {mutation.isPending ? 'Starting…' : 'Run Audit'}
+          {mutation.isPending && (
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" className="animate-spin">
+              <path d="M21 12a9 9 0 11-6.2-8.56" />
+            </svg>
+          )}
+          {mutation.isPending ? 'Starting…' : cta}
         </button>
       </form>
 
       {mutation.isError && (
-        <p className="mt-2 text-sm font-semibold text-rose-300">{(mutation.error as Error).message}</p>
+        <p className="mt-2 text-[0.8125rem] font-semibold" style={{ color: 'var(--color-error)' }}>
+          {(mutation.error as Error).message}
+        </p>
       )}
-
-      <button
-        type="button"
-        onClick={() => setUrl(EXAMPLE)}
-        className="mt-2 text-[12px] font-semibold text-cyan-300 underline decoration-dotted underline-offset-2 hover:text-cyan-200"
-      >
-        Use an example dataset URL
-      </button>
     </div>
   )
 }
+
+export { EXAMPLE }

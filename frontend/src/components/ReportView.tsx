@@ -220,41 +220,77 @@ export default function ReportView({
       {/* Trust Score & Rationale Block (Compact) */}
       <div className="grid sm:grid-cols-4 gap-6 items-center bg-[#0c1320]/70 p-6 rounded-2xl border border-slate-800">
         <div className="text-center sm:text-left sm:border-r border-white/5 sm:pr-6">
-          <div className={`text-6xl font-light ${scoreTextColor}`}>
+          <div className={`text-[5rem] font-bold leading-none ${scoreTextColor}`}>
             {report.trust_score}
           </div>
-          <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mt-1 flex items-center justify-center sm:justify-start">
+          <div
+            className="text-[10px] font-bold uppercase mt-2"
+            style={{ letterSpacing: '0.15em', color: '#5a5f68' }}
+          >
             Trust Score
-            <Info text="A 0–100 score computed from license clarity, consent signals, citation verification and originality checks. Higher = safer to build on." />
           </div>
-          <div className={`text-[11px] font-bold mt-1 ${scoreTextColor}`}>
+          <div className={`text-sm font-semibold mt-1 ${scoreTextColor}`}>
             {scoreLabel}
           </div>
         </div>
         <div className="sm:col-span-3">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-1 flex items-center">
+          <div
+            className="text-[10px] font-bold uppercase mb-2"
+            style={{ letterSpacing: '0.15em', color: '#5a5f68' }}
+          >
             Auditor Summary
-            <Info text="A plain-language reading of the score: what lowered it and what you should verify before using this dataset." />
           </div>
-          <p className="text-sm font-medium text-slate-200 leading-relaxed">
+          <p className="text-[15px] leading-[1.6]" style={{ color: '#e4e6eb' }}>
             {report.rationale || 'No summary was generated.'}
           </p>
 
           {Object.keys(breakdown).length > 0 && (
-            <div className="mt-4 grid gap-x-6 gap-y-2.5 sm:grid-cols-2">
+            <div className="mt-5 space-y-3">
               {Object.entries(breakdown).map(([key, value]) => {
                 const meta = BREAKDOWN_LABEL[key] ?? { label: key, hint: 'Contribution to the trust score.' }
                 const v = Math.max(0, Math.min(100, Math.round(value)))
-                const barColor = v >= 70 ? 'bg-emerald-400' : v >= 40 ? 'bg-amber-400' : 'bg-rose-400'
+                const barColor = v >= 70 ? '#4a9d7f' : v >= 40 ? '#c4645f' : '#c4645f'
+
+                // Icon mapping
+                const icons: Record<string, JSX.Element> = {
+                  consent: (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  ),
+                  originality: (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+                    </svg>
+                  ),
+                  citations: (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+                    </svg>
+                  ),
+                  metadata: (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                      <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                  ),
+                }
+
                 return (
-                  <div key={key} className="flex items-center gap-2">
-                    <span className="w-[118px] shrink-0 truncate text-[11px] font-semibold text-slate-400" title={meta.hint}>
+                  <div key={key} className="flex items-center gap-3">
+                    <div style={{ color: '#8b9099' }} className="shrink-0">
+                      {icons[key] || icons.metadata}
+                    </div>
+                    <span className="w-32 shrink-0 text-xs font-medium" style={{ color: '#8b9099' }}>
                       {meta.label}
                     </span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
-                      <div className={`h-full rounded-full ${barColor}`} style={{ width: `${v}%` }} />
+                    <div className="h-2 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                      <div className="h-full rounded-full" style={{ width: `${v}%`, background: barColor }} />
                     </div>
-                    <span className="w-8 shrink-0 text-right font-mono text-[10.5px] font-bold text-slate-400">{v}</span>
+                    <span className="w-10 shrink-0 text-right font-mono text-xs font-bold" style={{ color: '#e4e6eb' }}>
+                      {v}
+                    </span>
                   </div>
                 )
               })}

@@ -1,35 +1,40 @@
-export default function Footer({ compact = false }: { compact?: boolean }) {
-  const iconClass = 'text-slate-500 hover:text-cyan-300 transition-colors'
+import Logo from './Logo'
 
+export default function Footer() {
   return (
-    <footer className={`bg-[#0a0f1a] ${compact ? 'px-5 py-3' : 'px-5 py-6'}`}>
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 pt-4">
-        <div className="flex items-center gap-2">
-          <span className="rounded-[5px] bg-gradient-to-br from-cyan-400 to-teal-500 p-[2px] shadow-[0_0_12px_rgba(34,211,238,0.3)]">
-            <svg width="15" height="15" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="5" fill="#0e7490" />
-              <path d="M16 7.5l7.5 3v6.2c0 4.4-3.1 7.4-7.5 8.8-4.4-1.4-7.5-4.4-7.5-8.8V10.5L16 7.5z" stroke="white" strokeWidth="1.7" fill="none" />
-            </svg>
+    <footer style={{ background: 'var(--color-surface)' }}>
+      <div className="rule-fade" />
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6">
+        <div className="flex items-center gap-2.5">
+          <Logo size={22} />
+          <span className="font-display text-[0.875rem] font-bold" style={{ color: 'var(--color-primary)' }}>
+            DataSentinel
           </span>
-          <span className="font-display text-[13px] font-bold text-slate-100">DataSentinel</span>
+          <span className="hidden font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted sm:inline">
+            Dataset Provenance Watchdog
+          </span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <a href="https://drive.google.com/file/d/1Rq0D3AITueDZdNEuksm3obFP22YQuaps/view?usp=sharing" target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="CV">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM6 20V4h7v5h5v11H6zm2-8h8v1.5H8V12zm0 3h8v1.5H8V15zm0-6h4v1.5H8V9z"/>
-            </svg>
+        <nav className="flex flex-wrap items-center gap-5" aria-label="Footer">
+          <a href="#api" className="text-[0.8125rem] font-medium text-secondary transition-colors hover:text-primary">
+            API & CI gate
           </a>
-          <a href="https://github.com/m-rishab" target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="GitHub">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
+          <a href="#top" className="text-[0.8125rem] font-medium text-secondary transition-colors hover:text-primary">
+            Top
           </a>
-          <p className="text-[11px] font-medium text-slate-500">
-            © {new Date().getFullYear()} · LangGraph + NVIDIA Nemotron
-          </p>
-        </div>
+          <a
+            href="https://github.com/m-rishab"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[0.8125rem] font-medium text-secondary transition-colors hover:text-primary"
+          >
+            GitHub
+          </a>
+        </nav>
+
+        <p className="font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted">
+          © {new Date().getFullYear()} · LangGraph + NVIDIA
+        </p>
       </div>
     </footer>
   )

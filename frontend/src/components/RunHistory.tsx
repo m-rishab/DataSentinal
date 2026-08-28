@@ -10,11 +10,11 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-function scoreTone(score: number | null): { cls: string; text: string } {
-  if (score == null) return { cls: 'bg-slate-400/10 text-slate-400', text: '—' }
-  if (score < 40) return { cls: 'bg-rose-400/15 text-rose-300', text: String(score) }
-  if (score <= 70) return { cls: 'bg-amber-400/15 text-amber-300', text: String(score) }
-  return { cls: 'bg-emerald-400/15 text-emerald-300', text: String(score) }
+function scoreTone(score: number | null): { bg: string; fg: string; text: string } {
+  if (score == null) return { bg: 'color-mix(in srgb, var(--color-muted) 10%, transparent)', fg: 'var(--color-muted)', text: '—' }
+  if (score < 40) return { bg: 'color-mix(in srgb, var(--color-error) 14%, transparent)', fg: 'var(--color-error)', text: String(score) }
+  if (score <= 70) return { bg: 'color-mix(in srgb, var(--color-warning) 14%, transparent)', fg: 'var(--color-warning)', text: String(score) }
+  return { bg: 'color-mix(in srgb, var(--color-success) 14%, transparent)', fg: 'var(--color-success)', text: String(score) }
 }
 
 export default function RunHistory({
@@ -31,20 +31,24 @@ export default function RunHistory({
   return (
     <section className="mx-auto w-full max-w-5xl px-6 pb-20">
       <div className="rule-fade mb-5 pt-8">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-            ✦ Recent Audits
-          </h2>
-          <span className="font-mono text-[11px] text-slate-500">{runs.length} stored</span>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="eyebrow">✦ Recent Audits</h2>
+          <span className="shrink-0 font-mono text-[0.65625rem] text-muted">{runs.length} stored</span>
         </div>
       </div>
 
       {runs.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-700 px-4 py-6 text-center text-xs font-medium text-slate-500">
+        <p
+          className="rounded-xl border border-dashed px-4 py-6 text-center text-[0.8125rem] font-medium text-muted"
+          style={{ borderColor: 'var(--color-line-strong)' }}
+        >
           No audits yet — run one above and it will appear here.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0c1320]/80 backdrop-blur shadow-[0_4px_18px_rgba(2,6,16,0.5)]">
+        <div
+          className="card overflow-hidden"
+          style={{ boxShadow: 'var(--shadow-lift)' }}
+        >
           {runs.map((run, i) => {
             const tone = scoreTone(run.trust_score)
             return (
@@ -52,33 +56,36 @@ export default function RunHistory({
                 key={run.run_id}
                 type="button"
                 onClick={() => onOpen(run.run_id, run.url)}
-                className={`flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-white/[0.04] ${
-                  i > 0 ? 'border-t border-white/5' : ''
-                }`}
+                className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+                style={i > 0 ? { borderTop: '1px solid var(--color-line)' } : undefined}
               >
-                <span className={`flex h-8 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-black ${tone.cls}`}>
+                <span
+                  className="flex h-8 w-9 shrink-0 items-center justify-center rounded-lg text-[0.875rem] font-bold tabular-nums"
+                  style={{ background: tone.bg, color: tone.fg }}
+                >
                   {tone.text}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-semibold text-slate-100">
+                  <span className="block truncate text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
                     {run.title || run.url}
                   </span>
-                  <span className="block truncate font-mono text-[10.5px] text-slate-500">
+                  <span className="block truncate font-mono text-[0.65625rem]" style={{ color: 'var(--color-muted)' }}>
                     {run.url}
                   </span>
                 </span>
                 {run.gate?.passed != null && (
                   <span
-                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                    className="shrink-0 rounded-full border px-2 py-0.5 font-mono text-[0.5625rem] font-bold uppercase tracking-wider"
+                    style={
                       run.gate.passed
-                        ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
-                        : 'border-rose-400/30 bg-rose-400/10 text-rose-300'
-                    }`}
+                        ? { borderColor: 'color-mix(in srgb, var(--color-success) 35%, transparent)', background: 'color-mix(in srgb, var(--color-success) 10%, transparent)', color: 'var(--color-success)' }
+                        : { borderColor: 'color-mix(in srgb, var(--color-error) 35%, transparent)', background: 'color-mix(in srgb, var(--color-error) 10%, transparent)', color: 'var(--color-error)' }
+                    }
                   >
                     gate {run.gate.passed ? 'pass' : 'fail'}
                   </span>
                 )}
-                <span className="w-16 shrink-0 text-right font-mono text-[10.5px] text-slate-500">
+                <span className="w-16 shrink-0 text-right font-mono text-[0.65625rem]" style={{ color: 'var(--color-muted)' }}>
                   {timeAgo(run.created_at)}
                 </span>
               </button>

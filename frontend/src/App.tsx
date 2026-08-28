@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Header from './components/Header'
-import Hero from './components/Hero'
+import Landing from './components/Landing'
 import LiveStepper from './components/LiveStepper'
-import PipelineStrip from './components/PipelineStrip'
 import ReportView from './components/ReportView'
-import RunHistory from './components/RunHistory'
 import Footer from './components/Footer'
 import { fetchRuns } from './lib/api'
 
@@ -17,7 +15,7 @@ export default function App() {
   const [datasetUrl, setDatasetUrl] = useState('')
   const [scrollPct, setScrollPct] = useState(0)
 
-  /* Fixed gradient progress bar on the landing page (Kombai-inspired). */
+  /* Fixed 2px progress hairline on the landing page. */
   useEffect(() => {
     const onScroll = () => {
       const doc = document.documentElement
@@ -71,36 +69,32 @@ export default function App() {
     setPhase('report')
   }
 
-  const lockViewport = phase === 'landing' || phase === 'running' || phase === 'graph'
+  const lockViewport = phase === 'running' || phase === 'graph'
 
   return (
     <div
-      className={`flex flex-col ${
-        lockViewport ? 'h-screen overflow-hidden' : 'min-h-screen'
-      }`}
-      style={{ background: '#0d0f12' }}
+      className={`flex flex-col ${lockViewport ? 'h-screen overflow-hidden' : 'min-h-screen'}`}
+      style={{ background: 'var(--color-page)' }}
     >
-      <Header compact={phase !== 'landing'} onHome={goHome} />
+      <Header
+        compact={phase !== 'landing'}
+        phase={phase}
+        onHome={goHome}
+        onViewGraph={phase === 'report' && runId ? () => setPhase('graph') : undefined}
+      />
 
       {phase === 'landing' && (
-        <div
-          className="scroll-progress"
-          style={{ transform: `scaleX(${scrollPct})` }}
-          aria-hidden="true"
-        />
+        <div className="scroll-progress" style={{ transform: `scaleX(${scrollPct})` }} aria-hidden="true" />
       )}
 
       <main className={`flex-1 ${phase === 'running' || phase === 'graph' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         {phase === 'landing' && (
-          <>
-            <Hero onStart={startRun} />
-            <PipelineStrip />
-            <RunHistory
-              runs={runsQuery.data ?? []}
-              isLoading={runsQuery.isLoading}
-              onOpen={openRun}
-            />
-          </>
+          <Landing
+            onStart={startRun}
+            runs={runsQuery.data ?? []}
+            runsLoading={runsQuery.isLoading}
+            onOpenReport={openRun}
+          />
         )}
 
         {(phase === 'running' || phase === 'graph') && runId && (
@@ -114,8 +108,8 @@ export default function App() {
         )}
 
         {phase === 'report' && runId && (
-          <div className="pt-20 pb-16">
-            <div className="mx-auto max-w-4xl px-6">
+          <div className="pt-6 pb-16">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
               <ReportView
                 runId={runId}
                 datasetUrl={datasetUrl}
@@ -127,7 +121,7 @@ export default function App() {
         )}
       </main>
 
-      {phase === 'landing' && <Footer compact />}
+      {phase === 'landing' && <Footer />}
     </div>
   )
 }

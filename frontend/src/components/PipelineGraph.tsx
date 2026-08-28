@@ -1,6 +1,6 @@
-/* React Flow + dagre pipeline graph with minimal dark design system.
-   NO glow effects, NO gradients. Flat cards with muted status colors.
-   Running nodes pulse opacity only. Failed nodes show error state clearly. */
+/* React Flow + dagre audit pipeline graph.
+   Flat cards, muted status colors, no neon. Selection + hover focus the
+   connected path and dim everything else. Keyboard accessible. */
 
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -9,10 +9,11 @@ import {
   Controls,
   Handle,
   MarkerType,
+  MiniMap,
   Position,
   ReactFlow,
-  useEdgesState,
   useNodesState,
+  useEdgesState,
   type Edge,
   type Node,
   type NodeProps,
@@ -20,70 +21,47 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import dagre from '@dagrejs/dagre'
-import {
-  Database,
-  FileOutput,
-  FileText,
-  Fingerprint,
-  Link2,
-  Scale,
-  ShieldCheck,
-  AlertCircle,
-  type LucideIcon,
-} from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
+import { PIPELINE, CONNECTIONS } from '../lib/steps'
+import { downloadGraphPng } from '../lib/graphExport'
+import type { RetryState } from '../lib/graphExport'
 
 export type NodeStatus = 'pending' | 'running' | 'completed' | 'failed'
-export type RetryPhase = 'none' | 'active' | 'done'
-
-interface StepDef {
-  node: string
-  label: string
-  kicker: string
-  icon: LucideIcon
-}
+export type GraphFilter = 'all' | 'running' | 'completed' | 'failed'
 
 interface StepData extends Record<string, unknown> {
   label: string
   kicker: string
-  icon: LucideIcon
+  category: string
   status: NodeStatus
   duration?: number
   result?: string
   revealed: boolean
   selected: boolean
+  dimmed: boolean
+  matched: boolean
 }
 
 interface PipelineGraphProps {
-  runId: string
   statuses: Record<string, NodeStatus>
   durations: Record<string, number>
   results: Record<string, string>
-  retry: RetryPhase
+  retry: RetryState
   selectedNode: string | null
   onSelect: (node: string | null) => void
+  filter?: GraphFilter
+  runId?: string
 }
 
-const STEPS: StepDef[] = [
-  { node: 'ingest', label: 'Ingest', kicker: '01 · Source', icon: Database },
-  { node: 'consent_agent', label: 'Consent & License', kicker: '02 · Rights', icon: ShieldCheck },
-  { node: 'citation_tracer', label: 'Citation Tracer', kicker: '03 · Papers', icon: FileText },
-  { node: 'duplication_agent', label: 'Duplication Check', kicker: '04 · Originality', icon: Fingerprint },
-  { node: 'related_work_agent', label: 'Related Work', kicker: '05 · Context', icon: Link2 },
-  { node: 'critic_aggregator', label: 'Critic Aggregator', kicker: '06 · Score', icon: Scale },
-  { node: 'report_generator', label: 'Report Generator', kicker: '07 · Output', icon: FileOutput },
-]
+const NODE_W = 240
+const NODE_H = 118
 
-const CONNECTIONS: { id: string; from: string; to: string }[] = [
-  { id: 'e-ingest-consent', from: 'ingest', to: 'consent_agent' },
-  { id: 'e-ingest-citation', from: 'ingest', to: 'citation_tracer' },
-  { id: 'e-ingest-duplication', from: 'ingest', to: 'duplication_agent' },
-  { id: 'e-ingest-related', from: 'ingest', to: 'related_work_agent' },
-  { id: 'e-consent-critic', from: 'consent_agent', to: 'critic_aggregator' },
-  { id: 'e-citation-critic', from: 'citation_tracer', to: 'critic_aggregator' },
-  { id: 'e-duplication-critic', from: 'duplication_agent', to: 'critic_aggregator' },
-  { id: 'e-related-critic', from: 'related_work_agent', to: 'critic_aggregator' },
-  { id: 'e-critic-report', from: 'critic_aggregator', to: 'report_generator' },
-]
+const COLOR = {
+  pending: '#3a414d',
+  running: '#6b96c4',
+  completed: '#4a9d7f',
+  failed: '#c4645f',
+}
 
 const REVEAL: { t: number; id: string }[] = [
   { t: 80, id: 'ingest' },
@@ -104,41 +82,20 @@ const REVEAL: { t: number; id: string }[] = [
   { t: 6260, id: 'report_generator' },
 ]
 
-const NODE_W = 232
-const NODE_H = 124
-
-// Design system colors (muted, desaturated)
-const STATUS_COLORS: Record<NodeStatus, string> = {
-  pending: '#3a3f47',
-  running: '#6b96c4',
-  completed: '#4a9d7f',
-  failed: '#c4645f',
-}
-
 function parseResult(result?: string): { text: string; amber: boolean } | null {
   if (!result) return null
   const flags = result.match(/^(\d+)\s*flag/i)
-  if (flags) {
-    const n = Number(flags[1])
-    return { text: result, amber: n > 0 }
-  }
+  if (flags) return { text: result, amber: Number(flags[1]) > 0 }
   return { text: result, amber: false }
 }
 
 function layoutPositions(): Record<string, { x: number; y: number }> {
   const g = new dagre.graphlib.Graph()
   g.setDefaultEdgeLabel(() => ({}))
-  g.setGraph({
-    rankdir: 'LR',
-    nodesep: 44,
-    ranksep: 120,
-    marginx: 32,
-    marginy: 24,
-  })
-  STEPS.forEach((s) => g.setNode(s.node, { width: NODE_W, height: NODE_H }))
+  g.setGraph({ rankdir: 'LR', nodesep: 44, ranksep: 118, marginx: 36, marginy: 28 })
+  PIPELINE.forEach((s) => g.setNode(s.node, { width: NODE_W, height: NODE_H }))
   CONNECTIONS.forEach((c) => g.setEdge(c.from, c.to))
   dagre.layout(g)
-
   const positions: Record<string, { x: number; y: number }> = {}
   for (const id of g.nodes()) {
     const n = g.node(id)
@@ -154,121 +111,127 @@ function buildBaseEdges(): Edge[] {
     target: c.to,
     type: 'smoothstep',
     animated: false,
-    style: {
-      stroke: STATUS_COLORS.pending,
-      strokeWidth: 2,
-      opacity: 0,
-    },
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-      width: 20,
-      height: 20,
-      color: STATUS_COLORS.pending,
-    },
+    style: { stroke: COLOR.pending, strokeWidth: 2, opacity: 0 },
+    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: COLOR.pending },
   }))
 }
 
+/* Node ids connected (both directions) to a focus node. */
+function pathSetFrom(focus: string | null): Set<string> {
+  if (!focus) return new Set(PIPELINE.map((s) => s.node))
+  const adjacent = new Map<string, Set<string>>()
+  for (const c of CONNECTIONS) {
+    if (!adjacent.has(c.from)) adjacent.set(c.from, new Set())
+    if (!adjacent.has(c.to)) adjacent.set(c.to, new Set())
+    adjacent.get(c.from)!.add(c.to)
+    adjacent.get(c.to)!.add(c.from)
+  }
+  const visited = new Set<string>([focus])
+  const queue = [focus]
+  while (queue.length) {
+    const cur = queue.shift()!
+    for (const next of adjacent.get(cur) ?? []) {
+      if (!visited.has(next)) {
+        visited.add(next)
+        queue.push(next)
+      }
+    }
+  }
+  return visited
+}
+
 /* ------------------------------------------------------------------ */
-/* Custom node — flat card with status colors, no glow                */
+/* Custom node                                                         */
 /* ------------------------------------------------------------------ */
 
-function StepNode({ data }: NodeProps) {
-  const d = data as StepData
-  const { label, kicker, icon: Icon, status, duration, result, revealed, selected } = d
+function StepNode(props: NodeProps) {
+  const { id, data } = props
+  const { label, kicker, category, status, duration, result, revealed } = data as StepData
+  const selected = Boolean((data as StepData).selected)
+  const dimmed = Boolean((data as StepData).dimmed)
   const running = status === 'running'
   const completed = status === 'completed'
   const failed = status === 'failed'
-
-  // Background color from design system
-  const bgColor = selected ? '#1a1e23' : '#14171b'
-  const borderColor = failed
-    ? STATUS_COLORS.failed
-    : running
-    ? STATUS_COLORS.running
-    : completed
-    ? STATUS_COLORS.completed
-    : 'rgba(255, 255, 255, 0.08)'
-
-  const textColor = failed
-    ? STATUS_COLORS.failed
-    : running
-    ? STATUS_COLORS.running
-    : completed
-    ? STATUS_COLORS.completed
-    : '#8b9099'
-
+  const color = COLOR[status]
   const parsed = parseResult(result)
 
   return (
     <div
-      className={`relative rounded-xl border-2 transition-all ${running ? 'pulse-running' : ''}`}
+      data-node-id={id}
+      className={`relative rounded-xl border transition-all duration-300 ${
+        selected ? 'ring-2 ring-offset-2 ring-offset-[#10141a]' : ''
+      } ${running ? 'pulse-soft' : ''}`}
       style={{
         width: NODE_W,
         height: NODE_H,
-        background: bgColor,
-        borderColor,
-        opacity: revealed ? 1 : 0,
-        transform: revealed ? 'scale(1)' : 'scale(0.9)',
-        transition: 'all 0.3s ease',
+        background: 'var(--color-panel)',
+        borderColor: failed ? color : running ? 'color-mix(in srgb, ' + color + ' 70%, transparent)' : completed ? 'color-mix(in srgb, ' + color + ' 45%, transparent)' : 'var(--color-line)',
+        boxShadow: selected ? 'var(--shadow-lift)' : 'none',
+        opacity: revealed ? (dimmed ? 0.3 : 1) : 0,
+        transform: revealed ? (selected ? 'scale(1.02)' : 'scale(1)') : 'scale(0.92)',
         cursor: 'pointer',
       }}
     >
-      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+      <Handle type="target" position={Position.Left} className="op-node-handle" />
+      <Handle type="source" position={Position.Right} className="op-node-handle" />
 
-      <div className="flex h-full flex-col justify-between p-4">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div
-              className="flex h-8 w-8 items-center justify-center rounded-lg"
-              style={{
-                background: `color-mix(in srgb, ${textColor} 15%, transparent)`,
-                color: textColor,
-              }}
+      <div className="flex h-full flex-col justify-between p-3.5">
+        {/* Header: number · category · status dot */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              className="grid h-5 w-5 shrink-0 place-items-center rounded font-mono text-[0.625rem] font-bold tabular-nums"
+              style={{ background: `color-mix(in srgb, ${color} 14%, transparent)`, color }}
             >
-              <Icon size={16} />
-            </div>
-            <div>
-              <div className="text-tiny" style={{ color: '#5a5f68' }}>
-                {kicker}
-              </div>
-              <div className="text-small font-medium" style={{ color: '#e4e6eb' }}>
-                {label}
-              </div>
-            </div>
+              {kicker.slice(0, 2)}
+            </span>
+            <span className="truncate font-mono text-[0.625rem] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--color-muted)' }}>
+              {category}
+            </span>
           </div>
-
-          {/* Status indicator */}
-          {failed && (
-            <div
-              className="flex h-6 w-6 items-center justify-center rounded-full"
-              style={{ background: `color-mix(in srgb, ${STATUS_COLORS.failed} 20%, transparent)` }}
-            >
-              <AlertCircle size={14} style={{ color: STATUS_COLORS.failed }} />
-            </div>
-          )}
+          <span
+            className={`h-2 w-2 shrink-0 rounded-full ${running ? 'pulse-soft' : ''}`}
+            style={{ background: failed ? COLOR.failed : running ? COLOR.running : completed ? COLOR.completed : COLOR.pending }}
+            title={status}
+          />
         </div>
 
-        {/* Footer - result or duration */}
-        <div className="flex items-center justify-between">
-          {parsed && (
-            <div
-              className="rounded px-2 py-1 text-tiny font-medium"
+        {/* Title */}
+        <div className="mt-1 truncate font-display text-[0.9375rem] font-semibold leading-snug" style={{ color: 'var(--color-primary)' }}>
+          {label}
+        </div>
+
+        {/* Footer: result metric + duration */}
+        <div className="mt-1 flex items-center justify-between gap-2">
+          {failed ? (
+            <span className="inline-flex items-center gap-1 text-[0.6875rem] font-semibold" style={{ color: COLOR.failed }}>
+              <AlertCircle size={12} /> Failed
+            </span>
+          ) : parsed ? (
+            <span
+              className="truncate rounded px-1.5 py-0.5 font-mono text-[0.65625rem] font-medium"
               style={{
                 background: parsed.amber
-                  ? 'color-mix(in srgb, #c4645f 15%, transparent)'
-                  : `color-mix(in srgb, ${textColor} 10%, transparent)`,
-                color: parsed.amber ? '#c4645f' : textColor,
+                  ? 'color-mix(in srgb, var(--color-warning) 12%, transparent)'
+                  : `color-mix(in srgb, ${color} 10%, transparent)`,
+                color: parsed.amber ? 'var(--color-warning)' : color,
               }}
             >
               {parsed.text}
-            </div>
+            </span>
+          ) : status === 'running' ? (
+            <span className="font-mono text-[0.65625rem] font-medium" style={{ color: 'var(--color-muted)' }}>
+              inspecting…
+            </span>
+          ) : (
+            <span className="font-mono text-[0.65625rem] font-medium text-muted">
+              {status === 'pending' ? 'queued' : 'ok'}
+            </span>
           )}
           {duration != null && duration > 0 && !isNaN(duration) && (
-            <div className="text-tiny" style={{ color: '#5a5f68' }}>
+            <span className="shrink-0 font-mono text-[0.625rem] tabular-nums text-muted">
               {(duration / 1000).toFixed(1)}s
-            </div>
+            </span>
           )}
         </div>
       </div>
@@ -276,167 +239,205 @@ function StepNode({ data }: NodeProps) {
   )
 }
 
-const nodeTypes: NodeTypes = {
-  step: StepNode,
-}
+const nodeTypes: NodeTypes = { step: StepNode }
 
 /* ------------------------------------------------------------------ */
 /* Main component                                                      */
 /* ------------------------------------------------------------------ */
 
-export default function PipelineGraph({
-  statuses,
-  durations,
-  results,
-  retry,
-  selectedNode,
-  onSelect,
-}: PipelineGraphProps) {
+export default function PipelineGraph({ statuses, durations, results, retry, selectedNode, onSelect, filter = 'all', runId = 'audit' }: PipelineGraphProps) {
   const [revealedIds, setRevealedIds] = useState(new Set<string>())
+  const [hoverId, setHoverId] = useState<string | null>(null)
 
-  // Staggered reveal animation
   useEffect(() => {
     const timers = REVEAL.map((r) =>
       window.setTimeout(() => {
         setRevealedIds((prev) => new Set([...prev, r.id]))
-      }, r.t)
+      }, r.t),
     )
     return () => timers.forEach(clearTimeout)
   }, [])
 
   const positions = useMemo(() => layoutPositions(), [])
 
+  const focusId = selectedNode ?? hoverId
+  const path = useMemo(() => pathSetFrom(focusId), [focusId])
+
   const initialNodes: Node[] = useMemo(
     () =>
-      STEPS.map((s) => ({
+      PIPELINE.map((s) => ({
         id: s.node,
         type: 'step',
         position: positions[s.node] || { x: 0, y: 0 },
         data: {
           label: s.label,
           kicker: s.kicker,
-          icon: s.icon,
+          category: s.category,
           status: 'pending',
           revealed: false,
           selected: false,
+          matched: true,
         },
       })),
-    [positions]
+    [positions],
   )
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(buildBaseEdges())
 
-  // Update nodes based on statuses
+  /* Merge live status + focus + filter state into nodes. */
   useEffect(() => {
     setNodes((nds) =>
       nds.map((node) => {
         const status = statuses[node.id] || 'pending'
-        const duration = durations[node.id]
-        const result = results[node.id]
-        const revealed = revealedIds.has(node.id)
         const selected = selectedNode === node.id
-
+        const onPath = focusId == null || (focusId === node.id || path.has(node.id))
+        const matched = filter === 'all' || (status === 'running' && filter === 'running') || (status === 'completed' && filter === 'completed') || (status === 'failed' && filter === 'failed')
+        const revealed = revealedIds.has(node.id)
         return {
           ...node,
           data: {
             ...node.data,
             status,
-            duration,
-            result,
+            duration: durations[node.id],
+            result: results[node.id],
             revealed,
             selected,
+            id: node.id,
+            dimmed: focusId != null && !onPath,
+            matched,
           },
+          style: { opacity: matched ? undefined : 0.12 },
         }
-      })
+      }),
     )
-  }, [statuses, durations, results, revealedIds, selectedNode, setNodes])
+  }, [statuses, durations, results, revealedIds, selectedNode, focusId, path, filter, setNodes])
 
-  // Update edges based on source node status
+  /* Edges: status colour, draw-in, focus dimming. */
   useEffect(() => {
     setEdges((eds) =>
       eds.map((edge) => {
         const sourceStatus = statuses[edge.source] || 'pending'
+        const color = COLOR[sourceStatus]
         const revealed = revealedIds.has(edge.id)
-        const color = STATUS_COLORS[sourceStatus]
+        const onPath = focusId == null || (path.has(edge.source) && path.has(edge.target))
         const animated = sourceStatus === 'running'
-
         return {
           ...edge,
           animated,
           style: {
             ...edge.style,
             stroke: color,
-            opacity: revealed ? 1 : 0,
+            strokeWidth: animated ? 2.4 : 2,
+            opacity: revealed ? (onPath ? 1 : 0.18) : 0,
           },
           markerEnd: edge.markerEnd
-            ? {
-                type: MarkerType.ArrowClosed,
-                width: 20,
-                height: 20,
-                color,
-              }
+            ? { type: MarkerType.ArrowClosed, width: 20, height: 20, color }
             : undefined,
         }
-      })
+      }),
     )
-  }, [statuses, revealedIds, setEdges])
+  }, [statuses, revealedIds, focusId, path, setEdges])
 
-  // Add retry edge if citation is being refined
+  /* Retry edge (critic → citation tracer) while refining. */
   useEffect(() => {
-    if (retry === 'active') {
-      const retryEdge: Edge = {
-        id: 'e-retry-citation',
-        source: 'critic_aggregator',
-        target: 'citation_tracer',
-        type: 'smoothstep',
-        animated: true,
-        style: {
-          stroke: STATUS_COLORS.running,
-          strokeWidth: 2,
-          strokeDasharray: '5,5',
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: STATUS_COLORS.running,
-        },
-      }
-      setEdges((eds) => {
-        if (eds.some((e) => e.id === 'e-retry-citation')) return eds
-        return [...eds, retryEdge]
-      })
+    if (retry === 'none') return
+    const retryEdge: Edge = {
+      id: 'e-retry-citation',
+      source: 'critic_aggregator',
+      target: 'citation_tracer',
+      type: 'smoothstep',
+      animated: retry === 'active',
+      style: retry === 'active'
+        ? { stroke: COLOR.running, strokeWidth: 2, strokeDasharray: '5,5' }
+        : { stroke: COLOR.completed, strokeWidth: 2, opacity: 0.7 },
+      markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: retry === 'active' ? COLOR.running : COLOR.completed },
     }
+    setEdges((eds) => {
+      if (eds.some((e) => e.id === 'e-retry-citation')) return eds.map((e) => (e.id === 'e-retry-citation' ? retryEdge : e))
+      return [...eds, retryEdge]
+    })
   }, [retry, setEdges])
 
+  const onFullscreen = () => {
+    const host = document.getElementById('graph-host')?.parentElement
+    if (!host) return
+    if (document.fullscreenElement) void document.exitFullscreen()
+    else void host.requestFullscreen().catch(() => {})
+  }
+
+  const onExport = () => downloadGraphPng(statuses, durations, results, retry, runId)
+
   return (
-    <div className="h-full w-full" style={{ background: '#0d0f12' }}>
+    <div
+      id="graph-host"
+      className="relative h-full w-full"
+      style={{ background: 'var(--color-page)' }}
+      aria-label="Audit pipeline graph: seven agents investigating the dataset. Use the controls to zoom and pan."
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        onNodeClick={(_, node) => onSelect(node.id)}
+        onNodeClick={(_, node) => onSelect(node.id === selectedNode ? null : node.id)}
         onPaneClick={() => onSelect(null)}
+        onNodeMouseEnter={(_, node) => setHoverId(node.id)}
+        onNodeMouseLeave={() => setHoverId(null)}
         fitView
-        minZoom={0.5}
-        maxZoom={1.5}
+        minZoom={0.35}
+        maxZoom={1.6}
         proOptions={{ hideAttribution: true }}
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color="rgba(255, 255, 255, 0.05)"
+        <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="rgba(141,155,178,0.08)" />
+        <MiniMap
+          pannable
+          zoomable
+          style={{ background: 'var(--color-surface)' }}
+          nodeColor={(n) => {
+            const s = (statuses[n.id] ?? 'pending') as NodeStatus
+            return COLOR[s]
+          }}
+          nodeStrokeWidth={0}
+          maskColor="rgba(11,14,19,0.72)"
         />
         <Controls
+          showInteractive={false}
           style={{
-            background: '#14171b',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '8px',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-line)',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            boxShadow: 'var(--shadow-lift)',
           }}
         />
       </ReactFlow>
+
+      {/* Custom control cluster */}
+      <div
+        className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5"
+        aria-label="Graph controls"
+      >
+        <button
+          type="button"
+          onClick={onExport}
+          className="btn px-2.5 py-1.5 !text-[0.6875rem]"
+          title="Download graph as PNG"
+          aria-label="Download graph as PNG"
+        >
+          Export
+        </button>
+        <button
+          type="button"
+          onClick={onFullscreen}
+          className="btn px-2.5 py-1.5 !text-[0.6875rem]"
+          title="Toggle fullscreen"
+          aria-label="Toggle fullscreen"
+        >
+          ⛶
+        </button>
+      </div>
     </div>
   )
 }
