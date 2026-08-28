@@ -78,7 +78,7 @@ export default function ReportView({
     return (
       <div className="flex flex-col items-center gap-3 py-24">
         <div className="h-7 w-7 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-line-strong)', borderTopColor: 'var(--color-accent)' }} />
-        <p className="font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-muted">Loading report…</p>
+        <p className="font-mono text-[0.875rem] uppercase tracking-[0.18em] text-muted">Loading report…</p>
       </div>
     )
   }
@@ -91,8 +91,8 @@ export default function ReportView({
         <p className="text-[0.875rem] font-semibold" style={{ color: 'var(--color-error)' }}>
           Could not load report
         </p>
-        <p className="mt-1 font-mono text-[0.75rem] text-muted">{(error as Error | null)?.message}</p>
-        <button type="button" onClick={onReset} className="btn btn-danger mt-4 px-3 py-1.5 !text-[0.75rem]">
+        <p className="mt-1 font-mono text-[0.875rem] text-muted">{(error as Error | null)?.message}</p>
+        <button type="button" onClick={onReset} className="btn btn-danger mt-4 px-3 py-1.5 !text-[0.875rem]">
           Start over
         </button>
       </div>
@@ -130,15 +130,15 @@ export default function ReportView({
           }}
         >
           <span
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.8125rem] font-black text-white"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.875rem] font-black text-white"
             style={{ background: gate.passed ? '#4a9d7f' : '#c4645f' }}
           >
             {gate.passed ? '✓' : '✕'}
           </span>
-          <p className="text-[0.8125rem] font-bold" style={{ color: gate.passed ? '#9bd0b9' : '#e0b3b0' }}>
+          <p className="text-[0.875rem] font-bold" style={{ color: gate.passed ? '#9bd0b9' : '#e0b3b0' }}>
             {gate.passed ? 'Gate passed' : 'Gate failed'} — trust score {report.trust_score} vs required {gate.fail_under}
           </p>
-          <code className="chip ml-auto font-mono !text-[0.65625rem]">
+          <code className="chip ml-auto font-mono !text-[0.875rem]">
             curl /audit/{runId}/verdict → exit {gate.passed ? '0' : '1'}
           </code>
         </div>
@@ -148,20 +148,20 @@ export default function ReportView({
       <div className="flex flex-col justify-between gap-4 border-b pb-6 sm:flex-row sm:items-start" style={{ borderColor: 'var(--color-line)' }}>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="truncate font-display text-[1.4rem] font-semibold tracking-tight" style={{ color: 'var(--color-primary)' }}>
+            <h2 className="truncate font-display text-[1.6rem] font-semibold tracking-tight" style={{ color: 'var(--color-primary)' }}>
               {report.metadata.title || 'Dataset Report'}
             </h2>
             <span className="chip hidden sm:inline-flex" style={{ color: tone.color, borderColor: `color-mix(in srgb, ${tone.color} 35%, transparent)`, background: `color-mix(in srgb, ${tone.color} 10%, transparent)` }}>
               {tone.label}
             </span>
           </div>
-          <p className="mt-1 truncate font-mono text-[0.65625rem] text-muted">
+          <p className="mt-1 truncate font-mono text-[0.875rem] text-muted">
             {runId} · {report.metadata.license || 'license not stated'}
           </p>
         </div>
         <div className="no-print flex flex-wrap items-center gap-2">
           {onViewGraph && (
-            <button type="button" onClick={onViewGraph} className="btn btn-ghost px-3 py-2 !text-[0.75rem]" title="Open the audit investigation workspace">
+            <button type="button" onClick={onViewGraph} className="btn btn-ghost px-3 py-2 !text-[0.875rem]" title="Open the audit investigation workspace">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <circle cx="5" cy="12" r="2.2" /><circle cx="19" cy="5" r="2.2" /><circle cx="19" cy="19" r="2.2" />
                 <path d="M7 11l9.5-5M7 13l9.5 5" />
@@ -169,22 +169,22 @@ export default function ReportView({
               Audit Graph
             </button>
           )}
-          <button type="button" onClick={copyShare} className="btn btn-ghost px-3 py-2 !text-[0.75rem]" title={`Copy public link: ${shareLink}`}>
+          <button type="button" onClick={copyShare} className="btn btn-ghost px-3 py-2 !text-[0.875rem]" title={`Copy public link: ${shareLink}`}>
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               {copied ? <path d="M20 6L9 17l-5-5" /> : <><rect x="9" y="9" width="12" height="12" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></>}
             </svg>
             {copied ? 'Link copied' : 'Share'}
           </button>
-          <button type="button" onClick={() => window.print()} className="btn btn-ghost px-3 py-2 !text-[0.75rem]">
+          <button type="button" onClick={() => window.print()} className="btn btn-ghost px-3 py-2 !text-[0.875rem]">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><path d="M6 14h12v8H6z" />
             </svg>
             PDF
           </button>
-          <a href={report?.dataset_url || datasetUrl} target="_blank" rel="noreferrer" className="text-[0.75rem] font-medium text-secondary underline decoration-line-strong transition-colors hover:text-accent hover:decoration-accent">
+          <a href={report?.dataset_url || datasetUrl} target="_blank" rel="noreferrer" className="text-[0.875rem] font-medium text-secondary underline decoration-line-strong transition-colors hover:text-accent hover:decoration-accent">
             Dataset Source
           </a>
-          <button type="button" onClick={onReset} className="btn btn-primary px-3.5 py-2 !text-[0.75rem]">
+          <button type="button" onClick={onReset} className="btn btn-primary px-3.5 py-2 !text-[0.875rem]">
             New Audit
           </button>
         </div>
@@ -198,20 +198,20 @@ export default function ReportView({
         <div className="flex items-center gap-5 sm:flex-col sm:gap-3 sm:border-r sm:pr-6" style={{ borderColor: 'var(--color-line)' }}>
           <Ring score={report.trust_score} label={tone.label} size={104} strokeWidth={10} animate delay={120} />
           <div className="sm:text-center">
-            <div className="text-[10px] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
+            <div className="text-[0.6875rem] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
               Trust Score
             </div>
-            <div className="mt-1 font-display text-[1.1rem] font-semibold" style={{ color: tone.color }}>
+            <div className="mt-1 font-display text-[1.2rem] font-semibold" style={{ color: tone.color }}>
               {tone.label}
             </div>
           </div>
         </div>
 
         <div className="sm:col-span-3">
-          <p className="text-[10px] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
+          <p className="text-[0.6875rem] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
             Auditor Summary
           </p>
-          <p className="mt-2 font-editorial text-[1.05rem] leading-[1.75]" style={{ color: 'var(--color-primary)' }}>
+          <p className="mt-2 font-editorial text-[1.125rem] leading-[1.75]" style={{ color: 'var(--color-primary)' }}>
             {report.rationale || 'No summary was generated.'}
           </p>
 
@@ -235,7 +235,7 @@ export default function ReportView({
             type="button"
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className="relative shrink-0 px-3.5 py-3 text-[0.8125rem] font-semibold capitalize transition-colors"
+            className="relative shrink-0 px-3.5 py-3 text-[0.875rem] font-semibold capitalize transition-colors"
             style={{ color: activeTab === tab.key ? 'var(--color-primary)' : 'var(--color-secondary)' }}
           >
             {tab.label}
@@ -289,7 +289,7 @@ export default function ReportView({
                     return (
                       <div key={i} className="card flex items-center justify-between gap-4 p-4 transition-colors hover:bg-white/[0.02]">
                         <div className="min-w-0">
-                          <p className="truncate text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
+                          <p className="truncate text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
                             {citation.paper_title}
                           </p>
                           {citation.doi && (
@@ -297,7 +297,7 @@ export default function ReportView({
                               href={`https://doi.org/${citation.doi}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="mt-1 inline-block font-mono text-[0.65625rem] text-muted transition-colors hover:text-accent hover:underline"
+                              className="mt-1 inline-block font-mono text-[0.875rem] text-muted transition-colors hover:text-accent hover:underline"
                             >
                               doi:{citation.doi}
                             </a>
@@ -318,7 +318,7 @@ export default function ReportView({
               ) : (
                 <div className="space-y-2">
                   {report.related_work.papers.map((paper, i) => (
-                    <div key={i} className="card flex items-center justify-between gap-4 p-3 text-[0.8125rem]">
+                    <div key={i} className="card flex items-center justify-between gap-4 p-3 text-[0.875rem]">
                       {paper.url ? (
                         <a href={paper.url} target="_blank" rel="noreferrer" className="truncate font-semibold text-secondary transition-colors hover:text-accent hover:underline">
                           {paper.title}
@@ -326,7 +326,7 @@ export default function ReportView({
                       ) : (
                         <span className="truncate font-semibold text-primary">{paper.title}</span>
                       )}
-                      <span className="shrink-0 font-mono text-[0.65625rem] text-muted">{paper.year}</span>
+                      <span className="shrink-0 font-mono text-[0.875rem] text-muted">{paper.year}</span>
                     </div>
                   ))}
                 </div>
@@ -336,7 +336,7 @@ export default function ReportView({
                   <SectionTitle title="Alternative Datasets" />
                   <div className="space-y-2">
                     {report.related_work.alternative_datasets.map((alt, i) => (
-                      <div key={i} className="card flex items-center justify-between gap-4 p-3 text-[0.8125rem]">
+                      <div key={i} className="card flex items-center justify-between gap-4 p-3 text-[0.875rem]">
                         {alt.url ? (
                           <a href={alt.url} target="_blank" rel="noreferrer" className="truncate font-semibold text-secondary transition-colors hover:text-accent hover:underline">
                             {alt.name}
@@ -344,7 +344,7 @@ export default function ReportView({
                         ) : (
                           <span className="truncate font-semibold text-primary">{alt.name}</span>
                         )}
-                        <span className="shrink-0 font-mono text-[0.65625rem] capitalize text-muted">{alt.source}</span>
+                        <span className="shrink-0 font-mono text-[0.875rem] capitalize text-muted">{alt.source}</span>
                       </div>
                     ))}
                   </div>
@@ -361,7 +361,7 @@ export default function ReportView({
               <SectionTitle title="License & Reuse Terms" />
               <div className="card p-4">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-display text-[1.05rem] font-semibold" style={{ color: report.metadata.license ? 'var(--color-primary)' : 'var(--color-warning)' }}>
+                  <span className="font-display text-[1.125rem] font-semibold" style={{ color: report.metadata.license ? 'var(--color-primary)' : 'var(--color-warning)' }}>
                     {report.metadata.license || 'Missing'}
                   </span>
                   {licenseInfo && (
@@ -371,8 +371,8 @@ export default function ReportView({
                     />
                   )}
                 </div>
-                {licenseInfo && <p className="mt-2 text-[0.8125rem] leading-relaxed text-secondary">{licenseInfo.blurb}</p>}
-                <p className="mt-3 text-[0.8125rem] leading-relaxed text-secondary">
+                {licenseInfo && <p className="mt-2 text-[0.875rem] leading-relaxed text-secondary">{licenseInfo.blurb}</p>}
+                <p className="mt-3 text-[0.875rem] leading-relaxed text-secondary">
                   <b style={{ color: 'var(--color-primary)' }}>Why this matters:</b>{' '}
                   {report.metadata.license
                     ? 'The stated terms determine whether you can redistribute or build a product on this data. Treat undocumented terms as risky.'
@@ -404,16 +404,16 @@ export default function ReportView({
                       style={{ background: `color-mix(in srgb, ${gate.passed ? '#4a9d7f' : '#c4645f'} 14%, transparent)`, color: gate.passed ? '#4a9d7f' : '#c4645f' }}>
                       {gate.passed ? '✓' : '✕'}
                     </span>
-                    <p className="text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
+                    <p className="text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
                       {gate.passed ? 'This run would pass' : 'This run would fail'} a CI gate set at fail_under={gate.fail_under}.
                     </p>
-                    <code className="chip ml-auto font-mono !text-[0.65625rem]">
+                    <code className="chip ml-auto font-mono !text-[0.875rem]">
                       /audit/{runId}/verdict
                     </code>
                   </div>
                 ) : (
-                  <p className="text-[0.8125rem] text-secondary">
-                    No threshold was configured for this run. Use <code className="chip! px-1.5 py-[2px] font-mono !text-[0.625rem]">?fail_under=70</code> when auditing to turn the score into a pass/fail gate for CI.
+                  <p className="text-[0.875rem] text-secondary">
+                    No threshold was configured for this run. Use <code className="chip! px-1.5 py-[2px] font-mono !text-[0.6875rem]">?fail_under=70</code> when auditing to turn the score into a pass/fail gate for CI.
                   </p>
                 )}
               </div>
@@ -427,7 +427,7 @@ export default function ReportView({
           <div className="space-y-6">
             <div>
               <SectionTitle title="Audit Trace Logs" />
-              <div className="max-h-96 overflow-y-auto rounded-xl border p-4 font-mono text-[0.6875rem] leading-relaxed" style={{ background: '#070a10', borderColor: 'var(--color-line)', color: 'var(--color-secondary)' }}>
+              <div className="max-h-96 overflow-y-auto rounded-xl border p-4 font-mono text-[0.875rem] leading-relaxed" style={{ background: '#070a10', borderColor: 'var(--color-line)', color: 'var(--color-secondary)' }}>
                 {report.evidence_log.length === 0 ? (
                   <Empty text="No trace lines recorded." />
                 ) : (
@@ -449,7 +449,7 @@ export default function ReportView({
               ) : (
                 <ul className="space-y-2">
                   {report.errors.map((err, i) => (
-                    <li key={i} className="rounded-lg border px-3 py-2 font-mono text-[0.6875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', background: 'color-mix(in srgb, var(--color-error) 8%, transparent)', color: '#e0b3b0' }}>
+                    <li key={i} className="rounded-lg border px-3 py-2 font-mono text-[0.875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', background: 'color-mix(in srgb, var(--color-error) 8%, transparent)', color: '#e0b3b0' }}>
                       {err}
                     </li>
                   ))}
@@ -502,7 +502,7 @@ function OverviewPanel({
           <SectionTitle title="Dataset Columns" />
           <div className="flex flex-wrap gap-1.5">
             {effectiveColumns.map((col) => (
-              <span key={col} className="chip font-mono !text-[0.65625rem]">{col}</span>
+              <span key={col} className="chip font-mono !text-[0.875rem]">{col}</span>
             ))}
           </div>
         </div>
@@ -524,7 +524,7 @@ function OverviewPanel({
         {report.metadata.files.length > 0 ? (
           <div className="card max-h-40 overflow-y-auto">
             {report.metadata.files.map((file, i) => (
-              <div key={i} className="px-3 py-1.5 font-mono text-[0.6875rem] text-secondary" style={i > 0 ? { borderTop: '1px solid var(--color-line)' } : undefined}>
+              <div key={i} className="px-3 py-1.5 font-mono text-[0.875rem] text-secondary" style={i > 0 ? { borderTop: '1px solid var(--color-line)' } : undefined}>
                 {file}
               </div>
             ))}
@@ -590,15 +590,15 @@ function FindingsGrouped({
             {g.items.map((f, i) => (
               <div key={i} className="card p-4" style={{ borderColor: `color-mix(in srgb, ${g.tone} 30%, transparent)` }}>
                 <div className="flex items-start justify-between gap-3">
-                  <p className="text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{f.finding}</p>
+                  <p className="text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{f.finding}</p>
                   <div className="flex shrink-0 items-center gap-2">
                     <Pill color={SEVERITY_TONE[f.severity] ?? 'var(--color-muted)'} text={f.severity} />
-                    <span className="rounded border px-1.5 py-0.5 font-mono text-[0.5625rem] uppercase tracking-wider text-muted" style={{ borderColor: 'var(--color-line)' }}>
+                    <span className="rounded border px-1.5 py-0.5 font-mono text-[0.625rem] uppercase tracking-wider text-muted" style={{ borderColor: 'var(--color-line)' }}>
                       {f.group}
                     </span>
                   </div>
                 </div>
-                {f.evidence && <p className="mt-1.5 text-[0.75rem] leading-relaxed text-secondary">{f.evidence}</p>}
+                {f.evidence && <p className="mt-1.5 text-[0.875rem] leading-relaxed text-secondary">{f.evidence}</p>}
               </div>
             ))}
           </div>
@@ -630,20 +630,20 @@ function PassedBlock({
       >
         <div className="grid gap-1.5 sm:grid-cols-3">
           <div>
-            <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">Citations verified</p>
-            <p className="mt-0.5 font-display text-[1.15rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
+            <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted">Citations verified</p>
+            <p className="mt-0.5 font-display text-[1.25rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
               {citationsVerified}
             </p>
           </div>
           <div>
-            <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">Metadata fields present</p>
-            <p className="mt-0.5 font-display text-[1.15rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
+            <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted">Metadata fields present</p>
+            <p className="mt-0.5 font-display text-[1.25rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
               {metadataOk}/{metadataTotal}
             </p>
           </div>
           <div>
-            <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">Inspection checks passed</p>
-            <p className="mt-0.5 font-display text-[1.15rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
+            <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted">Inspection checks passed</p>
+            <p className="mt-0.5 font-display text-[1.25rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
               {checks.length}
             </p>
           </div>
@@ -651,7 +651,7 @@ function PassedBlock({
         {checks.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {checks.map((c) => (
-              <span key={c.check} className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', color: 'var(--color-success)' }}>
+              <span key={c.check} className="rounded-full border px-2 py-0.5 font-mono text-[0.6875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', color: 'var(--color-success)' }}>
                 ✓ {c.check}
               </span>
             ))}
@@ -668,16 +668,16 @@ function FileInspection({ inspection }: { inspection: NonNullable<AuditReport['f
     <div>
       <SectionTitle title="File Inspection" />
       <div className="card p-4">
-        <p className="font-mono text-[0.65625rem] text-muted">
+        <p className="font-mono text-[0.875rem] text-muted">
           {inspection.files_checked ?? 0} files · {inspection.columns_detected ?? 0} cols
           {inspection.rows_sampled != null ? ` · ${inspection.rows_sampled} rows sampled` : ''}
           {inspection.headers_verified ? ' · headers verified' : ''}
         </p>
         <div className="mt-3 space-y-1.5">
           {checks.map((check, i) => (
-            <div key={i} className="flex items-start gap-2 text-[0.75rem] leading-snug">
+            <div key={i} className="flex items-start gap-2 text-[0.875rem] leading-snug">
               <span
-                className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full text-[0.5625rem] font-black"
+                className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full text-[0.625rem] font-black"
                 style={{
                   background: `color-mix(in srgb, ${CHECK_TONE(check.result)} 10%, transparent)`,
                   color: CHECK_TONE(check.result),
@@ -691,7 +691,7 @@ function FileInspection({ inspection }: { inspection: NonNullable<AuditReport['f
           ))}
         </div>
         {inspection.pii_columns && inspection.pii_columns.length > 0 && (
-          <p className="mt-3 rounded-lg border px-3 py-2 text-[0.75rem] font-medium" style={{ background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--color-warning) 30%, transparent)', color: 'var(--color-warning)' }}>
+          <p className="mt-3 rounded-lg border px-3 py-2 text-[0.875rem] font-medium" style={{ background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)', borderColor: 'color-mix(in srgb, var(--color-warning) 30%, transparent)', color: 'var(--color-warning)' }}>
             Possible PII columns detected: {inspection.pii_columns.join(', ')} — review before sharing this dataset onward.
           </p>
         )}
@@ -723,7 +723,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
         <div className="card p-4">
           <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1">
             <span className="eyebrow">Data Profile</span>
-            <span className="font-mono text-[0.65625rem] text-muted">
+            <span className="font-mono text-[0.875rem] text-muted">
               {dp.rows_profiled ? `${dp.rows_profiled} real rows · via ${dp.source_used}` : 'not available for this source'}
             </span>
           </div>
@@ -731,7 +731,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
           {dp.rows_profiled ? (
             <>
               {dp.skip_reason && (
-                <p className="mb-3 text-[0.75rem] leading-snug" style={{ color: 'var(--color-warning)' }}>
+                <p className="mb-3 text-[0.875rem] leading-snug" style={{ color: 'var(--color-warning)' }}>
                   Partial profile: {dp.skip_reason}
                 </p>
               )}
@@ -747,7 +747,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
                 <div className="mt-3 max-h-44 overflow-y-auto rounded-lg border" style={{ borderColor: 'var(--color-line)' }}>
                   <table className="w-full text-left">
                     <thead className="sticky top-0" style={{ background: 'var(--color-panel)' }}>
-                      <tr className="font-mono text-[0.625rem] font-bold uppercase tracking-wider text-muted">
+                      <tr className="font-mono text-[0.6875rem] font-bold uppercase tracking-wider text-muted">
                         {['Numeric column', 'Min', 'Mean', 'Max', 'Missing'].map((h) => (
                           <th key={h} className="px-3 py-1.5 font-bold">{h}</th>
                         ))}
@@ -755,7 +755,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
                     </thead>
                     <tbody>
                       {dp.numeric_summary!.map((s, i) => (
-                        <tr key={s.column} className="font-mono text-[0.6875rem] text-secondary" style={i > 0 ? { borderTop: '1px solid var(--color-line)' } : undefined}>
+                        <tr key={s.column} className="font-mono text-[0.875rem] text-secondary" style={i > 0 ? { borderTop: '1px solid var(--color-line)' } : undefined}>
                           <td className="max-w-[140px] truncate px-3 py-1.5 font-semibold" style={{ color: 'var(--color-primary)' }}>{s.column}</td>
                           <td className="px-3 py-1.5">{s.min}</td>
                           <td className="px-3 py-1.5">{s.mean}</td>
@@ -774,11 +774,11 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
                     const maxCount = Math.max(...dp.class_balance!.values.map((x) => x.count), 1)
                     return (
                       <div key={v.value} className="flex items-center gap-2">
-                        <span className="w-32 shrink-0 truncate text-right font-mono text-[0.65625rem] text-secondary">{v.value}</span>
+                        <span className="w-32 shrink-0 truncate text-right font-mono text-[0.875rem] text-secondary">{v.value}</span>
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
                           <div className="h-full rounded-full" style={{ width: `${(v.count / maxCount) * 100}%`, background: 'var(--color-accent)' }} />
                         </div>
-                        <span className="w-10 shrink-0 font-mono text-[0.65625rem] text-muted">{v.count}</span>
+                        <span className="w-10 shrink-0 font-mono text-[0.875rem] text-muted">{v.count}</span>
                       </div>
                     )
                   })}
@@ -786,7 +786,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
               )}
             </>
           ) : (
-            <p className="text-[0.8125rem] leading-snug text-secondary">
+            <p className="text-[0.875rem] leading-snug text-secondary">
               {dp.skip_reason || 'This source does not expose downloadable rows.'} The audit ran on page metadata,
               filenames and column listings instead.
             </p>
@@ -806,7 +806,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
 function Pill({ color, text }: { color: string; text: string }) {
   return (
     <span
-      className="shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[0.5625rem] font-bold uppercase tracking-wider"
+      className="shrink-0 rounded-full border px-2.5 py-0.5 font-mono text-[0.625rem] font-bold uppercase tracking-wider"
       style={{ color, borderColor: `color-mix(in srgb, ${color} 35%, transparent)`, background: `color-mix(in srgb, ${color} 10%, transparent)` }}
     >
       {text}
@@ -840,19 +840,19 @@ function Breakdown({ breakdown, report }: { breakdown: ScoreBreakdown; report: A
               }}
             >
               <div className="flex items-center gap-3">
-                <span className="w-28 shrink-0 text-[0.8125rem] font-medium text-secondary sm:w-32" title={meta.hint}>
+                <span className="w-28 shrink-0 text-[0.875rem] font-medium text-secondary sm:w-32" title={meta.hint}>
                   {meta.label}
                 </span>
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <div className="bar-fill h-full rounded-full" style={{ width: visible ? `${v}%` : '0%', background: barColor }} />
                 </div>
-                <span className="w-8 shrink-0 text-right font-mono text-[0.8125rem] font-bold tabular-nums" style={{ color: 'var(--color-primary)' }}>
+                <span className="w-8 shrink-0 text-right font-mono text-[0.875rem] font-bold tabular-nums" style={{ color: 'var(--color-primary)' }}>
                   {v}
                 </span>
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : key)}
-                  className="btn btn-ghost shrink-0 px-2 py-1 !text-[0.65625rem]"
+                  className="btn btn-ghost shrink-0 px-2 py-1 !text-[0.875rem]"
                   aria-expanded={isOpen}
                   title={meta.hint}
                 >
@@ -868,7 +868,7 @@ function Breakdown({ breakdown, report }: { breakdown: ScoreBreakdown; report: A
           )
         })}
       </div>
-      <p className="mt-2 font-mono text-[0.59375rem] uppercase tracking-[0.18em] text-muted">
+      <p className="mt-2 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-muted">
         open why? to read the evidence this metric was derived from
       </p>
     </div>
@@ -883,14 +883,14 @@ function evidenceFor(key: string, report: AuditReport): React.ReactNode {
       <div className="space-y-2">
         {report.consent_flags.map((f, i) => (
           <div key={i} className="flex items-start justify-between gap-3">
-            <p className="text-[0.75rem] leading-relaxed text-secondary">
+            <p className="text-[0.875rem] leading-relaxed text-secondary">
               <b style={{ color: 'var(--color-primary)' }}>{f.finding}</b>
               {f.evidence ? ` — ${f.evidence}` : ''}
             </p>
             <Pill color={SEVERITY_TONE[f.severity] ?? 'var(--color-muted)'} text={f.severity} />
           </div>
         ))}
-        {report.metadata.license && <p className="text-[0.6875rem] text-muted">license: {report.metadata.license}</p>}
+        {report.metadata.license && <p className="text-[0.875rem] text-muted">license: {report.metadata.license}</p>}
       </div>
     )
   }
@@ -902,16 +902,16 @@ function evidenceFor(key: string, report: AuditReport): React.ReactNode {
     return (
       <div>
         <div className="mb-2 flex flex-wrap gap-2">
-          <span className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', color: 'var(--color-success)' }}>
+          <span className="rounded-full border px-2 py-0.5 font-mono text-[0.6875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', color: 'var(--color-success)' }}>
             {verified.length} verified
           </span>
           {retracted.length > 0 && (
-            <span className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', color: 'var(--color-error)' }}>
+            <span className="rounded-full border px-2 py-0.5 font-mono text-[0.6875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', color: 'var(--color-error)' }}>
               {retracted.length} retracted / disputed
             </span>
           )}
           {unknown.length > 0 && (
-            <span className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'var(--color-line)', color: 'var(--color-muted)' }}>
+            <span className="rounded-full border px-2 py-0.5 font-mono text-[0.6875rem]" style={{ borderColor: 'var(--color-line)', color: 'var(--color-muted)' }}>
               {unknown.length} unknown
             </span>
           )}
@@ -920,7 +920,7 @@ function evidenceFor(key: string, report: AuditReport): React.ReactNode {
           {report.citation_trail.slice(0, 4).map((c, i) => {
             const retraction = RETRACTION_LABEL[c.retraction_status] ?? RETRACTION_LABEL.unknown
             return (
-              <li key={i} className="flex items-center justify-between gap-3 text-[0.75rem]">
+              <li key={i} className="flex items-center justify-between gap-3 text-[0.875rem]">
                 <span className="min-w-0 truncate text-secondary">{c.paper_title}</span>
                 <Pill color={retraction.color} text={retraction.label} />
               </li>
@@ -936,7 +936,7 @@ function evidenceFor(key: string, report: AuditReport): React.ReactNode {
       <div className="space-y-2">
         {report.duplication_flags.map((f, i) => (
           <div key={i} className="flex items-start justify-between gap-3">
-            <p className="text-[0.75rem] leading-relaxed text-secondary">
+            <p className="text-[0.875rem] leading-relaxed text-secondary">
               <b style={{ color: 'var(--color-primary)' }}>{f.finding}</b>
               {f.evidence ? ` — ${f.evidence}` : ''}
             </p>
@@ -963,8 +963,8 @@ function evidenceFor(key: string, report: AuditReport): React.ReactNode {
 
 function MiniPass({ text }: { text: string }) {
   return (
-    <p className="flex items-center gap-2 text-[0.75rem] font-medium" style={{ color: 'var(--color-success)' }}>
-      <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-[0.5625rem] font-black" style={{ background: 'color-mix(in srgb, var(--color-success) 12%, transparent)' }}>
+    <p className="flex items-center gap-2 text-[0.875rem] font-medium" style={{ color: 'var(--color-success)' }}>
+      <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-[0.625rem] font-black" style={{ background: 'color-mix(in srgb, var(--color-success) 12%, transparent)' }}>
         ✓
       </span>
       {text}
@@ -975,10 +975,10 @@ function MiniPass({ text }: { text: string }) {
 function KVCard({ label, value, info, warn, children }: { label: string; value: string; info: string; warn?: boolean; children?: React.ReactNode }) {
   return (
     <div className="card p-4">
-      <span className="text-[0.625rem] font-bold uppercase tracking-wider" style={{ letterSpacing: '0.16em', color: 'var(--color-muted)' }}>
+      <span className="text-[0.6875rem] font-bold uppercase tracking-wider" style={{ letterSpacing: '0.16em', color: 'var(--color-muted)' }}>
         {label} <Info text={info} />
       </span>
-      <p className="mt-1 truncate font-display text-[1.05rem] font-semibold" style={{ color: warn ? 'var(--color-warning)' : 'var(--color-primary)' }}>
+      <p className="mt-1 truncate font-display text-[1.125rem] font-semibold" style={{ color: warn ? 'var(--color-warning)' : 'var(--color-primary)' }}>
         {value}
       </p>
       {children}
@@ -990,27 +990,27 @@ function CompletenessRow({ label, ok, detail }: { label: string; ok: boolean; de
   return (
     <div className="card flex items-center gap-3 p-3.5">
       <span
-        className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[0.65625rem] font-black"
+        className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[0.875rem] font-black"
         style={{ background: `color-mix(in srgb, ${ok ? '#4a9d7f' : '#c9a14a'} 12%, transparent)`, color: ok ? 'var(--color-success)' : 'var(--color-warning)' }}
       >
         {ok ? '✓' : '!'}
       </span>
-      <span className="shrink-0 text-[0.75rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{label}</span>
-      <span className="truncate font-mono text-[0.65625rem] text-muted">{detail}</span>
+      <span className="shrink-0 text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{label}</span>
+      <span className="truncate font-mono text-[0.875rem] text-muted">{detail}</span>
     </div>
   )
 }
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <h3 className="mb-3 text-[0.625rem] font-bold uppercase" style={{ letterSpacing: '0.2em', color: 'var(--color-muted)' }}>
+    <h3 className="mb-3 text-[0.6875rem] font-bold uppercase" style={{ letterSpacing: '0.2em', color: 'var(--color-muted)' }}>
       {title}
     </h3>
   )
 }
 
 function Empty({ text }: { text: string }) {
-  return <p className="text-[0.8125rem] font-medium italic text-muted">{text}</p>
+  return <p className="text-[0.875rem] font-medium italic text-muted">{text}</p>
 }
 
 function StatBox({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone: 'ok' | 'warn' }) {
@@ -1023,11 +1023,11 @@ function StatBox({ label, value, sub, tone }: { label: string; value: string; su
           : { borderColor: 'color-mix(in srgb, var(--color-warning) 35%, transparent)', background: 'color-mix(in srgb, var(--color-warning) 8%, transparent)' }
       }
     >
-      <p className="truncate text-[0.5625rem] font-bold uppercase tracking-wider text-muted" title={label}>{label}</p>
-      <p className="mt-0.5 text-[1.1rem] font-semibold leading-none tabular-nums" style={{ color: tone === 'ok' ? 'var(--color-primary)' : 'var(--color-warning)' }}>
+      <p className="truncate text-[0.625rem] font-bold uppercase tracking-wider text-muted" title={label}>{label}</p>
+      <p className="mt-0.5 text-[1.2rem] font-semibold leading-none tabular-nums" style={{ color: tone === 'ok' ? 'var(--color-primary)' : 'var(--color-warning)' }}>
         {value}
       </p>
-      {sub && <p className="mt-1 text-[0.65625rem] font-medium text-muted">{sub}</p>}
+      {sub && <p className="mt-1 text-[0.875rem] font-medium text-muted">{sub}</p>}
     </div>
   )
 }
@@ -1044,10 +1044,10 @@ function WarningBanner() {
         <line x1="12" y1="17" x2="12.01" y2="17" />
       </svg>
       <div>
-        <p className="text-[0.8125rem] font-semibold" style={{ color: 'var(--color-error)' }}>
+        <p className="text-[0.875rem] font-semibold" style={{ color: 'var(--color-error)' }}>
           This score is based on partial evidence
         </p>
-        <p className="mt-1 text-[0.75rem] leading-relaxed text-secondary">
+        <p className="mt-1 text-[0.875rem] leading-relaxed text-secondary">
           Data profiling failed for this source. The trust score reflects metadata and citation checks only, not actual
           dataset content verification.
         </p>
@@ -1064,7 +1064,7 @@ function Info({ text }: { text: string }) {
         <circle cx="12" cy="12" r="9" />
         <path d="M12 8h.01M12 11v5" strokeLinecap="round" />
       </svg>
-      <span className="normal-case tracking-normal pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden w-60 -translate-x-1/2 rounded-lg border px-3 py-2 text-[0.6875rem] font-medium leading-snug shadow-xl group-hover:block group-focus:block" style={{ background: 'var(--color-panel)', borderColor: 'var(--color-line-strong)', color: 'var(--color-primary)' }}>
+      <span className="normal-case tracking-normal pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden w-60 -translate-x-1/2 rounded-lg border px-3 py-2 text-[0.875rem] font-medium leading-snug shadow-xl group-hover:block group-focus:block" style={{ background: 'var(--color-panel)', borderColor: 'var(--color-line-strong)', color: 'var(--color-primary)' }}>
         {text}
       </span>
     </span>
@@ -1077,7 +1077,7 @@ function Note({ children }: { children: React.ReactNode }) {
       className="rounded-xl border px-4 py-3"
       style={{ borderColor: 'color-mix(in srgb, var(--color-warning) 35%, transparent)', background: 'color-mix(in srgb, var(--color-warning) 8%, transparent)' }}
     >
-      <p className="text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-warning)' }}>{children}</p>
+      <p className="text-[0.875rem] leading-relaxed" style={{ color: 'var(--color-warning)' }}>{children}</p>
     </div>
   )
 }

@@ -48,10 +48,10 @@ export default function TimelineView({
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="font-mono text-[0.65625rem] font-bold uppercase tracking-[0.2em] text-muted">
+          <p className="font-mono text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-muted">
             linear read · same statuses as the graph
           </p>
-          <span className="font-mono text-[0.65625rem] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--color-secondary)' }}>
+          <span className="font-mono text-[0.8125rem] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--color-secondary)' }}>
             {doneCount}/{PIPELINE.length} agents complete
             {runningNode ? (
               <>
@@ -79,7 +79,7 @@ export default function TimelineView({
                     aria-hidden="true"
                   >
                     {(status === 'completed' || status === 'failed') && (
-                      <span className="text-[0.5625rem] font-bold" style={{ color: tone }}>{status === 'failed' ? '!' : '✓'}</span>
+                      <span className="text-[0.625rem] font-bold" style={{ color: tone }}>{status === 'failed' ? '!' : '✓'}</span>
                     )}
                   </span>
 
@@ -93,17 +93,17 @@ export default function TimelineView({
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <span className="font-mono text-[0.625rem] font-bold" style={{ color: tone }}>{s.kicker.slice(0, 2)}</span>
+                        <span className="font-mono text-[0.6875rem] font-bold" style={{ color: tone }}>{s.kicker.slice(0, 2)}</span>
                         <span className="truncate font-display text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
                           {s.label}
                         </span>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
                         {durations[s.node] != null && durations[s.node]! > 0 && !isNaN(durations[s.node]!) && (
-                          <span className="font-mono text-[0.625rem] tabular-nums text-muted">{(durations[s.node]! / 1000).toFixed(1)}s</span>
+                          <span className="font-mono text-[0.6875rem] tabular-nums text-muted">{(durations[s.node]! / 1000).toFixed(1)}s</span>
                         )}
                         <span
-                          className={`rounded-full border px-2 py-0.5 font-mono text-[0.59375rem] font-bold uppercase tracking-wider ${status === 'running' ? 'pulse-soft' : ''}`}
+                          className={`rounded-full border px-2 py-0.5 font-mono text-[0.65625rem] font-bold uppercase tracking-wider ${status === 'running' ? 'pulse-soft' : ''}`}
                           style={{ borderColor: `color-mix(in srgb, ${tone} 35%, transparent)`, color: tone, background: `color-mix(in srgb, ${tone} 8%, transparent)` }}
                         >
                           {statusLabel(status)}
@@ -112,7 +112,7 @@ export default function TimelineView({
                     </div>
 
                     {(messages[s.node] || result) && (
-                      <p className="mt-2 text-[0.75rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
+                      <p className="mt-2 text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
                         {messages[s.node]}
                         {result && (
                           <span
@@ -135,7 +135,7 @@ export default function TimelineView({
           </div>
         </div>
 
-        <p className="mt-6 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-muted">
+        <p className="mt-6 font-mono text-[0.6875rem] uppercase tracking-[0.18em] text-muted">
           tap a row to open its evidence · superseded agents stay greyed
         </p>
       </div>

@@ -35,7 +35,7 @@ function Elapsed({ from, running }: { from: number; running: boolean }) {
   const mm = String(Math.floor(s / 60)).padStart(2, '0')
   const ss = String(s % 60).padStart(2, '0')
   return (
-    <span className="font-mono text-[0.75rem] tabular-nums" style={{ color: 'var(--color-secondary)' }}>
+    <span className="font-mono text-[0.8125rem] tabular-nums" style={{ color: 'var(--color-secondary)' }}>
       {mm}:{ss}
     </span>
   )
@@ -258,7 +258,7 @@ export default function LiveStepper({
     <div className="relative flex h-full min-h-0" style={{ background: 'var(--color-page)' }}>
       {reconnecting && (
         <div
-          className="fixed left-0 right-0 top-0 z-50 flex items-center justify-center gap-2 py-2 text-[0.8125rem] font-medium"
+          className="fixed left-0 right-0 top-0 z-50 flex items-center justify-center gap-2 py-2 text-[0.9375rem] font-medium"
           style={{ background: 'color-mix(in srgb, var(--color-info) 12%, transparent)', borderBottom: '1px solid color-mix(in srgb, var(--color-info) 30%, transparent)', color: 'var(--color-info)' }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" className="animate-spin">
@@ -282,7 +282,7 @@ export default function LiveStepper({
             </span>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <p className="truncate font-display text-[0.875rem] font-semibold leading-tight" style={{ color: 'var(--color-primary)' }}>
+                <p className="truncate font-display text-[0.9375rem] font-semibold leading-tight" style={{ color: 'var(--color-primary)' }}>
                   {meta?.title ?? (runId === 'preview' ? 'Iris Dataset' : 'Preparing…')}
                 </p>
                 {onBack ? (
@@ -296,7 +296,7 @@ export default function LiveStepper({
                   </button>
                 ) : null}
               </div>
-              <p className="truncate font-mono text-[0.625rem] uppercase tracking-[0.16em] text-muted">
+              <p className="truncate font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-muted">
                 {headerLabel} · {runId}
               </p>
             </div>
@@ -309,14 +309,14 @@ export default function LiveStepper({
           <div className="flex shrink-0 items-center gap-2">
             {autoReturn && (
               <span className="flex items-center gap-2">
-                <span className="hidden font-mono text-[0.625rem] uppercase tracking-[0.16em] text-muted sm:inline">elapsed</span>
+                <span className="hidden font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-muted sm:inline">elapsed</span>
                 <Elapsed from={startedAtRef.current} running={autoReturn} />
               </span>
             )}
-            <span className="hidden font-mono text-[0.625rem] uppercase tracking-[0.14em] text-muted md:inline">
+            <span className="hidden font-mono text-[0.6875rem] uppercase tracking-[0.14em] text-muted md:inline">
                 drag · click nodes for details
               </span>
-            <span className="hidden rounded-full border px-2 py-0.5 font-mono text-[0.59375rem] font-semibold uppercase tracking-[0.14em] text-muted lg:inline" style={{ borderColor: 'var(--color-line)' }}>
+            <span className="hidden rounded-full border px-2 py-0.5 font-mono text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-muted lg:inline" style={{ borderColor: 'var(--color-line)' }}>
               t=timeline · /=search · esc=close
             </span>
             {/* Graph / Timeline toggle */}
@@ -326,7 +326,7 @@ export default function LiveStepper({
                   key={v}
                   type="button"
                   onClick={() => setView(v)}
-                  className={`rounded-full px-2.5 py-0.5 capitalize font-mono text-[0.625rem] font-semibold transition-colors ${
+                  className={`rounded-full px-2.5 py-0.5 capitalize font-mono text-[0.6875rem] font-semibold transition-colors ${
                     view === v ? 'text-[#0b0e13]' : 'text-muted hover:text-primary'
                   }`}
                   style={view === v ? { background: 'var(--color-accent)' } : undefined}
@@ -366,24 +366,24 @@ export default function LiveStepper({
             >
               <Metric label="License" value={meta.license || 'Not stated'} tone={meta.license ? 'ok' : 'warn'} />
               <span className="flex items-center gap-1.5">
-                <span className="font-mono text-[0.625rem] font-bold uppercase tracking-[0.14em] text-muted">Files</span>
-                <span className="text-[0.8125rem] font-semibold" style={{ color: fileCount > 0 ? 'var(--color-primary)' : 'var(--color-warning)' }}>
+                <span className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted">Files</span>
+                <span className="text-[0.9375rem] font-semibold" style={{ color: fileCount > 0 ? 'var(--color-primary)' : 'var(--color-warning)' }}>
                   {fileCount} listed
                 </span>
               </span>
               {columnCount > 0 && (
                 <span className="flex min-w-0 items-center gap-2">
-                  <span className="shrink-0 font-mono text-[0.625rem] font-bold uppercase tracking-[0.14em] text-muted">
+                  <span className="shrink-0 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted">
                     Columns ({columnCount})
                   </span>
                   <span className="flex max-w-full items-center gap-1 overflow-x-auto whitespace-nowrap pb-0.5">
                     {meta.columns!.slice(0, 10).map((col) => (
-                      <span key={col} className="chip !px-1.5 !py-[2px] font-mono !text-[0.625rem]">
+                      <span key={col} className="chip !px-1.5 !py-[2px] font-mono !text-[0.6875rem]">
                         {col}
                       </span>
                     ))}
                     {columnCount > 10 && (
-                      <span className="shrink-0 font-mono text-[0.65625rem] text-muted">+{columnCount - 10} more</span>
+                      <span className="shrink-0 font-mono text-[0.8125rem] text-muted">+{columnCount - 10} more</span>
                     )}
                   </span>
                 </span>
@@ -442,7 +442,7 @@ export default function LiveStepper({
                   key={f}
                   type="button"
                   onClick={() => setFilter(f)}
-                  className={`rounded-full px-2 py-0.5 capitalize font-mono text-[0.625rem] font-semibold transition-colors ${
+                  className={`rounded-full px-2 py-0.5 capitalize font-mono text-[0.6875rem] font-semibold transition-colors ${
                     filter === f ? 'text-[#0b0e13]' : 'text-muted hover:text-primary'
                   }`}
                   style={filter === f ? { background: 'var(--color-primary)' } : undefined}
@@ -460,10 +460,10 @@ export default function LiveStepper({
               className="absolute bottom-4 left-1/2 z-20 w-[min(92%,420px)] -translate-x-1/2 rounded-xl border p-4 shadow-[0_18px_50px_rgba(2,6,16,0.55)]"
               style={{ background: 'color-mix(in srgb, var(--color-error) 10%, var(--color-panel))', borderColor: 'color-mix(in srgb, var(--color-error) 35%, transparent)' }}
             >
-              <p className="text-[0.875rem] font-semibold" style={{ color: '#e0b3b0' }}>
+              <p className="text-[0.9375rem] font-semibold" style={{ color: '#e0b3b0' }}>
                 {failed}
               </p>
-              <button type="button" onClick={onReset} className="btn btn-danger mt-3 px-3 py-1.5 !text-[0.75rem]">
+              <button type="button" onClick={onReset} className="btn btn-danger mt-3 px-3 py-1.5 !text-[0.8125rem]">
                 Start over
               </button>
             </div>
@@ -474,25 +474,25 @@ export default function LiveStepper({
       {/* Right: detail drawer (bottom sheet on small screens) */}
       <div
         className={`relative h-full shrink-0 overflow-hidden transition-[width,height] duration-500 ease-out ${
-          selected ? 'w-[min(100%,400px)]' : 'w-0'
+          selected ? 'w-[min(100%,460px)]' : 'w-0'
         } max-md:absolute max-md:bottom-0 max-md:left-0 max-md:z-30 ${
-          selected ? 'max-md:h-[min(72vh,560px)] max-md:w-full' : 'max-md:h-0'
+          selected ? 'max-md:h-[min(72vh,580px)] max-md:w-full' : 'max-md:h-0'
         }`}
         style={{ background: 'var(--color-surface)', borderLeft: '1px solid var(--color-line)' }}
       >
         {selected && (
           <aside
             key={selected.node}
-            className="slide-in flex h-full w-[min(100%,400px)] flex-col fade-in"
+            className="slide-in flex h-full w-[min(100%,460px)] flex-col fade-in"
             style={{ background: 'var(--color-surface)' }}
             aria-label={`${selected.label} details`}
           >
             <div className="flex shrink-0 items-start justify-between gap-3 border-b px-5 py-4" style={{ borderColor: 'var(--color-line)' }}>
               <div className="min-w-0">
-                <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--color-info)' }}>
+                <p className="font-mono text-[0.75rem] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--color-info)' }}>
                   {selected.kicker}
                 </p>
-                <h3 className="mt-1 truncate font-display text-[1.2rem] font-semibold leading-tight" style={{ color: 'var(--color-primary)' }}>
+                <h3 className="mt-1 truncate font-display text-[1.35rem] font-semibold leading-tight" style={{ color: 'var(--color-primary)' }}>
                   {selected.label}
                 </h3>
               </div>
@@ -508,9 +508,9 @@ export default function LiveStepper({
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-5 py-4" style={{ overscrollBehavior: 'contain' }}>
+            <div className="flex-1 overflow-y-auto px-6 py-5" style={{ overscrollBehavior: 'contain' }}>
               {/* Status */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span
                   className="chip"
                   style={{
@@ -525,37 +525,33 @@ export default function LiveStepper({
                   />
                   {statusLabel(selectedStatus)}
                 </span>
-                {selectedDuration != null && selectedDuration > 0 && (
-                  <span className="font-mono text-[0.65625rem] tabular-nums text-muted">
-                    {(selectedDuration / 1000).toFixed(1)}s
+                {(selectedDuration != null && selectedDuration > 0) || selectedTs ? (
+                  <span className="font-mono text-[0.75rem] tabular-nums text-muted">
+                    {(selectedDuration != null && selectedDuration > 0 ? `${(selectedDuration / 1000).toFixed(1)}s` : '')}
+                    {selectedDuration != null && selectedDuration > 0 && selectedTs ? ' · ' : ''}
+                    {selectedTs ? `finished ${new Date(selectedTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : ''}
                   </span>
-                )}
-                {selectedTs && (
-                  <span className="font-mono text-[0.65625rem] tabular-nums text-muted">
-                    finished{' '}
-                    {new Date(selectedTs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </span>
-                )}
+                ) : null}
               </div>
 
-              <p className="mt-3 text-[0.75rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
+              <p className="mt-3 text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
                 {STATUS_MEANING[selectedStatus]}
               </p>
 
-              <p className="mt-4 text-[0.875rem] leading-relaxed" style={{ color: 'var(--color-primary)' }}>
+              <p className="mt-4 text-[0.9375rem] leading-relaxed" style={{ color: 'var(--color-primary)' }}>
                 {selected.description}
               </p>
 
               {/* Result / evidence */}
               {selectedResult && (
                 <div
-                  className="mt-4 rounded-lg border p-3"
+                  className="mt-5 rounded-lg border p-3.5"
                   style={{ background: 'color-mix(in srgb, var(--color-success) 6%, var(--color-panel))', borderColor: 'color-mix(in srgb, var(--color-success) 25%, transparent)' }}
                 >
-                  <p className="font-mono text-[0.625rem] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--color-success)' }}>
+                  <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.16em]" style={{ color: 'var(--color-success)' }}>
                     Result
                   </p>
-                  <p className="mt-1 font-mono text-[0.75rem] leading-relaxed" style={{ color: 'var(--color-primary)' }}>
+                  <p className="mt-1.5 font-mono text-[0.875rem] leading-relaxed" style={{ color: 'var(--color-primary)' }}>
                     {selectedResult}
                   </p>
                 </div>
@@ -566,8 +562,8 @@ export default function LiveStepper({
 
               {showEvidence && (
                 <div className="mt-3 rounded-lg border p-3" style={{ borderColor: 'var(--color-line)', background: 'var(--color-panel)' }}>
-                  <p className="font-mono text-[0.625rem] font-bold uppercase tracking-[0.16em] text-muted">Raw evidence</p>
-                  <p className="mt-1 font-mono text-[0.72rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
+                  <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-muted">Raw evidence</p>
+                  <p className="mt-1.5 font-mono text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
                     {selectedMsg || 'No message yet for this node.'}
                   </p>
                 </div>
@@ -578,24 +574,24 @@ export default function LiveStepper({
                 <button
                   type="button"
                   onClick={() => setShowEvidence((v) => !v)}
-                  className="btn px-3 py-1.5 !text-[0.75rem]"
+                  className="btn px-3.5 py-1.5 !text-[0.8125rem]"
                   disabled={!selectedMsg && !selectedResult}
                 >
                   {showEvidence ? 'Hide evidence' : 'View evidence'}
                 </button>
-                <button type="button" onClick={() => setSelectedNode(null)} className="btn btn-ghost px-3 py-1.5 !text-[0.75rem]">
+                <button type="button" onClick={() => setSelectedNode(null)} className="btn btn-ghost px-3.5 py-1.5 !text-[0.8125rem]">
                   Focus graph
                 </button>
               </div>
 
-              <p className="mt-5 font-mono text-[0.625rem] font-bold uppercase tracking-[0.16em] text-muted">What this agent checks</p>
-              <ul className="mt-2 space-y-1.5">
+              <p className="mt-6 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-muted">What this agent checks</p>
+              <ul className="mt-2.5 space-y-2">
                 {selected.bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2 text-[0.8125rem] font-medium leading-snug" style={{ color: 'var(--color-secondary)' }}>
+                  <li key={b} className="flex items-start gap-2.5 text-[0.9375rem] font-medium leading-snug" style={{ color: 'var(--color-secondary)' }}>
                     <svg
                       className="mt-[3px] shrink-0"
-                      width="12"
-                      height="12"
+                      width="14"
+                      height="14"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="var(--color-accent)"
@@ -612,12 +608,12 @@ export default function LiveStepper({
 
               {selected.node === 'ingest' && meta && meta.columns && meta.columns.length > 0 && (
                 <>
-                  <p className="mt-5 font-mono text-[0.625rem] font-bold uppercase tracking-[0.16em] text-muted">
+                  <p className="mt-5 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-muted">
                     Detected columns ({meta.columns.length})
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {meta.columns.map((col) => (
-                      <span key={col} className="chip font-mono !text-[0.65625rem]">
+                      <span key={col} className="chip font-mono !text-[0.8125rem]">
                         {col}
                       </span>
                     ))}
@@ -625,9 +621,9 @@ export default function LiveStepper({
                 </>
               )}
 
-              <p className="mt-5 font-mono text-[0.625rem] font-bold uppercase tracking-[0.16em] text-muted">Live log</p>
-              <div className="mt-2 rounded-lg border p-3" style={{ background: '#070a10', borderColor: 'var(--color-line)' }}>
-                <p className="font-mono text-[0.75rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
+              <p className="mt-6 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-muted">Live log</p>
+              <div className="mt-2.5 rounded-lg border p-3.5" style={{ background: '#070a10', borderColor: 'var(--color-line)' }}>
+                <p className="font-mono text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
                   {selectedMsg || 'Waiting for this node to run…'}
                 </p>
               </div>
@@ -650,7 +646,7 @@ function LegendDot({ color, text }: { color: string; text: string }) {
   return (
     <span className="flex items-center gap-1.5">
       <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-      <span className="text-[0.65625rem] font-semibold" style={{ color: 'var(--color-secondary)' }}>
+      <span className="text-[0.8125rem] font-semibold" style={{ color: 'var(--color-secondary)' }}>
         {text}
       </span>
     </span>
@@ -660,9 +656,9 @@ function LegendDot({ color, text }: { color: string; text: string }) {
 function Metric({ label, value, tone }: { label: string; value: string; tone?: 'ok' | 'warn' }) {
   return (
     <span className="flex min-w-0 items-center gap-1.5">
-      <span className="font-mono text-[0.625rem] font-bold uppercase tracking-[0.14em] text-muted">{label}</span>
+      <span className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-muted">{label}</span>
       <span
-        className="max-w-[200px] truncate text-[0.8125rem] font-semibold"
+        className="max-w-[200px] truncate text-[0.9375rem] font-semibold"
         style={{ color: tone === 'warn' ? 'var(--color-warning)' : 'var(--color-primary)' }}
       >
         {value}
@@ -707,11 +703,11 @@ function DerivedMetrics({
   if (rows.length === 0) return null
 
   return (
-    <div className="mt-3 grid grid-cols-2 gap-1.5">
+    <div className="mt-4 grid grid-cols-2 gap-2">
       {rows.map((r) => (
-        <div key={r.label} className="rounded-lg border px-3 py-2" style={{ borderColor: 'var(--color-line)', background: 'var(--color-panel)' }}>
-          <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">{r.label}</p>
-          <p className="mt-0.5 font-display text-[1rem] font-semibold tabular-nums" style={{ color: r.tone === 'warn' ? 'var(--color-warning)' : 'var(--color-primary)' }}>
+        <div key={r.label} className="rounded-lg border px-3.5 py-2.5" style={{ borderColor: 'var(--color-line)', background: 'var(--color-panel)' }}>
+          <p className="font-mono text-[0.75rem] font-bold uppercase tracking-[0.14em] text-muted">{r.label}</p>
+          <p className="mt-1 font-display text-[1.2rem] font-semibold tabular-nums" style={{ color: r.tone === 'warn' ? 'var(--color-warning)' : 'var(--color-primary)' }}>
             {r.value}
           </p>
         </div>

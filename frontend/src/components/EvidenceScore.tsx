@@ -47,20 +47,20 @@ export default function EvidenceScore() {
 
   return (
     <section id="evidence-score" className="relative" aria-label="How evidence becomes a trust score">
-      <div ref={ref} className="relative" style={{ height: '320vh' }}>
-        <div className="sticky top-0 flex h-screen items-center overflow-hidden px-6">
+      <div ref={ref} className="relative" style={{ height: '220vh' }}>
+        <div className="sticky top-0 flex h-screen items-center overflow-hidden px-6 py-12">
           <div className="mx-auto w-full max-w-6xl">
-            <div ref={headRef} className={`mb-8 sm:mb-12 ${visible ? 'fade-in-up' : 'opacity-0'}`}>
+            <div ref={headRef} className={`mb-8 sm:mb-10 ${visible ? 'fade-in-up' : 'opacity-0'}`}>
               <p className="eyebrow">✦ evidence → score</p>
-              <h2 className={`mt-3 font-display text-[clamp(1.8rem,4.4vw,3rem)] font-semibold tracking-tight ${visible ? 'fade-in-up' : 'opacity-0'}`} style={{ color: 'var(--color-primary)' }}>
+              <h2 className={`mt-3 font-display text-[clamp(2rem,4.6vw,3.2rem)] font-semibold tracking-tight ${visible ? 'fade-in-up' : 'opacity-0'}`} style={{ color: 'var(--color-primary)' }}>
                 Every number is accountable to something.
               </h2>
             </div>
 
-            <div className="grid gap-10 md:grid-cols-2 md:items-center">
+            <div className="grid items-center gap-12 md:grid-cols-[1.05fr_1fr] md:gap-8">
               {/* Evidence column */}
               <div>
-                <p className="mb-4 font-mono text-[0.65625rem] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-muted)' }}>
+                <p className="mb-4 font-mono text-[0.75rem] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-muted)' }}>
                   Evidence signals
                 </p>
                 <div className="space-y-2">
@@ -69,7 +69,7 @@ export default function EvidenceScore() {
                     return (
                       <div key={item.label}>
                         <div
-                          className="flex items-center justify-between rounded-lg border px-4 py-3 transition-all duration-500"
+                          className="flex items-center justify-between rounded-lg border px-4 py-3.5 transition-all duration-500"
                           style={{
                             borderColor: on ? (item.status === 'warn' ? 'color-mix(in srgb, var(--color-warning) 45%, transparent)' : 'color-mix(in srgb, var(--color-success) 40%, transparent)') : 'var(--color-line)',
                             background: on ? 'var(--color-surface)' : 'transparent',
@@ -77,10 +77,10 @@ export default function EvidenceScore() {
                             transform: on ? 'translateX(0)' : 'translateX(-8px)',
                           }}
                         >
-                          <span className="font-mono text-[0.6875rem] font-bold tracking-[0.16em]" style={{ color: 'var(--color-primary)' }}>
+                          <span className="font-mono text-[0.75rem] font-bold tracking-[0.16em]" style={{ color: 'var(--color-primary)' }}>
                             {item.label}
                           </span>
-                          <span className="font-mono text-[0.75rem]" style={{ color: item.status === 'warn' ? 'var(--color-warning)' : 'var(--color-success)' }}>
+                          <span className="font-mono text-[0.8125rem]" style={{ color: item.status === 'warn' ? 'var(--color-warning)' : 'var(--color-success)' }}>
                             {on ? item.note : '…'}
                           </span>
                         </div>
@@ -106,21 +106,21 @@ export default function EvidenceScore() {
               <div className="relative flex flex-col items-center justify-center">
                 <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 55% at 50% 50%, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 70%)' }} aria-hidden="true" />
                 <div
-                  className="relative grid h-44 w-44 place-items-center rounded-full border"
+                  className="relative grid h-52 w-52 place-items-center rounded-full border"
                   style={{
                     borderColor: `color-mix(in srgb, ${currentScore >= 70 ? '#4a9d7f' : currentScore >= 40 ? '#c9a14a' : '#c4645f'} 40%, transparent)`,
                   }}
                 >
                   <div className="text-center">
-                    <div className="font-display text-[3.4rem] font-bold leading-none tabular-nums" style={{ color: 'var(--color-primary)' }}>
+                    <div className="font-display text-[4rem] font-bold leading-none tabular-nums" style={{ color: 'var(--color-primary)' }}>
                       <ScoreTween value={currentScore} />
                     </div>
-                    <div className="mt-1 font-mono text-[0.65625rem] font-bold uppercase tracking-[0.2em]" style={{ color: scoreColor }}>
+                    <div className="mt-1.5 font-mono text-[0.75rem] font-bold uppercase tracking-[0.2em]" style={{ color: scoreColor }}>
                       {currentScore < 40 ? 'HIGH RISK' : currentScore <= 70 ? 'CAUTION' : 'TRUSTWORTHY'}
                     </div>
                   </div>
                 </div>
-                <p className="mt-4 font-mono text-[0.625rem] uppercase tracking-[0.2em] text-muted">
+                <p className="mt-4 font-mono text-[0.6875rem] uppercase tracking-[0.2em] text-muted">
                   80 · final verdict
                 </p>
               </div>

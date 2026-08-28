@@ -75,11 +75,11 @@ export default function Ring({
       </svg>
       <div className="absolute inset-0 grid place-items-center">
         <div className="text-center">
-          <div className="font-display font-bold leading-none tabular-nums" style={{ color: 'var(--color-primary)', fontSize: size * 0.17 }}>
+          <div className="font-display font-bold leading-none tabular-nums" style={{ color: 'var(--color-primary)', fontSize: size * 0.19 }}>
             {score}
           </div>
           {label && (
-            <div className="mt-0.5 font-mono font-bold uppercase" style={{ color: tone.color, fontSize: Math.max(7, size * 0.047), letterSpacing: '0.18em' }}>
+            <div className="mt-0.5 font-mono font-bold uppercase" style={{ color: tone.color, fontSize: Math.max(11, size * 0.07), letterSpacing: '0.18em' }}>
               {label}
             </div>
           )}

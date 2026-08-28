@@ -55,20 +55,22 @@ export default function AgentSequence() {
   return (
     <section id="how-it-works" className="relative overflow-hidden">
       {/* Tall pinned track */}
-      <div ref={trackRef} className="relative" style={{ height: '280vh' }}>
-        <div className="sticky top-0 flex h-screen flex-col justify-center px-6">
+      <div ref={trackRef} className="relative" style={{ height: '200vh' }}>
+        <div className="sticky top-0 flex h-screen flex-col justify-between overflow-hidden px-6 pb-10 pt-16 sm:pt-20">
           <div ref={showRef} className={`mx-auto w-full max-w-6xl ${visible ? '' : 'opacity-0'}`} style={{ transition: 'opacity 0.6s var(--ease-out)' }}>
-            <div className="mb-10 text-center">
+            <div className="text-center">
               <p className="eyebrow justify-center">✦ investigation sequence</p>
-              <h2 className={`mt-4 font-display text-[clamp(1.9rem,4.6vw,3.2rem)] font-semibold leading-[1.04] tracking-tight ${visible ? 'fade-in-up' : ''}`} style={{ color: 'var(--color-primary)' }}>
+              <h2 className={`mt-4 font-display text-[clamp(2rem,4.8vw,3.4rem)] font-semibold leading-[1.04] tracking-tight ${visible ? 'fade-in-up' : ''}`} style={{ color: 'var(--color-primary)' }}>
                 Seven agents investigate <em style={{ color: 'var(--color-accent)', fontStyle: 'normal' }}>every dataset</em>.
               </h2>
-              <p className="mx-auto mt-3 max-w-lg text-[0.875rem] text-secondary">Scroll — you are moving through the audit. Each agent hands its evidence to the next.</p>
+              <p className="mx-auto mt-3 max-w-lg text-[0.9375rem] text-secondary">Scroll — you are moving through the audit. Each agent hands its evidence to the next.</p>
             </div>
+          </div>
 
+          <div className="flex flex-1 flex-col justify-center">
             {/* Horizontal pipeline strip */}
-            <div className="relative mx-auto max-w-5xl overflow-x-auto pb-2 md:overflow-visible" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex min-w-max items-center gap-1 px-1 md:gap-0 md:px-0">
+            <div className="relative mx-auto w-full max-w-6xl overflow-x-auto pb-2 md:overflow-visible" style={{ scrollbarWidth: 'none' }}>
+              <div className="flex min-w-max items-center gap-1 px-1 md:justify-center md:gap-1.5 md:px-0">
                 {SEQUENCE.map((label, i) => {
                   const done = i <= activeIndex
                   const active = i === activeIndex
@@ -87,7 +89,7 @@ export default function AgentSequence() {
                           if (preview) setPreview((p) => (p ? { ...p, x: e.clientX + 24, y: e.clientY + 20 } : p))
                         }}
                         onMouseLeave={() => setPreview(null)}
-                        className={`flex flex-col items-center gap-2 rounded-xl px-3 py-3 transition-all duration-500 md:px-5 ${active ? 'scale-[1.08]' : done ? 'scale-100' : 'scale-[0.96]'}`}
+                        className={`flex flex-col items-center gap-2 rounded-xl px-4 py-4 transition-all duration-500 md:px-6 ${active ? 'scale-[1.08]' : done ? 'scale-100' : 'scale-[0.96]'}`}
                         style={{
                           background: active ? 'var(--color-panel)' : 'transparent',
                           border: '1px solid' + (active ? 'color-mix(in srgb, var(--color-accent) 45%, transparent)' : done ? 'var(--color-line-strong)' : 'var(--color-line)'),
@@ -95,18 +97,18 @@ export default function AgentSequence() {
                         }}
                         aria-current={active ? 'step' : undefined}
                       >
-                        <span className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.18em]" style={{ color: active ? 'var(--color-accent)' : 'var(--color-muted)' }}>
+                        <span className="font-mono text-[0.65625rem] font-bold uppercase tracking-[0.18em]" style={{ color: active ? 'var(--color-accent)' : 'var(--color-muted)' }}>
                           {String(i + 1).padStart(2, '0')}
                         </span>
-                        <span className="whitespace-nowrap font-display text-[0.875rem] font-semibold md:text-[0.9375rem]" style={{ color: 'var(--color-primary)' }}>
+                        <span className="whitespace-nowrap font-display text-[1rem] font-semibold md:text-[1.05rem]" style={{ color: 'var(--color-primary)' }}>
                           {label}
                         </span>
-                        <span className="font-mono text-[0.625rem]" style={{ color: done ? 'var(--color-success)' : 'var(--color-muted)' }}>
+                        <span className="font-mono text-[0.6875rem]" style={{ color: done ? 'var(--color-success)' : 'var(--color-muted)' }}>
                           {done ? '✓' : '○'}
                         </span>
                       </button>
                       {i < SEQUENCE.length - 1 && (
-                        <div className="relative mx-1 hidden h-px w-10 shrink-0 overflow-hidden md:block lg:w-14" style={{ background: 'var(--color-line)' }} aria-hidden="true">
+                        <div className="relative mx-1.5 hidden h-px w-14 shrink-0 overflow-hidden md:block lg:w-20" style={{ background: 'var(--color-line)' }} aria-hidden="true">
                           <div
                             className="absolute inset-0 transition-transform duration-200"
                             style={{
@@ -124,15 +126,15 @@ export default function AgentSequence() {
             </div>
 
             {/* Evidence tape for the current position */}
-            <div className="mx-auto mt-8 max-w-3xl">
-              <div key={activeIndex} className={`min-h-[86px] text-center fade-in`} style={{ color: 'var(--color-secondary)' }}>
+            <div className="mx-auto w-full max-w-3xl">
+              <div key={activeIndex} className={`min-h-[112px] text-center fade-in`} style={{ color: 'var(--color-secondary)' }}>
                 {step && (
                   <>
-                    <p className="font-mono text-[0.65625rem] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-info)' }}>
+                    <p className="font-mono text-[0.75rem] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-info)' }}>
                       now: {activeSnippet}
                     </p>
-                    <p className="mt-2 text-[0.9375rem] leading-relaxed">{step.description}</p>
-                    {META[activeSnippet ?? ''] && <p className="mt-1.5 text-[0.75rem] text-muted">{META[activeSnippet ?? '']}</p>}
+                    <p className="mt-2.5 text-[1rem] leading-relaxed">{step.description}</p>
+                    {META[activeSnippet ?? ''] && <p className="mt-2 text-[0.8125rem] text-muted">{META[activeSnippet ?? '']}</p>}
                   </>
                 )}
               </div>
@@ -159,30 +161,30 @@ export default function AgentSequence() {
             if (!s) {
               return (
                 <div>
-                  <p className="font-mono text-[0.625rem] font-bold uppercase tracking-[0.18em] text-muted">Dataset</p>
-                  <p className="mt-1 text-[0.8125rem] text-secondary">The source page being investigated.</p>
+                  <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-muted">Dataset</p>
+                  <p className="mt-1 text-[0.875rem] text-secondary">The source page being investigated.</p>
                 </div>
               )
             }
             const i = PIPELINE.indexOf(s)
             return (
               <div>
-                <p className="font-mono text-[0.625rem] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--color-info)' }}>
+                <p className="font-mono text-[0.6875rem] font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--color-info)' }}>
                   {s.kicker}
                 </p>
-                <p className="mt-1 font-display text-[0.9375rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
+                <p className="mt-1 font-display text-[1rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
                   {s.label}
                 </p>
-                <p className="mt-1.5 text-[0.75rem] leading-relaxed text-secondary">{s.description}</p>
+                <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-secondary">{s.description}</p>
                 <ul className="mt-2 space-y-1">
                   {s.bullets.slice(0, 2).map((b) => (
-                    <li key={b} className="flex items-start gap-1.5 text-[0.6875rem] text-muted">
+                    <li key={b} className="flex items-start gap-1.5 text-[0.75rem] text-muted">
                       <span style={{ color: 'var(--color-accent)' }}>→</span> {b}
                     </li>
                   ))}
                 </ul>
                 {i !== -1 && s.node === 'citation_tracer' && (
-                  <p className="mt-2 font-mono text-[0.625rem] text-muted">Sources: OpenAlex · Crossref</p>
+                  <p className="mt-2 font-mono text-[0.6875rem] text-muted">Sources: OpenAlex · Crossref</p>
                 )}
               </div>
             )
@@ -202,11 +204,11 @@ export default function AgentSequence() {
                 style={{ borderColor: 'var(--color-line)', background: 'var(--color-surface)' }}
                 aria-expanded={expandedNode === m.node}
               >
-                <span className="font-display text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{m.title}</span>
-                <span className="font-mono text-[0.625rem]" style={{ color: 'var(--color-accent)' }}>{expandedNode === m.node ? '−' : '+'}</span>
+                <span className="font-display text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{m.title}</span>
+                <span className="font-mono text-[0.6875rem]" style={{ color: 'var(--color-accent)' }}>{expandedNode === m.node ? '−' : '+'}</span>
               </button>
               {expandedNode === m.node && stepByNode(m.node) && (
-                <p className="px-3 py-2 text-[0.75rem] leading-relaxed text-secondary">{stepByNode(m.node)!.description}</p>
+                <p className="px-3 py-2 text-[0.8125rem] leading-relaxed text-secondary">{stepByNode(m.node)!.description}</p>
               )}
             </div>
           ))}
