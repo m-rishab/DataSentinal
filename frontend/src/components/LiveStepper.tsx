@@ -218,7 +218,7 @@ export default function LiveStepper({
   const headerLabel = !graphReady ? 'Building workflow' : doneCount === PIPELINE.length ? 'Audit complete' : 'Live audit'
 
   return (
-    <div className="flex h-full min-h-0" style={{ background: 'var(--color-page)' }}>
+    <div className="relative flex h-full min-h-0" style={{ background: 'var(--color-page)' }}>
       {reconnecting && (
         <div
           className="fixed left-0 right-0 top-0 z-50 flex items-center justify-center gap-2 py-2 text-[0.8125rem] font-medium"
