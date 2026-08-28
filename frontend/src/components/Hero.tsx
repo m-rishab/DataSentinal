@@ -1,126 +1,216 @@
-import AuditForm from './AuditForm'
+import { useEffect, useRef, useState } from 'react'
+import { startAudit } from '../lib/api'
 
-const steps = [
-  {
-    n: '01',
-    title: 'Paste a dataset URL',
-    body: 'Kaggle, Hugging Face, or any public listing.',
-    icon: (
-      <path
-        d="M7 8.5A1.5 1.5 0 018.5 7h7A1.5 1.5 0 0117 8.5v7a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 017 15.5v-7zM3.5 10v3a1 1 0 01-1-1v-1a1 1 0 011-1zM20 11v3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-  },
-  {
-    n: '02',
-    title: 'Agents run in parallel',
-    body: 'License, citations, originality, related work.',
-    icon: (
-      <>
-        <circle cx="6" cy="6" r="2.4" />
-        <circle cx="18" cy="6" r="2.4" />
-        <circle cx="6" cy="18" r="2.4" />
-        <circle cx="18" cy="18" r="2.4" />
-        <path d="M8.2 7.3l7.6 2M8 17.8l8-9.6M7.4 8.2l9.2 7.6" strokeLinecap="round" />
-      </>
-    ),
-  },
-  {
-    n: '03',
-    title: 'Read the trust score',
-    body: 'A 0–100 score with flags and evidence.',
-    icon: (
-      <path
-        d="M12 3.5l6.7 2.6v4.6c0 4-2.8 6.7-6.7 8-3.9-1.3-6.7-4-6.7-8V6.1L12 3.5zM9.2 12.1l2.1 2.1 3.9-4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-  },
-]
+/**
+ * Animated particle/node background using the running status color at low opacity.
+ * Minimal, subtle movement - no flashy effects.
+ */
+function ParticleBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth * devicePixelRatio
+      canvas.height = canvas.offsetHeight * devicePixelRatio
+      ctx.scale(devicePixelRatio, devicePixelRatio)
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const particles: Array<{ x: number; y: number; vx: number; vy: number; r: number }> = []
+    const count = 40
+    const w = canvas.offsetWidth
+    const h = canvas.offsetHeight
+
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: Math.random() * 2 + 1,
+      })
+    }
+
+    let frame = 0
+    const draw = () => {
+      frame = requestAnimationFrame(draw)
+      ctx.clearRect(0, 0, w, h)
+
+      // Running color (#6b96c4) at 12% opacity
+      ctx.fillStyle = 'rgba(107, 150, 196, 0.12)'
+      ctx.strokeStyle = 'rgba(107, 150, 196, 0.08)'
+      ctx.lineWidth = 1
+
+      particles.forEach(p => {
+        p.x += p.vx
+        p.y += p.vy
+        if (p.x < 0 || p.x > w) p.vx *= -1
+        if (p.y < 0 || p.y > h) p.vy *= -1
+
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fill()
+      })
+
+      // Connect nearby particles with lines
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x
+          const dy = particles[i].y - particles[j].y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < 120) {
+            ctx.beginPath()
+            ctx.moveTo(particles[i].x, particles[i].y)
+            ctx.lineTo(particles[j].x, particles[j].y)
+            ctx.stroke()
+          }
+        }
+      }
+    }
+    draw()
+
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 pointer-events-none"
+      style={{ width: '100%', height: '100%' }}
+    />
+  )
+}
 
 export default function Hero({ onStart }: { onStart: (url: string, runId: string) => void }) {
+  const [url, setUrl] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!url.trim() || submitting) return
+
+    setError(null)
+    setSubmitting(true)
+
+    try {
+      const { run_id } = await startAudit(url.trim())
+      onStart(url.trim(), run_id)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start audit')
+      setSubmitting(false)
+    }
+  }
+
   return (
-    <section className="relative flex min-h-full flex-col justify-center px-5 pt-20 pb-6">
-      <div
-        className="orb-drift pointer-events-none absolute -top-24 right-[-8%] h-[380px] w-[380px] rounded-full opacity-50 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #22d3ee 0%, transparent 70%)' }}
-      />
-      <div
-        className="orb-drift pointer-events-none absolute bottom-[-10%] left-[-6%] h-[300px] w-[300px] rounded-full opacity-40 blur-3xl"
-        style={{ background: 'radial-gradient(circle, #818cf8 0%, transparent 70%)', animationDelay: '-4.5s' }}
-      />
+    <section className="relative min-h-[90vh] flex items-center justify-center px-6 overflow-hidden">
+      <ParticleBackground />
 
-      <div className="relative mx-auto w-full max-w-3xl">
-        <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-3.5 py-1.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.25)]">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-300" />
-          </span>
-          LangGraph · NVIDIA Nemotron
+      <div className="relative z-10 w-full max-w-3xl space-y-8 fade-in-up">
+        {/* Headline */}
+        <div className="text-center space-y-4">
+          <h1 className="text-title" style={{ color: '#e4e6eb' }}>
+            Trust Score for Any Dataset
+          </h1>
+          <p className="text-body max-w-2xl mx-auto" style={{ color: '#8b9099' }}>
+            Paste a Kaggle or Hugging Face dataset URL. Get an evidence-backed provenance report in
+            under a minute — license check, citation trace, duplication scan, and a 0–100 trust score.
+          </p>
         </div>
 
-        <h1 className="font-editorial max-w-3xl text-[clamp(2.7rem,6.2vw,4.6rem)] font-medium leading-[1.02] tracking-[-0.015em] text-[#f2edd8]">
-          Know the <em className="text-glow font-semibold not-italic">truth</em> behind{' '}
-          <em className="font-black italic text-slate-50">every dataset.</em>
-        </h1>
+        {/* Input form */}
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="relative">
+            <input
+              type="url"
+              value={url}
+              onChange={e => setUrl(e.target.value)}
+              placeholder="https://www.kaggle.com/datasets/..."
+              disabled={submitting}
+              className="w-full px-5 py-4 text-body rounded-xl border transition-all"
+              style={{
+                background: '#14171b',
+                borderColor: error ? '#c4645f' : 'rgba(255, 255, 255, 0.08)',
+                color: '#e4e6eb',
+                outline: 'none',
+              }}
+              onFocus={e => {
+                if (!error) e.target.style.borderColor = 'rgba(255, 255, 255, 0.15)'
+              }}
+              onBlur={e => {
+                if (!error) e.target.style.borderColor = 'rgba(255, 255, 255, 0.08)'
+              }}
+            />
+            {error && (
+              <p className="absolute -bottom-6 left-1 text-tiny" style={{ color: '#c4645f' }}>
+                {error}
+              </p>
+            )}
+          </div>
 
-        <p className="mt-5 max-w-xl text-[16.5px] font-normal leading-[1.7] text-slate-400">
-          Audit license compliance, citation trails, and originality for any public dataset — live, in one pass.
-        </p>
+          <button
+            type="submit"
+            disabled={!url.trim() || submitting}
+            className="w-full px-6 py-4 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: submitting ? '#3a3f47' : '#6b96c4',
+              color: '#0d0f12',
+              border: 'none',
+            }}
+            onMouseEnter={e => {
+              if (!submitting && url.trim()) {
+                e.currentTarget.style.background = '#7ba3cc'
+              }
+            }}
+            onMouseLeave={e => {
+              if (!submitting) {
+                e.currentTarget.style.background = '#6b96c4'
+              }
+            }}
+          >
+            {submitting ? 'Starting audit...' : 'Audit This Dataset'}
+          </button>
+        </form>
 
-        <div className="mt-7">
-          <AuditForm onStart={onStart} />
-        </div>
-
-        <div className="rule-fade mt-8 flex items-center justify-between gap-3 pt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
-          <span>07 parallel agents · live stream</span>
-          <span className="hidden text-slate-400 sm:inline">OpenAlex · NVIDIA Nemotron</span>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {steps.map((s) => (
-            <div
-              key={s.n}
-              className="group flex items-start gap-3 rounded-2xl border border-slate-800 bg-[#0c1320]/80 px-3.5 py-3 backdrop-blur transition-all hover:border-cyan-400/40 hover:shadow-[0_8px_28px_rgba(34,211,238,0.15)]"
+        {/* Quick examples */}
+        <div className="flex flex-wrap gap-3 justify-center text-tiny">
+          <span style={{ color: '#5a5f68' }}>Try:</span>
+          {[
+            { label: 'Iris', url: 'https://www.kaggle.com/datasets/uciml/iris' },
+            { label: 'Titanic', url: 'https://www.kaggle.com/datasets/yasserh/titanic-dataset' },
+            { label: 'IMDB', url: 'https://huggingface.co/datasets/imdb' },
+          ].map(ex => (
+            <button
+              key={ex.url}
+              onClick={() => setUrl(ex.url)}
+              disabled={submitting}
+              className="px-3 py-1.5 rounded-lg border transition-colors disabled:opacity-50"
+              style={{
+                background: '#14171b',
+                borderColor: 'rgba(255, 255, 255, 0.08)',
+                color: '#8b9099',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'
+              }}
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-teal-400 text-white shadow-[0_0_14px_rgba(34,211,238,0.35)]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                  {s.icon}
-                </svg>
-              </span>
-              <div>
-                <p className="text-[13px] font-bold text-slate-100">
-                  <span className="mr-1.5 font-mono text-[11px] font-semibold text-cyan-300">{s.n}</span>
-                  {s.title}
-                </p>
-                <p className="mt-0.5 text-[12px] leading-snug text-slate-500">{s.body}</p>
-              </div>
-            </div>
+              {ex.label}
+            </button>
           ))}
         </div>
-      </div>
-
-      {/* Scroll hint — the editorial nudge to keep going down. */}
-      <div className="pointer-events-none absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1.5 sm:flex">
-        <span className="scroll-hint font-mono text-[9px] uppercase tracking-[0.22em] text-slate-500">
-          Scroll
-        </span>
-        <svg
-          className="scroll-hint text-cyan-300"
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
       </div>
     </section>
   )

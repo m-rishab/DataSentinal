@@ -75,9 +75,10 @@ export default function App() {
 
   return (
     <div
-      className={`flex flex-col bg-[#070b14] ${
+      className={`flex flex-col ${
         lockViewport ? 'h-screen overflow-hidden' : 'min-h-screen'
       }`}
+      style={{ background: '#0d0f12' }}
     >
       <Header compact={phase !== 'landing'} onHome={goHome} />
 
