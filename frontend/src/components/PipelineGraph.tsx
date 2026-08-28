@@ -265,7 +265,7 @@ function StepNode({ data }: NodeProps) {
               {parsed.text}
             </div>
           )}
-          {duration && duration > 0 && (
+          {duration != null && duration > 0 && !isNaN(duration) && (
             <div className="text-tiny" style={{ color: '#5a5f68' }}>
               {(duration / 1000).toFixed(1)}s
             </div>

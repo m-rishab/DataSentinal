@@ -95,8 +95,49 @@ export default function ReportView({
     ? report.metadata.columns
     : report.data_profile?.columns_profiled ?? []
 
+  // Check for partial evidence (failed profiling or empty data)
+  const profilingFailed =
+    report.data_profile?.skip_reason != null ||
+    (effectiveColumns.length === 0 && (report.data_profile?.rows_profiled ?? 0) === 0)
+
   return (
     <div className="w-full space-y-8 fade-in-up print-area">
+      {/* Partial evidence warning banner */}
+      {profilingFailed && (
+        <div
+          className="flex items-start gap-3 rounded-xl border px-4 py-3"
+          style={{
+            background: 'color-mix(in srgb, #c4645f 10%, transparent)',
+            borderColor: 'color-mix(in srgb, #c4645f 30%, transparent)',
+          }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#c4645f"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="shrink-0 mt-0.5"
+          >
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <div>
+            <p className="text-sm font-semibold" style={{ color: '#c4645f' }}>
+              This score is based on partial evidence
+            </p>
+            <p className="mt-1 text-xs" style={{ color: '#8b9099' }}>
+              Data profiling failed for this source. The trust score reflects metadata and citation checks only, not
+              actual dataset content verification.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* CI gate verdict banner — only when a threshold was actually set */}
       {gate && gate.fail_under != null && (
         <div

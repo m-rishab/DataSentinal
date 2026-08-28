@@ -745,6 +745,19 @@ def _deterministic_score(state: dict) -> tuple[int, str, str, dict]:
         metadata_penalty += 3
         score -= 3
 
+    # Penalize when data profiling fails or returns empty results
+    profile = state.get("data_profile") or {}
+    columns_count = len(meta.get("columns") or [])
+    rows_profiled = profile.get("rows_profiled") or 0
+    profile_failed = (
+        profile.get("skip_reason") is not None or
+        (columns_count == 0 and rows_profiled == 0)
+    )
+    if profile_failed:
+        metadata_penalty += 15
+        score -= 15
+        notes.append("data profiling failed or returned empty — content verification incomplete")
+
     breakdown = {
         "consent": _dimension(100, consent_penalty),
         "originality": _dimension(100, originality_penalty),

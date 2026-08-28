@@ -51,14 +51,16 @@ def _hf_rows(dataset_id: str) -> list[dict]:
     """Fetch up to MAX_ROWS real rows via the datasets-server /rows API."""
     config, split = "default", "train"
     try:
-        splits = requests.get(
+        splits_resp = requests.get(
             f"https://datasets-server.huggingface.co/splits?dataset={dataset_id}",
             headers={"User-Agent": USER_AGENT},
             timeout=TIMEOUT,
-        ).json()
-        first = (splits.get("splits") or [{}])[0]
-        config = first.get("config", "default")
-        split = first.get("split", "train")
+        )
+        if splits_resp.status_code == 200:
+            splits = splits_resp.json()
+            first = (splits.get("splits") or [{}])[0]
+            config = first.get("config", "default")
+            split = first.get("split", "train")
     except Exception:  # noqa: BLE001 — fall back to defaults
         pass
 
@@ -69,7 +71,14 @@ def _hf_rows(dataset_id: str) -> list[dict]:
         timeout=TIMEOUT,
     )
     if resp.status_code != 200:
-        raise _ProfileSkipped(f"datasets-server returned HTTP {resp.status_code}")
+        # Log the actual error for debugging
+        try:
+            error_detail = resp.json()
+            raise _ProfileSkipped(
+                f"datasets-server returned HTTP {resp.status_code}: {error_detail.get('error', 'unknown error')}"
+            )
+        except Exception:
+            raise _ProfileSkipped(f"datasets-server returned HTTP {resp.status_code}")
     rows = [
         r.get("row")
         for r in (resp.json().get("rows") or [])

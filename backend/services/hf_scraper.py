@@ -47,27 +47,37 @@ def _hub_metadata(dataset_id: str) -> dict:
     return resp.json()
 
 
-def _first_rows(dataset_id: str) -> tuple[list[str], list[dict]] | tuple[list[str], list[dict]]:
+def _first_rows(dataset_id: str) -> tuple[list[str], list[dict]]:
     """Fetch column names + sample rows via datasets-server (best effort)."""
+    config, split = "default", "train"
+
+    # Try to get actual config/split names
     try:
-        splits = requests.get(
+        splits_resp = requests.get(
             f"https://datasets-server.huggingface.co/splits?dataset={dataset_id}",
             headers={"User-Agent": USER_AGENT},
             timeout=API_TIMEOUT,
-        ).json()
-        split_list = ((splits.get("splits") or [{}])[0])
-        config = split_list.get("config", "default")
-        split = split_list.get("split", "train")
+        )
+        if splits_resp.status_code == 200:
+            splits = splits_resp.json()
+            split_list = (splits.get("splits") or [{}])[0]
+            config = split_list.get("config", "default")
+            split = split_list.get("split", "train")
     except Exception:  # noqa: BLE001 — best effort only
-        config, split = "default", "train"
+        pass
 
     try:
-        data = requests.get(
+        data_resp = requests.get(
             f"https://datasets-server.huggingface.co/first-rows"
             f"?dataset={dataset_id}&config={config}&split={split}",
             headers={"User-Agent": USER_AGENT},
             timeout=API_TIMEOUT,
-        ).json()
+        )
+        if data_resp.status_code != 200:
+            # Silent fail for scraper - columns will be empty
+            return [], []
+
+        data = data_resp.json()
         features = [f.get("name") for f in (data.get("features") or []) if f.get("name")]
         rows = [r.get("row") for r in (data.get("rows") or []) if isinstance(r.get("row"), dict)]
         return features, rows[:20]
