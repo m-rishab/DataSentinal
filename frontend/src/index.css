@@ -3,7 +3,7 @@
 @theme {
   --color-primary: #0e7490;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -21,7 +21,7 @@ body {
 }
 
 .font-display {
-  font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.01em;
 }
 
@@ -131,6 +131,63 @@ body {
 .preview-in {
   opacity: 0;
   animation: previewIn 0.16s ease-out 0.18s forwards;
+}
+
+/* ---- React Flow customisations ---- */
+.react-flow {
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Our node cards own their chrome; RF wrapper stays transparent. */
+.react-flow__node {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 224px;
+  cursor: grab;
+}
+.react-flow__node:active {
+  cursor: grabbing;
+}
+
+/* Handles are invisible anchors pinned to each edge's midpoint. */
+.op-node-handle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  min-width: 10px;
+  height: 40%;
+  background: transparent;
+  border: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Edges sit beneath nodes but stay clickable so the animated dash reads. */
+.react-flow__edge {
+  cursor: default;
+}
+
+/* Slim, quiet zoom controls in the corner. */
+.react-flow__controls {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+}
+.react-flow__controls-button {
+  width: 26px;
+  height: 26px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-sizing: content-box;
+}
+.react-flow__controls-button:hover {
+  background: #f8fafc;
+}
+.react-flow__controls-button svg {
+  fill: #475569;
 }
 
 /* Print / PDF: show only the report, cleanly on white. */

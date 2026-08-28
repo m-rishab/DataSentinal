@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { fetchLiveMetadata, openAuditStream } from '../lib/api'
 import type { DatasetMetadata, SSEEvent } from '../lib/types'
 import { downloadGraphPng, type NodeStatus as GraphNodeStatus, type RetryState } from '../lib/graphExport'
+import PipelineGraph from './PipelineGraph'
 
 type NodeStatus = 'pending' | 'running' | 'completed' | 'failed'
 type RetryPhase = 'none' | 'active' | 'done'
@@ -12,14 +13,7 @@ interface StepDef {
   kicker: string
   description: string
   bullets: string[]
-  x: number
-  y: number
-  w: number
-  h: number
 }
-
-const STAGE_W = 1000
-const STAGE_H = 520
 
 const STEPS: StepDef[] = [
   {
@@ -32,7 +26,6 @@ const STEPS: StepDef[] = [
       'Captures license and metadata fields',
       'Reads filenames and column names',
     ],
-    x: 120, y: 260, w: 168, h: 64,
   },
   {
     node: 'consent_agent',
@@ -44,7 +37,6 @@ const STEPS: StepDef[] = [
       'Looks for consent / PII language',
       'Scores severity of each finding',
     ],
-    x: 400, y: 70, w: 188, h: 64,
   },
   {
     node: 'citation_tracer',
@@ -56,7 +48,6 @@ const STEPS: StepDef[] = [
       'Resolves DOIs via Crossref',
       'Marks retracted or disputed papers',
     ],
-    x: 400, y: 196, w: 188, h: 64,
   },
   {
     node: 'duplication_agent',
@@ -68,7 +59,6 @@ const STEPS: StepDef[] = [
       'Flags re-upload file patterns',
       'Notes thin or scraped listings',
     ],
-    x: 400, y: 324, w: 188, h: 64,
   },
   {
     node: 'related_work_agent',
@@ -80,7 +70,6 @@ const STEPS: StepDef[] = [
       'Suggests alternative datasets',
       'Adds venue and citation context',
     ],
-    x: 400, y: 450, w: 188, h: 64,
   },
   {
     node: 'critic_aggregator',
@@ -92,7 +81,6 @@ const STEPS: StepDef[] = [
       'May request one citation retry',
       'Produces the trust score',
     ],
-    x: 720, y: 196, w: 188, h: 64,
   },
   {
     node: 'report_generator',
@@ -104,45 +92,8 @@ const STEPS: StepDef[] = [
       'Writes evidence and errors',
       'Saves the run to the database',
     ],
-    x: 720, y: 360, w: 188, h: 64,
   },
 ]
-
-const CONNECTIONS: { id: string; from: string; to: string }[] = [
-  { id: 'ingest→consent_agent', from: 'ingest', to: 'consent_agent' },
-  { id: 'ingest→citation_tracer', from: 'ingest', to: 'citation_tracer' },
-  { id: 'ingest→duplication_agent', from: 'ingest', to: 'duplication_agent' },
-  { id: 'ingest→related_work_agent', from: 'ingest', to: 'related_work_agent' },
-  { id: 'consent_agent→critic_aggregator', from: 'consent_agent', to: 'critic_aggregator' },
-  { id: 'citation_tracer→critic_aggregator', from: 'citation_tracer', to: 'critic_aggregator' },
-  { id: 'duplication_agent→critic_aggregator', from: 'duplication_agent', to: 'critic_aggregator' },
-  { id: 'related_work_agent→critic_aggregator', from: 'related_work_agent', to: 'critic_aggregator' },
-  { id: 'critic_aggregator→report_generator', from: 'critic_aggregator', to: 'report_generator' },
-]
-
-const REVEAL: { t: number; kind: 'node' | 'edge'; id: string }[] = [
-  { t: 80, kind: 'node', id: 'ingest' },
-  { t: 520, kind: 'edge', id: 'ingest→consent_agent' },
-  { t: 980, kind: 'node', id: 'consent_agent' },
-  { t: 1380, kind: 'edge', id: 'ingest→citation_tracer' },
-  { t: 1840, kind: 'node', id: 'citation_tracer' },
-  { t: 2240, kind: 'edge', id: 'ingest→duplication_agent' },
-  { t: 2700, kind: 'node', id: 'duplication_agent' },
-  { t: 3100, kind: 'edge', id: 'ingest→related_work_agent' },
-  { t: 3560, kind: 'node', id: 'related_work_agent' },
-  { t: 4000, kind: 'edge', id: 'consent_agent→critic_aggregator' },
-  { t: 4280, kind: 'edge', id: 'citation_tracer→critic_aggregator' },
-  { t: 4560, kind: 'edge', id: 'duplication_agent→critic_aggregator' },
-  { t: 4840, kind: 'edge', id: 'related_work_agent→critic_aggregator' },
-  { t: 5340, kind: 'node', id: 'critic_aggregator' },
-  { t: 5800, kind: 'edge', id: 'critic_aggregator→report_generator' },
-  { t: 6260, kind: 'node', id: 'report_generator' },
-]
-
-function bezier(x1: number, y1: number, x2: number, y2: number) {
-  const dx = Math.max(40, Math.abs(x2 - x1) * 0.45)
-  return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`
-}
 
 function statusLabel(status: NodeStatus) {
   if (status === 'running') return 'Running'
@@ -178,36 +129,10 @@ export default function LiveStepper({
   const [durations, setDurations] = useState<Record<string, number>>({})
   const [results, setResults] = useState<Record<string, string>>({})
   const [retry, setRetry] = useState<RetryPhase>('none')
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null)
   const [failed, setFailed] = useState<string | null>(null)
   const [selectedNode, setSelectedNode] = useState<string | null>(null)
-  const [visibleNodes, setVisibleNodes] = useState<Set<string>>(new Set())
-  const [visibleEdges, setVisibleEdges] = useState<Set<string>>(new Set())
   const [graphReady, setGraphReady] = useState(false)
   const [meta, setMeta] = useState<DatasetMetadata | null>(null)
-  /* Draggable node positions (graph coordinates), persisted per run. */
-  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>(() => {
-    try {
-      const raw = localStorage.getItem(`ds-pos-${runId}`)
-      if (raw) {
-        const saved = JSON.parse(raw) as Record<string, { x: number; y: number }>
-        if (STEPS.every((s) => saved[s.node])) return saved
-      }
-    } catch {
-      /* fall through to defaults */
-    }
-    return Object.fromEntries(STEPS.map((s) => [s.node, { x: s.x, y: s.y }]))
-  })
-  const [draggingNode, setDraggingNode] = useState<string | null>(null)
-  const stageRef = useRef<HTMLDivElement>(null)
-  const dragRef = useRef<{
-    node: string
-    px: number
-    py: number
-    ox: number
-    oy: number
-    moved: boolean
-  } | null>(null)
   const doneRef = useRef(false)
   const startedAtRef = useRef(Date.now())
   const onDoneRef = useRef(onDone)
@@ -215,82 +140,12 @@ export default function LiveStepper({
   const autoReturnRef = useRef(autoReturn)
   autoReturnRef.current = autoReturn
 
-  const posOf = (node: string) => positions[node] ?? { x: 0, y: 0 }
-
-  const clampFor = (node: string, x: number, y: number) => {
-    const def = STEPS.find((s) => s.node === node)!
-    return {
-      x: Math.min(STAGE_W - def.w / 2 - 6, Math.max(def.w / 2 + 6, x)),
-      y: Math.min(STAGE_H - def.h / 2 - 6, Math.max(def.h / 2 + 6, y)),
-    }
-  }
-
-  /* Retry loop path follows the two nodes it connects. */
-  const retryPath = useMemo(() => {
-    const c = posOf('critic_aggregator')
-    const t = posOf('citation_tracer')
-    const sy = c.y - 34
-    const ey = t.y - 34
-    const lift = 110
-    return `M ${c.x - 20} ${sy} C ${c.x - 40} ${sy - lift}, ${t.x + 130} ${ey - lift}, ${t.x + 58} ${ey}`
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [positions])
-
-  const onNodePointerDown = (e: React.PointerEvent<HTMLButtonElement>, node: string) => {
-    const p = posOf(node)
-    dragRef.current = { node, px: e.clientX, py: e.clientY, ox: p.x, oy: p.y, moved: false }
-    e.currentTarget.setPointerCapture?.(e.pointerId)
-  }
-
-  const onNodePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const d = dragRef.current
-    if (!d || d.node !== e.currentTarget.dataset.node) return
-    if (!d.moved && Math.hypot(e.clientX - d.px, e.clientY - d.py) < 4) return
-    const rect = stageRef.current?.getBoundingClientRect()
-    if (!rect) return
-    d.moved = true
-    setDraggingNode(d.node)
-    setHoveredNode(null)
-    const dx = ((e.clientX - d.px) / rect.width) * STAGE_W
-    const dy = ((e.clientY - d.py) / rect.height) * STAGE_H
-    setPositions((prev) => ({ ...prev, [d.node]: clampFor(d.node, d.ox + dx, d.oy + dy) }))
-  }
-
-  const onNodePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
-    const d = dragRef.current
-    dragRef.current = null
-    setDraggingNode(null)
-    if (!d || d.node !== e.currentTarget.dataset.node) return
-    if (d.moved) {
-      try {
-        localStorage.setItem(
-          `ds-pos-${runId}`,
-          JSON.stringify({ ...positions, [d.node]: posOf(d.node) }),
-        )
-      } catch {
-        /* storage full/unavailable — positions stay session-only */
-      }
-    } else {
-      setSelectedNode(d.node)
-    }
-  }
-
-  /* Reveal the workflow graph piece by piece — runs once per mount. */
+  /* Flip the header from "Building workflow" to "Live audit" once the
+     graph has revealed its final node (the reveal animation itself lives
+     inside PipelineGraph). */
   useEffect(() => {
-    const timers: number[] = []
-    REVEAL.forEach((item) => {
-      timers.push(
-        window.setTimeout(() => {
-          if (item.kind === 'node') {
-            setVisibleNodes((prev) => new Set(prev).add(item.id))
-          } else {
-            setVisibleEdges((prev) => new Set(prev).add(item.id))
-          }
-        }, item.t),
-      )
-    })
-    timers.push(window.setTimeout(() => setGraphReady(true), 6700))
-    return () => timers.forEach(clearTimeout)
+    const timer = window.setTimeout(() => setGraphReady(true), 6700)
+    return () => window.clearTimeout(timer)
   }, [])
 
   /* Poll the lightweight metadata endpoint so title / license / files /
@@ -457,7 +312,7 @@ export default function LiveStepper({
           </div>
           <div className="flex items-center gap-3">
             <p className="hidden text-[12px] font-medium text-slate-400 md:block">
-              {autoReturn ? 'Click a node for details' : 'Drag nodes to rearrange · click for details'}
+              Drag nodes to rearrange · click for details
             </p>
             {onBack && (
               <button
@@ -547,214 +402,15 @@ export default function LiveStepper({
         )}
 
         <div className="graph-canvas relative min-h-0 flex-1 border-t border-slate-100">
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden p-4">
-            <div
-              ref={stageRef}
-              className="relative"
-              style={{
-                width: 'min(100%, 980px)',
-                maxWidth: '100%',
-                aspectRatio: `${STAGE_W} / ${STAGE_H}`,
-              }}
-            >
-              <svg
-                className="absolute inset-0 h-full w-full"
-                viewBox={`0 0 ${STAGE_W} ${STAGE_H}`}
-                fill="none"
-              >
-                <defs>
-                  <marker id="dsArrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-                    <path d="M 0 0 L 9 4.5 L 0 9 z" fill="#94a3b8" />
-                  </marker>
-                </defs>
-
-                {CONNECTIONS.map((conn) => {
-                  if (!visibleEdges.has(conn.id)) return null
-                  const fromDef = STEPS.find((s) => s.node === conn.from)!
-                  const toDef = STEPS.find((s) => s.node === conn.to)!
-                  const from = posOf(conn.from)
-                  const to = posOf(conn.to)
-                  const d = bezier(
-                    from.x + fromDef.w / 2,
-                    from.y,
-                    to.x - toDef.w / 2,
-                    to.y,
-                  )
-                  const toStatus = statuses[conn.to] ?? 'pending'
-                  return (
-                    <g key={conn.id}>
-                      {/* Base path: constant props after mount, drawn exactly once.
-                          Status changes can never re-trigger its animation. */}
-                      <path
-                        d={d}
-                        pathLength={1}
-                        className="edge-draw"
-                        stroke="#cbd5e1"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        fill="none"
-                        markerEnd="url(#dsArrow)"
-                      />
-                      {/* Flow overlay: separate element, mounted only while the
-                          downstream node is executing. */}
-                      {toStatus === 'running' && (
-                        <path
-                          d={d}
-                          className="edge-flow"
-                          stroke="#06b6d4"
-                          strokeWidth={2.4}
-                          strokeLinecap="round"
-                          fill="none"
-                        />
-                      )}
-                    </g>
-                  )
-                })}
-
-                {/* Retry loop: aggregator -> citation_tracer, drawn only once a bounce occurs.
-                    Stays mounted after first activation; animates with a soft opacity
-                    pulse while active (no dash marching = no flicker), then settles
-                    into a static dashed line once the retry completes. */}
-                {retry !== 'none' && (
-                  <g>
-                    <path
-                      d={retryPath}
-                      pathLength={1}
-                      className={retry === 'active' ? 'retry-active' : ''}
-                      stroke={retry === 'active' ? '#06b6d4' : '#34d399'}
-                      strokeWidth={1.8}
-                      strokeDasharray={retry === 'active' ? undefined : '5 5'}
-                      strokeLinecap="round"
-                      fill="none"
-                      markerEnd="url(#dsArrow)"
-                      opacity={0.9}
-                    />
-                    <text
-                      x="620" y="52"
-                      textAnchor="middle"
-                      className="font-mono select-none"
-                      fontSize="10.5"
-                      fill={retry === 'active' ? '#0891b2' : '#059669'}
-                    >
-                      retry · deeper citation search
-                    </text>
-                  </g>
-                )}
-              </svg>
-
-              {STEPS.map((step) => {
-                if (!visibleNodes.has(step.node)) return null
-                const status = statuses[step.node] ?? 'pending'
-                const isSelected = selectedNode === step.node
-                const isHovered = hoveredNode === step.node
-                const p = posOf(step.node)
-                /* Preview opens toward empty space so it never covers sibling nodes. */
-                const side: 'left' | 'right' = p.x > STAGE_W * 0.55 ? 'left' : 'right'
-
-                let border = 'border-slate-200'
-                let bg = 'bg-white'
-                let glow = ''
-                let title = 'text-slate-900'
-                let kicker = 'text-slate-400'
-                let dot = 'bg-slate-300'
-                if (status === 'running') {
-                  border = 'border-cyan-400'
-                  bg = 'bg-cyan-50'
-                  glow = 'node-running'
-                  title = 'text-cyan-900'
-                  kicker = 'text-cyan-600'
-                  dot = 'bg-cyan-500'
-                } else if (status === 'completed') {
-                  border = 'border-emerald-300'
-                  bg = 'bg-emerald-50'
-                  glow = 'shadow-[0_4px_16px_rgba(16,185,129,0.18)]'
-                  title = 'text-emerald-900'
-                  kicker = 'text-emerald-600'
-                  dot = 'bg-emerald-500'
-                } else if (status === 'failed') {
-                  border = 'border-rose-300'
-                  bg = 'bg-rose-50'
-                  title = 'text-rose-900'
-                  kicker = 'text-rose-500'
-                  dot = 'bg-rose-500'
-                }
-                if (isSelected) {
-                  glow += ' ring-2 ring-slate-900/25'
-                }
-
-                return (
-                  <div
-                    key={step.node}
-                    className="absolute"
-                    style={{
-                      left: `${(p.x / STAGE_W) * 100}%`,
-                      top: `${(p.y / STAGE_H) * 100}%`,
-                      width: `${(step.w / STAGE_W) * 100}%`,
-                      height: `${(step.h / STAGE_H) * 100}%`,
-                      transform: 'translate(-50%, -50%)',
-                      zIndex: draggingNode === step.node ? 40 : isHovered || isSelected ? 30 : 10,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      data-node={step.node}
-                      onPointerDown={(e) => onNodePointerDown(e, step.node)}
-                      onPointerMove={onNodePointerMove}
-                      onPointerUp={onNodePointerUp}
-                      onMouseEnter={() => setHoveredNode(step.node)}
-                      onMouseLeave={() => setHoveredNode((n) => (n === step.node ? null : n))}
-                      className={`node-pop flex h-full w-full cursor-grab touch-none items-center justify-between gap-2 rounded-2xl border px-3.5 text-left shadow-[0_4px_14px_rgba(15,23,42,0.07)] transition-all hover:-translate-y-0.5 hover:shadow-[0_10px_22px_rgba(15,23,42,0.12)] active:cursor-grabbing ${border} ${bg} ${glow} ${
-                        draggingNode === step.node
-                          ? 'scale-[1.03] shadow-[0_16px_34px_rgba(15,23,42,0.20)] transition-none'
-                          : ''
-                      }`}
-                    >
-                      <span className="min-w-0">
-                        <span className={`block text-[10px] font-semibold uppercase tracking-[0.14em] ${kicker}`}>
-                          {step.kicker}
-                          {durations[step.node] ? ` · ${(Math.round(durations[step.node] / 100) / 10).toFixed(1)}s` : ''}
-                        </span>
-                        <span className={`mt-0.5 block truncate text-[13.5px] font-semibold leading-tight ${title}`}>
-                          {step.label}
-                        </span>
-                      </span>
-                      <span className="relative flex h-2.5 w-2.5 shrink-0">
-                        {status === 'running' && (
-                          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
-                        )}
-                        <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${dot}`} />
-                      </span>
-                    </button>
-
-                    {/* Result chip: one-glance summary once the agent finishes */}
-                    {status === 'completed' && results[step.node] && (
-                      <span className="fade-in-up pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[10px] font-medium text-emerald-700">
-                        {results[step.node]}
-                      </span>
-                    )}
-
-                    {/* Hover preview: opens beside the node (never on top of siblings),
-                        delayed so quick mouse passes don't trigger it. */}
-                    {isHovered && selectedNode !== step.node && draggingNode !== step.node && (
-                      <span
-                        className={`preview-in pointer-events-none absolute top-1/2 z-40 w-64 -translate-y-1/2 rounded-xl border border-slate-200 bg-white p-3 text-left shadow-xl ${
-                          side === 'left' ? 'right-full mr-3' : 'left-full ml-3'
-                        }`}
-                      >
-                        <span className="block text-[11.5px] font-bold leading-snug text-slate-900">{step.label}</span>
-                        <span className="mt-1 block text-[11px] leading-snug text-slate-500">{step.description}</span>
-                        {messages[step.node] && (
-                          <span className="mt-1.5 block border-t border-slate-100 pt-1.5 font-mono text-[10px] leading-snug text-cyan-700">
-                            {messages[step.node]}
-                          </span>
-                        )}
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
+          <PipelineGraph
+            runId={runId}
+            statuses={statuses}
+            durations={durations}
+            results={results}
+            retry={retry}
+            selectedNode={selectedNode}
+            onSelect={setSelectedNode}
+          />
 
           {/* Minimal legend */}
           <div className="pointer-events-none absolute bottom-3 right-4 z-10 flex items-center gap-4 rounded-full border border-slate-200 bg-white/85 px-3.5 py-1.5 shadow-sm backdrop-blur">
