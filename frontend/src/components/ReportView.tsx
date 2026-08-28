@@ -3,7 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { fetchReport } from '../lib/api'
 import { explainLicense } from '../lib/licenses'
 import SchemaTable from './SchemaTable'
-import type { AuditReport, RetractionStatus, Severity } from '../lib/types'
+import Ring, { scoreTone } from './Ring'
+import { useReveal } from '../hooks'
+import type { AuditReport, RetractionStatus, ScoreBreakdown, Severity } from '../lib/types'
 type Tab = 'overview' | 'evidence' | 'citations' | 'compliance' | 'data' | 'logs'
 
 const BREAKDOWN_LABEL: Record<string, { label: string; hint: string }> = {
@@ -11,12 +13,6 @@ const BREAKDOWN_LABEL: Record<string, { label: string; hint: string }> = {
   originality: { label: 'Originality', hint: 'Freedom from copy-paste / re-upload markers.' },
   citations: { label: 'Citations', hint: 'Verified citing papers and their retraction status.' },
   metadata: { label: 'Metadata', hint: 'Completeness of title, license, files and columns.' },
-}
-
-function scoreTone(score: number): { color: string; label: string } {
-  if (score < 40) return { color: '#c4645f', label: 'High Risk' }
-  if (score <= 70) return { color: '#c9a14a', label: 'Caution' }
-  return { color: '#4a9d7f', label: 'Trustworthy' }
 }
 
 const SEVERITY_TONE: Record<Severity, string> = {
@@ -200,7 +196,7 @@ export default function ReportView({
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)', borderRadius: '16px', boxShadow: 'var(--shadow-lift)' }}
       >
         <div className="flex items-center gap-5 sm:flex-col sm:gap-3 sm:border-r sm:pr-6" style={{ borderColor: 'var(--color-line)' }}>
-          <ScoreRing score={report.trust_score} label={tone.label} />
+          <Ring score={report.trust_score} label={tone.label} size={104} strokeWidth={10} animate delay={120} />
           <div className="sm:text-center">
             <div className="text-[10px] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
               Trust Score
@@ -215,29 +211,12 @@ export default function ReportView({
           <p className="text-[10px] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
             Auditor Summary
           </p>
-          <p className="mt-2 text-[0.9375rem] leading-[1.65]" style={{ color: 'var(--color-primary)' }}>
+          <p className="mt-2 font-editorial text-[1.05rem] leading-[1.75]" style={{ color: 'var(--color-primary)' }}>
             {report.rationale || 'No summary was generated.'}
           </p>
 
           {Object.keys(breakdown).length > 0 && (
-            <div className="mt-5 space-y-3">
-              {Object.entries(breakdown).map(([key, value]) => {
-                const meta = BREAKDOWN_LABEL[key] ?? { label: key, hint: 'Contribution to the trust score.' }
-                const v = Math.max(0, Math.min(100, Math.round(value)))
-                const barColor = v >= 70 ? 'var(--color-success)' : v >= 40 ? 'var(--color-warning)' : 'var(--color-error)'
-                return (
-                  <div key={key} className="flex items-center gap-3" title={meta.hint}>
-                    <span className="w-32 shrink-0 text-[0.8125rem] font-medium text-secondary">{meta.label}</span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      <div className="h-full rounded-full" style={{ width: `${v}%`, background: barColor }} />
-                    </div>
-                    <span className="w-10 shrink-0 text-right font-mono text-[0.8125rem] font-bold tabular-nums" style={{ color: 'var(--color-primary)' }}>
-                      {v}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
+            <Breakdown breakdown={breakdown} report={report} />
           )}
         </div>
       </div>
@@ -279,8 +258,18 @@ export default function ReportView({
 
         {activeTab === 'evidence' && (
           <div className="space-y-8">
-            <FindingsBlock title="License & Consent Indicators" findings={findings.filter((f) => f.group === 'License & Consent')} />
-            <FindingsBlock title="Originality Checks" findings={findings.filter((f) => f.group === 'Originality')} hasData={findings.length > 0} />
+            <FindingsGrouped
+              findings={findings}
+              passedChecks={report.file_inspection?.checks?.filter((c) => c.result === 'pass') ?? []}
+              metadataOk={[
+                Boolean(report.metadata.title),
+                Boolean(report.metadata.license),
+                report.metadata.files.length > 0,
+                effectiveColumns.length > 0,
+              ].filter(Boolean).length}
+              metadataTotal={4}
+              citationsVerified={report.citation_trail.filter((c) => c.retraction_status === 'not_retracted' && c.verified_citation).length}
+            />
             {report.file_inspection && report.file_inspection.checks && report.file_inspection.checks.length > 0 && (
               <FileInspection inspection={report.file_inspection} />
             )}
@@ -558,27 +547,117 @@ function OverviewPanel({
 /* Evidence & compliance helpers                                       */
 /* ------------------------------------------------------------------ */
 
-function FindingsBlock({ title, findings, hasData = true }: { title: string; findings: { finding: string; severity: Severity; evidence: string }[]; hasData?: boolean }) {
+/* Findings grouped by severity (Critical / Warnings / Notes), followed by a
+   green "what passed" summary built from real checks + counts. */
+function FindingsGrouped({
+  findings,
+  passedChecks,
+  metadataOk,
+  metadataTotal,
+  citationsVerified,
+}: {
+  findings: { finding: string; severity: Severity; evidence: string; group: string }[]
+  passedChecks: { check: string; detail: string }[]
+  metadataOk: number
+  metadataTotal: number
+  citationsVerified: number
+}) {
+  const critical = findings.filter((f) => f.severity === 'critical')
+  const warnings = findings.filter((f) => f.severity === 'high' || f.severity === 'medium')
+  const notes = findings.filter((f) => f.severity === 'low' || f.severity === 'info')
+  const groups = [
+    critical.length > 0 ? { title: 'Critical', tone: 'var(--color-error)', items: critical } : null,
+    warnings.length > 0 ? { title: 'Warnings', tone: 'var(--color-warning)', items: warnings } : null,
+    notes.length > 0 ? { title: 'Notes', tone: 'var(--color-info)', items: notes } : null,
+  ].filter((g): g is { title: string; tone: string; items: typeof findings } => g != null)
+
+  if (groups.length === 0) {
+    return (
+      <div>
+        <SectionTitle title="Findings" />
+        <Empty text="No concerns flagged — nothing adversarial found here." />
+        <PassedBlock checks={passedChecks} metadataOk={metadataOk} metadataTotal={metadataTotal} citationsVerified={citationsVerified} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-8">
+      {groups.map((g) => (
+        <div key={g.title}>
+          <SectionTitle title={`${g.title} · ${g.items.length}`} />
+          <div className="space-y-3">
+            {g.items.map((f, i) => (
+              <div key={i} className="card p-4" style={{ borderColor: `color-mix(in srgb, ${g.tone} 30%, transparent)` }}>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{f.finding}</p>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Pill color={SEVERITY_TONE[f.severity] ?? 'var(--color-muted)'} text={f.severity} />
+                    <span className="rounded border px-1.5 py-0.5 font-mono text-[0.5625rem] uppercase tracking-wider text-muted" style={{ borderColor: 'var(--color-line)' }}>
+                      {f.group}
+                    </span>
+                  </div>
+                </div>
+                {f.evidence && <p className="mt-1.5 text-[0.75rem] leading-relaxed text-secondary">{f.evidence}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <PassedBlock checks={passedChecks} metadataOk={metadataOk} metadataTotal={metadataTotal} citationsVerified={citationsVerified} />
+    </div>
+  )
+}
+
+function PassedBlock({
+  checks,
+  metadataOk,
+  metadataTotal,
+  citationsVerified,
+}: {
+  checks: { check: string; detail: string }[]
+  metadataOk: number
+  metadataTotal: number
+  citationsVerified: number
+}) {
   return (
     <div>
-      <SectionTitle title={title} />
-      {!hasData || findings.length === 0 ? (
-        <Empty text="No concerns flagged — nothing adversarial found here." />
-      ) : (
-        <div className="space-y-3">
-          {findings.map((flag, i) => (
-            <div key={i} className="card p-4">
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-[0.8125rem] font-semibold" style={{ color: 'var(--color-primary)' }}>{flag.finding}</p>
-                <Pill color={SEVERITY_TONE[flag.severity] ?? 'var(--color-muted)'} text={flag.severity} />
-              </div>
-              {flag.evidence && (
-                <p className="mt-1.5 text-[0.75rem] leading-relaxed text-secondary">{flag.evidence}</p>
-              )}
-            </div>
-          ))}
+      <SectionTitle title="What passed" />
+      <div
+        className="rounded-xl border p-4"
+        style={{ background: 'color-mix(in srgb, var(--color-success) 6%, transparent)', borderColor: 'color-mix(in srgb, var(--color-success) 25%, transparent)' }}
+      >
+        <div className="grid gap-1.5 sm:grid-cols-3">
+          <div>
+            <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">Citations verified</p>
+            <p className="mt-0.5 font-display text-[1.15rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
+              {citationsVerified}
+            </p>
+          </div>
+          <div>
+            <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">Metadata fields present</p>
+            <p className="mt-0.5 font-display text-[1.15rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
+              {metadataOk}/{metadataTotal}
+            </p>
+          </div>
+          <div>
+            <p className="font-mono text-[0.59375rem] font-bold uppercase tracking-[0.14em] text-muted">Inspection checks passed</p>
+            <p className="mt-0.5 font-display text-[1.15rem] font-semibold tabular-nums" style={{ color: 'var(--color-success)' }}>
+              {checks.length}
+            </p>
+          </div>
         </div>
-      )}
+        {checks.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {checks.map((c) => (
+              <span key={c.check} className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', color: 'var(--color-success)' }}>
+                ✓ {c.check}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -735,30 +814,161 @@ function Pill({ color, text }: { color: string; text: string }) {
   )
 }
 
-/* SVG score ring showing the real 0–100 trust score in its tier colour. */
-function ScoreRing({ score, label }: { score: number; label: string }) {
-  const { color } = scoreTone(score)
-  const R = 38
-  const C = 2 * Math.PI * R
+/* Breakdown bars (animate on first appearance) with per-metric "Why?"
+   evidence panels fed by the real report payload for that metric. */
+function Breakdown({ breakdown, report }: { breakdown: ScoreBreakdown; report: AuditReport }) {
+  const { ref, visible } = useReveal<HTMLDivElement>(0.1)
+  const [open, setOpen] = useState<string | null>(null)
+  const entries = Object.entries(breakdown)
+
   return (
-    <div className="relative h-[104px] w-[104px] shrink-0" role="img" aria-label={`Trust score ${score} of 100 — ${label}`}>
-      <svg viewBox="0 0 104 104" className="h-full w-full -rotate-90">
-        <circle cx="52" cy="52" r={R} fill="none" strokeWidth="10" stroke="rgba(255,255,255,0.06)" />
-        <circle
-          cx="52" cy="52" r={R} fill="none"
-          strokeWidth="10" strokeLinecap="round"
-          stroke={color}
-          strokeDasharray={`${(Math.max(0, Math.min(100, score)) / 100) * C} ${C}`}
-          style={{ transition: 'stroke-dasharray 0.8s var(--ease-out)' }}
-        />
-      </svg>
-      <div className="absolute inset-0 grid place-items-center">
-        <div className="text-center">
-          <div className="font-display text-[1.75rem] font-bold leading-none tabular-nums" style={{ color: 'var(--color-primary)' }}>{score}</div>
-          <div className="mt-0.5 font-mono text-[0.5rem] font-bold uppercase tracking-[0.18em]" style={{ color }}>{label}</div>
-        </div>
+    <div ref={ref} className="mt-5">
+      <div className="space-y-2.5">
+        {entries.map(([key, value]) => {
+          const meta = BREAKDOWN_LABEL[key] ?? { label: key, hint: 'Contribution to the trust score.' }
+          const v = Math.max(0, Math.min(100, Math.round(value)))
+          const barColor = v >= 70 ? 'var(--color-success)' : v >= 40 ? 'var(--color-warning)' : 'var(--color-error)'
+          const isOpen = open === key
+          const evidence = evidenceFor(key, report)
+          return (
+            <div
+              key={key}
+              className="rounded-lg border p-2.5 transition-colors"
+              style={{
+                borderColor: isOpen ? 'color-mix(in srgb, var(--color-accent) 40%, transparent)' : 'var(--color-line)',
+                background: isOpen ? 'var(--color-panel)' : 'transparent',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-28 shrink-0 text-[0.8125rem] font-medium text-secondary sm:w-32" title={meta.hint}>
+                  {meta.label}
+                </span>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                  <div className="bar-fill h-full rounded-full" style={{ width: visible ? `${v}%` : '0%', background: barColor }} />
+                </div>
+                <span className="w-8 shrink-0 text-right font-mono text-[0.8125rem] font-bold tabular-nums" style={{ color: 'var(--color-primary)' }}>
+                  {v}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setOpen(isOpen ? null : key)}
+                  className="btn btn-ghost shrink-0 px-2 py-1 !text-[0.65625rem]"
+                  aria-expanded={isOpen}
+                  title={meta.hint}
+                >
+                  {isOpen ? '− close' : '＋ why?'}
+                </button>
+              </div>
+              {isOpen && evidence && (
+                <div className="fade-in mt-3 border-t pt-3" style={{ borderColor: 'var(--color-line)' }}>
+                  {evidence}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
+      <p className="mt-2 font-mono text-[0.59375rem] uppercase tracking-[0.18em] text-muted">
+        open why? to read the evidence this metric was derived from
+      </p>
     </div>
+  )
+}
+
+/* Real payload → human evidence for each breakdown metric. */
+function evidenceFor(key: string, report: AuditReport): React.ReactNode {
+  if (key === 'consent') {
+    if (report.consent_flags.length === 0) return <MiniPass text="No consent or license concerns were flagged." />
+    return (
+      <div className="space-y-2">
+        {report.consent_flags.map((f, i) => (
+          <div key={i} className="flex items-start justify-between gap-3">
+            <p className="text-[0.75rem] leading-relaxed text-secondary">
+              <b style={{ color: 'var(--color-primary)' }}>{f.finding}</b>
+              {f.evidence ? ` — ${f.evidence}` : ''}
+            </p>
+            <Pill color={SEVERITY_TONE[f.severity] ?? 'var(--color-muted)'} text={f.severity} />
+          </div>
+        ))}
+        {report.metadata.license && <p className="text-[0.6875rem] text-muted">license: {report.metadata.license}</p>}
+      </div>
+    )
+  }
+  if (key === 'citations') {
+    const verified = report.citation_trail.filter((c) => c.retraction_status === 'not_retracted')
+    const retracted = report.citation_trail.filter((c) => c.retraction_status === 'retracted' || c.retraction_status === 'possibly_retracted')
+    const unknown = report.citation_trail.filter((c) => c.retraction_status === 'unknown')
+    if (report.citation_trail.length === 0) return <MiniPass text="No citations surfaced to verify — nothing retracted found." />
+    return (
+      <div>
+        <div className="mb-2 flex flex-wrap gap-2">
+          <span className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-success) 30%, transparent)', color: 'var(--color-success)' }}>
+            {verified.length} verified
+          </span>
+          {retracted.length > 0 && (
+            <span className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', color: 'var(--color-error)' }}>
+              {retracted.length} retracted / disputed
+            </span>
+          )}
+          {unknown.length > 0 && (
+            <span className="rounded-full border px-2 py-0.5 font-mono text-[0.625rem]" style={{ borderColor: 'var(--color-line)', color: 'var(--color-muted)' }}>
+              {unknown.length} unknown
+            </span>
+          )}
+        </div>
+        <ul className="space-y-1.5">
+          {report.citation_trail.slice(0, 4).map((c, i) => {
+            const retraction = RETRACTION_LABEL[c.retraction_status] ?? RETRACTION_LABEL.unknown
+            return (
+              <li key={i} className="flex items-center justify-between gap-3 text-[0.75rem]">
+                <span className="min-w-0 truncate text-secondary">{c.paper_title}</span>
+                <Pill color={retraction.color} text={retraction.label} />
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    )
+  }
+  if (key === 'originality') {
+    if (report.duplication_flags.length === 0) return <MiniPass text="No duplicate or re-upload markers were found in the listing." />
+    return (
+      <div className="space-y-2">
+        {report.duplication_flags.map((f, i) => (
+          <div key={i} className="flex items-start justify-between gap-3">
+            <p className="text-[0.75rem] leading-relaxed text-secondary">
+              <b style={{ color: 'var(--color-primary)' }}>{f.finding}</b>
+              {f.evidence ? ` — ${f.evidence}` : ''}
+            </p>
+            <Pill color={SEVERITY_TONE[f.severity] ?? 'var(--color-muted)'} text={f.severity} />
+          </div>
+        ))}
+      </div>
+    )
+  }
+  if (key === 'metadata') {
+    return (
+      <div className="grid gap-1.5 sm:grid-cols-2">
+        <CompletenessRow label="Title" ok={Boolean(report.metadata.title)} detail={report.metadata.title?.slice(0, 48) || 'missing'} />
+        <CompletenessRow label="License" ok={Boolean(report.metadata.license)} detail={String(report.metadata.license || 'missing')} />
+        <CompletenessRow label="Upload date" ok={Boolean(report.metadata.upload_date)} detail={String(report.metadata.upload_date || 'unknown')} />
+        <CompletenessRow label="Tags" ok={report.metadata.tags.length > 0} detail={`${report.metadata.tags.length} tags`} />
+        <CompletenessRow label="Files listed" ok={report.metadata.files.length > 0} detail={`${report.metadata.files.length} items`} />
+        <CompletenessRow label="Columns detected" ok={(report.metadata.columns?.length ?? 0) > 0 || (report.data_profile?.columns_profiled?.length ?? 0) > 0} detail={`${report.metadata.columns?.length ?? 0} columns`} />
+      </div>
+    )
+  }
+  return null
+}
+
+function MiniPass({ text }: { text: string }) {
+  return (
+    <p className="flex items-center gap-2 text-[0.75rem] font-medium" style={{ color: 'var(--color-success)' }}>
+      <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-[0.5625rem] font-black" style={{ background: 'color-mix(in srgb, var(--color-success) 12%, transparent)' }}>
+        ✓
+      </span>
+      {text}
+    </p>
   )
 }
 
