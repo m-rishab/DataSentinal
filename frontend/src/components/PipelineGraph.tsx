@@ -107,28 +107,22 @@ const REVEAL: { t: number; id: string }[] = [
   { t: 6260, id: 'report_generator' },
 ]
 
-const NODE_W = 224
-const NODE_H = 118
+const NODE_W = 232
+const NODE_H = 124
 
 const STATUS_COLORS: Record<NodeStatus, string> = {
-  pending: '#475569',
+  pending: '#64748b',
   running: '#22d3ee',
   completed: '#34d399',
   failed: '#fb7185',
 }
 
-/* Neon halo applied to edges once the flow reaches them. */
+/* Edges keep a soft draw-in on reveal but no neon halo — status is
+   conveyed by the stroke colour alone. */
 function edgeClass(status: NodeStatus, revealed: boolean, animated: boolean) {
-  const glow =
-    status === 'running'
-      ? 'edge-glow-cyan'
-      : status === 'completed'
-        ? 'edge-glow-emerald'
-        : status === 'failed'
-          ? 'edge-glow-rose'
-          : ''
+  void status
   const draw = revealed && !animated ? 'edge-draw' : ''
-  return [glow, draw].filter(Boolean).join(' ')
+  return draw
 }
 
 function parseResult(result?: string): { text: string; amber: boolean } | null {
@@ -203,27 +197,31 @@ function StepNode({ data }: NodeProps) {
   const failed = status === 'failed'
 
   let glow: string
-  let border = 'border-slate-700/60'
-  let kickerCls = 'text-slate-500'
+  let border = 'border-white/10'
+  let kickerCls = 'text-slate-400'
   let iconCls = 'text-slate-400'
+  let iconBg = 'bg-white/5'
   let dotCls = 'bg-slate-500'
   if (running) {
     glow = 'node-glow-running'
-    border = 'border-cyan-400/60'
-    kickerCls = 'text-cyan-300'
+    border = 'border-cyan-400/50'
+    kickerCls = 'text-cyan-200'
     iconCls = 'text-cyan-300'
+    iconBg = 'bg-cyan-400/10'
     dotCls = 'bg-cyan-400'
   } else if (completed) {
     glow = 'node-glow-completed'
-    border = 'border-emerald-400/40'
+    border = 'border-emerald-400/35'
     kickerCls = 'text-emerald-300'
     iconCls = 'text-emerald-300'
+    iconBg = 'bg-emerald-400/10'
     dotCls = 'bg-emerald-400'
   } else if (failed) {
     glow = 'node-glow-failed'
-    border = 'border-rose-400/50'
+    border = 'border-rose-400/40'
     kickerCls = 'text-rose-300'
     iconCls = 'text-rose-300'
+    iconBg = 'bg-rose-400/10'
     dotCls = 'bg-rose-400'
   } else {
     glow = 'node-glow-pending'
@@ -233,33 +231,37 @@ function StepNode({ data }: NodeProps) {
 
   return (
     <div
-      className={`relative min-h-full rounded-[14px] border px-3.5 pb-2.5 pt-3 transition-all duration-300 hover:-translate-y-0.5 ${glow} ${
-        running ? 'node-running' : ''
-      } ${selected ? 'ring-2 ring-cyan-400/50' : ''} ${border}`}
-      style={{ opacity: revealed ? 1 : 0, transform: revealed ? undefined : 'scale(0.85)' }}
+      className={`relative min-h-full rounded-xl border px-4 pb-3 pt-3.5 transition-all duration-300 hover:-translate-y-0.5 ${glow} ${
+        selected ? 'ring-2 ring-cyan-400/40' : ''
+      } ${border}`}
+      style={{
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? undefined : 'scale(0.9)',
+        background: 'linear-gradient(180deg, #131c2e 0%, #0d1422 100%)',
+      }}
     >
       <Handle type="target" position={Position.Left} className="op-node-handle" />
 
-      <div className="flex items-start gap-2.5">
+      <div className="relative flex items-start gap-3">
         <span
-          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10 ${iconCls}`}
+          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconBg} ring-1 ring-white/10 ${iconCls}`}
         >
-          <Icon size={15} strokeWidth={2} />
+          <Icon size={16} strokeWidth={2} />
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className={`block text-[9.5px] font-bold uppercase tracking-[0.16em] ${kickerCls}`}>
+          <span className={`block text-[10px] font-semibold uppercase tracking-[0.17em] ${kickerCls}`}>
             {kicker}
             {duration ? ` · ${(Math.round(duration / 100) / 10).toFixed(1)}s` : ''}
           </span>
-          <span className="mt-0.5 block truncate text-[13.5px] font-bold leading-tight text-slate-50">
+          <span className="font-display mt-1 block truncate text-[15px] font-semibold leading-snug text-slate-50">
             {label}
           </span>
         </span>
 
         {running && (
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
             <span className={`relative inline-flex h-2 w-2 rounded-full ${dotCls}`} />
           </span>
         )}
@@ -267,12 +269,12 @@ function StepNode({ data }: NodeProps) {
       </div>
 
       {badge && !/^0\s*flag/i.test(badge.text) && (
-        <div className="mt-2 flex items-center gap-1.5 border-t border-white/5 pt-1.5">
+        <div className="relative mt-2.5 flex items-center gap-1.5 border-t border-white/5 pt-2">
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold ${
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[9.5px] font-medium ${
               badge.amber
-                ? 'bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25'
-                : 'bg-slate-400/10 text-slate-300 ring-1 ring-white/10'
+                ? 'bg-amber-400/10 text-amber-300/90'
+                : 'bg-white/5 text-slate-300/80 ring-1 ring-white/10'
             }`}
           >
             {badge.text}

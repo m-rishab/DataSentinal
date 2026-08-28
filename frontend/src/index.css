@@ -108,44 +108,42 @@ input:-webkit-autofill:focus {
   animation: retryPulse 1.6s ease-in-out infinite;
 }
 
-/* Persistent neon halo on the graph nodes, keyed by status. The pulsing
-   runHalo below layers on top of the static glow for the active node. */
+/* Persistent soft halo on the graph nodes, keyed by status. Kept minimal —
+   a 1px tinted ring and a shallow depth shadow, never a neon wash. */
 .node-glow-pending {
   box-shadow:
-    0 0 0 1px rgba(148, 163, 184, 0.14),
-    0 8px 24px rgba(2, 6, 16, 0.6);
+    0 0 0 1px rgba(148, 163, 184, 0.12),
+    0 6px 16px rgba(2, 6, 16, 0.45);
 }
 .node-glow-running {
   box-shadow:
-    0 0 0 1px rgba(34, 211, 238, 0.45),
-    0 0 18px rgba(34, 211, 238, 0.35),
-    0 0 46px rgba(34, 211, 238, 0.16);
+    0 0 0 1px rgba(34, 211, 238, 0.42),
+    0 6px 18px rgba(2, 6, 16, 0.45),
+    0 0 14px rgba(34, 211, 238, 0.16);
 }
 .node-glow-completed {
   box-shadow:
-    0 0 0 1px rgba(52, 211, 153, 0.32),
-    0 0 16px rgba(52, 211, 153, 0.30),
-    0 0 42px rgba(52, 211, 153, 0.13);
+    0 0 0 1px rgba(52, 211, 153, 0.28),
+    0 6px 16px rgba(2, 6, 16, 0.45);
 }
 .node-glow-failed {
   box-shadow:
-    0 0 0 1px rgba(251, 113, 133, 0.45),
-    0 0 16px rgba(251, 113, 133, 0.32),
-    0 0 34px rgba(251, 113, 133, 0.14);
+    0 0 0 1px rgba(251, 113, 133, 0.34),
+    0 6px 16px rgba(2, 6, 16, 0.45);
 }
 
 @keyframes runHalo {
   0%, 100% {
     box-shadow:
-      0 0 0 1px rgba(34, 211, 238, 0.45),
-      0 0 22px rgba(34, 211, 238, 0.42),
-      0 0 60px rgba(34, 211, 238, 0.20);
+      0 0 0 1px rgba(34, 211, 238, 0.42),
+      0 6px 18px rgba(2, 6, 16, 0.45),
+      0 0 12px rgba(34, 211, 238, 0.14);
   }
   50% {
     box-shadow:
-      0 0 0 1px rgba(34, 211, 238, 0.65),
-      0 0 34px rgba(34, 211, 238, 0.55),
-      0 0 90px rgba(34, 211, 238, 0.28);
+      0 0 0 1px rgba(34, 211, 238, 0.58),
+      0 6px 18px rgba(2, 6, 16, 0.45),
+      0 0 18px rgba(34, 211, 238, 0.24);
   }
 }
 .node-running {
@@ -167,11 +165,11 @@ input:-webkit-autofill:focus {
 .graph-canvas {
   background-color: #070b14;
   background-image:
-    radial-gradient(ellipse 55% 45% at 22% 12%, rgba(34, 211, 238, 0.09), transparent 60%),
-    radial-gradient(ellipse 45% 40% at 85% 88%, rgba(129, 140, 248, 0.08), transparent 55%),
-    radial-gradient(ellipse 40% 35% at 60% 50%, rgba(45, 212, 191, 0.04), transparent 60%),
-    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+    radial-gradient(ellipse 55% 45% at 22% 12%, rgba(34, 211, 238, 0.05), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 85% 88%, rgba(129, 140, 248, 0.045), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 60% 50%, rgba(45, 212, 191, 0.025), transparent 60%),
+    linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
   background-size: auto, auto, auto, 30px 30px, 30px 30px;
 }
 
@@ -196,7 +194,7 @@ input:-webkit-autofill:focus {
   border: none;
   background: transparent;
   padding: 0;
-  width: 224px;
+  width: 232px;
   cursor: grab;
 }
 .react-flow__node:active {
@@ -218,17 +216,6 @@ input:-webkit-autofill:focus {
 
 .react-flow__edge {
   cursor: default;
-}
-
-/* Neon halo on active/completed edges so the flow reads like a circuit. */
-.edge-glow-cyan path {
-  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.85));
-}
-.edge-glow-emerald path {
-  filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.75));
-}
-.edge-glow-rose path {
-  filter: drop-shadow(0 0 4px rgba(251, 113, 133, 0.75));
 }
 
 /* Slim, quiet zoom controls tuned for the dark canvas. */

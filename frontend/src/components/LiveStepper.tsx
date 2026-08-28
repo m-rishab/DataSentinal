@@ -444,7 +444,7 @@ export default function LiveStepper({
             key={selected.node}
             className="slide-card-in flex h-full w-[min(100%,380px)] flex-col bg-[#0a0f1a] text-slate-100"
           >
-            <div className="h-1 w-full shrink-0 bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 shadow-[0_0_18px_rgba(34,211,238,0.5)]" />
+            <div className="h-1 w-full shrink-0 bg-gradient-to-r from-cyan-400/80 via-teal-400/80 to-indigo-400/80" />
 
             <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/5 px-5 py-4">
               <div>
