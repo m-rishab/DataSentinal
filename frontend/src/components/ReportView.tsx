@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { fetchReport } from '../lib/api'
 import { explainLicense } from '../lib/licenses'
+import SchemaTable from './SchemaTable'
 import type { RetractionStatus, Severity } from '../lib/types'
 type Tab = 'overview' | 'citations' | 'compliance' | 'logs'
 
@@ -344,6 +345,18 @@ export default function ReportView({
                   </p>
                 )}
               </div>
+            )}
+
+            {/* Dataset Schema Table with PII detection */}
+            {effectiveColumns.length > 0 && (
+              <SchemaTable
+                columns={effectiveColumns}
+                dataProfile={report.data_profile}
+                isPartial={
+                  report.data_profile?.rows_profiled != null &&
+                  report.data_profile.rows_profiled < 1000
+                }
+              />
             )}
 
             {/* Real content profile — stats computed from actually downloaded rows */}

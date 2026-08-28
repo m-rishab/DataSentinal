@@ -133,6 +133,7 @@ export default function LiveStepper({
   const [selectedNode, setSelectedNode] = useState<string | null>(null)
   const [graphReady, setGraphReady] = useState(false)
   const [meta, setMeta] = useState<DatasetMetadata | null>(null)
+  const [reconnecting, setReconnecting] = useState(false)
   const doneRef = useRef(false)
   const startedAtRef = useRef(Date.now())
   const onDoneRef = useRef(onDone)
@@ -268,6 +269,8 @@ export default function LiveStepper({
         scheduleFlush()
       },
       () => setFailed('Lost connection to the audit stream.'),
+      () => setReconnecting(true),
+      () => setReconnecting(false),
     )
     return () => {
       close()
@@ -290,22 +293,61 @@ export default function LiveStepper({
   const columnCount = meta?.columns?.length ?? 0
 
   return (
-    <div className="flex h-full min-h-0 bg-[#070b14]">
+    <div className="flex h-full min-h-0" style={{ background: '#0d0f12' }}>
+      {/* Reconnecting banner */}
+      {reconnecting && (
+        <div
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-2 py-2 text-small"
+          style={{
+            background: 'color-mix(in srgb, #6b96c4 15%, transparent)',
+            borderBottom: '1px solid color-mix(in srgb, #6b96c4 30%, transparent)',
+            color: '#6b96c4',
+          }}
+        >
+          <div
+            className="h-4 w-4 animate-spin rounded-full border-2"
+            style={{
+              borderColor: '#6b96c4',
+              borderTopColor: 'transparent',
+            }}
+          />
+          <span>Reconnecting to audit stream...</span>
+        </div>
+      )}
+
       {/* Left: header + live dataset strip + graph canvas */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-2">
           <div className="flex items-center gap-3">
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-70" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
+              <span
+                className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70"
+                style={{ background: '#6b96c4' }}
+              />
+              <span
+                className="relative inline-flex h-2 w-2 rounded-full"
+                style={{ background: '#6b96c4' }}
+              />
             </span>
             <div>
-              <p className="font-display text-[13px] font-semibold uppercase tracking-[0.14em] text-slate-100">
+              <p
+                className="text-[13px] font-semibold uppercase tracking-[0.14em]"
+                style={{ color: '#e4e6eb' }}
+              >
                 {graphReady ? 'Live audit' : 'Building workflow'}
               </p>
-              <p className="mt-0.5 font-mono text-[11px] text-slate-500">{runId}</p>
+              <p className="mt-0.5 font-mono text-[11px]" style={{ color: '#5a5f68' }}>
+                {runId}
+              </p>
             </div>
-            <span className="rounded-full border border-slate-800 bg-[#0c1320] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
+            <span
+              className="rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+              style={{
+                borderColor: 'rgba(255, 255, 255, 0.08)',
+                background: '#14171b',
+                color: '#8b9099',
+              }}
+            >
               {doneCount}/{STEPS.length} steps
               {runningCount > 0 ? ` · ${runningCount} running` : ''}
             </span>

@@ -1,8 +1,6 @@
-/* React Flow + dagre pipeline graph for the live audit workflow.
-   dagre computes the LR layout automatically, so there is no manual
-   coordinate math and edges never cross by construction. Edges are
-   smoothstep with colour/animation derived from the source node status:
-   green completed · blue dashed running · gray waiting. */
+/* React Flow + dagre pipeline graph with minimal dark design system.
+   NO glow effects, NO gradients. Flat cards with muted status colors.
+   Running nodes pulse opacity only. Failed nodes show error state clearly. */
 
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -30,6 +28,7 @@ import {
   Link2,
   Scale,
   ShieldCheck,
+  AlertCircle,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -74,7 +73,6 @@ const STEPS: StepDef[] = [
   { node: 'report_generator', label: 'Report Generator', kicker: '07 · Output', icon: FileOutput },
 ]
 
-/* Edges excluding the dynamic retry loop, which is added at render time. */
 const CONNECTIONS: { id: string; from: string; to: string }[] = [
   { id: 'e-ingest-consent', from: 'ingest', to: 'consent_agent' },
   { id: 'e-ingest-citation', from: 'ingest', to: 'citation_tracer' },
@@ -87,7 +85,6 @@ const CONNECTIONS: { id: string; from: string; to: string }[] = [
   { id: 'e-critic-report', from: 'critic_aggregator', to: 'report_generator' },
 ]
 
-/* Staggered reveal, mirroring the node-by-node build animation. */
 const REVEAL: { t: number; id: string }[] = [
   { t: 80, id: 'ingest' },
   { t: 520, id: 'e-ingest-consent' },
@@ -110,19 +107,12 @@ const REVEAL: { t: number; id: string }[] = [
 const NODE_W = 232
 const NODE_H = 124
 
+// Design system colors (muted, desaturated)
 const STATUS_COLORS: Record<NodeStatus, string> = {
-  pending: '#64748b',
-  running: '#22d3ee',
-  completed: '#34d399',
-  failed: '#fb7185',
-}
-
-/* Edges keep a soft draw-in on reveal but no neon halo — status is
-   conveyed by the stroke colour alone. */
-function edgeClass(status: NodeStatus, revealed: boolean, animated: boolean) {
-  void status
-  const draw = revealed && !animated ? 'edge-draw' : ''
-  return draw
+  pending: '#3a3f47',
+  running: '#6b96c4',
+  completed: '#4a9d7f',
+  failed: '#c4645f',
 }
 
 function parseResult(result?: string): { text: string; amber: boolean } | null {
@@ -157,20 +147,13 @@ function layoutPositions(): Record<string, { x: number; y: number }> {
   return positions
 }
 
-const EDGE_CONNECTIONS = CONNECTIONS.map((c) => ({
-  id: c.id,
-  from: c.from,
-  to: c.to,
-}))
-
 function buildBaseEdges(): Edge[] {
-  return EDGE_CONNECTIONS.map((c) => ({
+  return CONNECTIONS.map((c) => ({
     id: c.id,
     source: c.from,
     target: c.to,
     type: 'smoothstep',
     animated: false,
-    className: '',
     style: {
       stroke: STATUS_COLORS.pending,
       strokeWidth: 2,
@@ -186,7 +169,7 @@ function buildBaseEdges(): Edge[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Custom node                                                         */
+/* Custom node — flat card with status colors, no glow                */
 /* ------------------------------------------------------------------ */
 
 function StepNode({ data }: NodeProps) {
@@ -195,102 +178,111 @@ function StepNode({ data }: NodeProps) {
   const running = status === 'running'
   const completed = status === 'completed'
   const failed = status === 'failed'
+  const pending = status === 'pending'
 
-  let glow: string
-  let border = 'border-white/10'
-  let kickerCls = 'text-slate-400'
-  let iconCls = 'text-slate-400'
-  let iconBg = 'bg-white/5'
-  let dotCls = 'bg-slate-500'
-  if (running) {
-    glow = 'node-glow-running'
-    border = 'border-cyan-400/50'
-    kickerCls = 'text-cyan-200'
-    iconCls = 'text-cyan-300'
-    iconBg = 'bg-cyan-400/10'
-    dotCls = 'bg-cyan-400'
-  } else if (completed) {
-    glow = 'node-glow-completed'
-    border = 'border-emerald-400/35'
-    kickerCls = 'text-emerald-300'
-    iconCls = 'text-emerald-300'
-    iconBg = 'bg-emerald-400/10'
-    dotCls = 'bg-emerald-400'
-  } else if (failed) {
-    glow = 'node-glow-failed'
-    border = 'border-rose-400/40'
-    kickerCls = 'text-rose-300'
-    iconCls = 'text-rose-300'
-    iconBg = 'bg-rose-400/10'
-    dotCls = 'bg-rose-400'
-  } else {
-    glow = 'node-glow-pending'
-  }
+  // Background color from design system
+  const bgColor = selected ? '#1a1e23' : '#14171b'
+  const borderColor = failed
+    ? STATUS_COLORS.failed
+    : running
+    ? STATUS_COLORS.running
+    : completed
+    ? STATUS_COLORS.completed
+    : 'rgba(255, 255, 255, 0.08)'
 
-  const badge = parseResult(result)
+  const textColor = failed
+    ? STATUS_COLORS.failed
+    : running
+    ? STATUS_COLORS.running
+    : completed
+    ? STATUS_COLORS.completed
+    : '#8b9099'
+
+  const parsed = parseResult(result)
 
   return (
     <div
-      className={`relative min-h-full rounded-xl border px-4 pb-3 pt-3.5 transition-all duration-300 hover:-translate-y-0.5 ${glow} ${
-        selected ? 'ring-2 ring-cyan-400/40' : ''
-      } ${border}`}
+      className={`relative rounded-xl border-2 transition-all ${running ? 'pulse-running' : ''}`}
       style={{
+        width: NODE_W,
+        height: NODE_H,
+        background: bgColor,
+        borderColor,
         opacity: revealed ? 1 : 0,
-        transform: revealed ? undefined : 'scale(0.9)',
-        background: 'linear-gradient(180deg, #131c2e 0%, #0d1422 100%)',
+        transform: revealed ? 'scale(1)' : 'scale(0.9)',
+        transition: 'all 0.3s ease',
+        cursor: 'pointer',
       }}
     >
-      <Handle type="target" position={Position.Left} className="op-node-handle" />
+      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
 
-      <div className="relative flex items-start gap-3">
-        <span
-          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${iconBg} ring-1 ring-white/10 ${iconCls}`}
-        >
-          <Icon size={16} strokeWidth={2} />
-        </span>
+      <div className="flex h-full flex-col justify-between p-4">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div
+              className="flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{
+                background: `color-mix(in srgb, ${textColor} 15%, transparent)`,
+                color: textColor,
+              }}
+            >
+              <Icon size={16} />
+            </div>
+            <div>
+              <div className="text-tiny" style={{ color: '#5a5f68' }}>
+                {kicker}
+              </div>
+              <div className="text-small font-medium" style={{ color: '#e4e6eb' }}>
+                {label}
+              </div>
+            </div>
+          </div>
 
-        <span className="min-w-0 flex-1">
-          <span className={`block text-[10px] font-semibold uppercase tracking-[0.17em] ${kickerCls}`}>
-            {kicker}
-            {duration ? ` · ${(Math.round(duration / 100) / 10).toFixed(1)}s` : ''}
-          </span>
-          <span className="font-display mt-1 block truncate text-[15px] font-semibold leading-snug text-slate-50">
-            {label}
-          </span>
-        </span>
-
-        {running && (
-          <span className="relative flex h-2 w-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
-            <span className={`relative inline-flex h-2 w-2 rounded-full ${dotCls}`} />
-          </span>
-        )}
-        {!running && <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotCls}`} />}
-      </div>
-
-      {badge && !/^0\s*flag/i.test(badge.text) && (
-        <div className="relative mt-2.5 flex items-center gap-1.5 border-t border-white/5 pt-2">
-          <span
-            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[9.5px] font-medium ${
-              badge.amber
-                ? 'bg-amber-400/10 text-amber-300/90'
-                : 'bg-white/5 text-slate-300/80 ring-1 ring-white/10'
-            }`}
-          >
-            {badge.text}
-          </span>
+          {/* Status indicator */}
+          {failed && (
+            <div
+              className="flex h-6 w-6 items-center justify-center rounded-full"
+              style={{ background: `color-mix(in srgb, ${STATUS_COLORS.failed} 20%, transparent)` }}
+            >
+              <AlertCircle size={14} style={{ color: STATUS_COLORS.failed }} />
+            </div>
+          )}
         </div>
-      )}
 
-      <Handle type="source" position={Position.Right} className="op-node-handle" />
+        {/* Footer - result or duration */}
+        <div className="flex items-center justify-between">
+          {parsed && (
+            <div
+              className="rounded px-2 py-1 text-tiny font-medium"
+              style={{
+                background: parsed.amber
+                  ? 'color-mix(in srgb, #c4645f 15%, transparent)'
+                  : `color-mix(in srgb, ${textColor} 10%, transparent)`,
+                color: parsed.amber ? '#c4645f' : textColor,
+              }}
+            >
+              {parsed.text}
+            </div>
+          )}
+          {duration && duration > 0 && (
+            <div className="text-tiny" style={{ color: '#5a5f68' }}>
+              {(duration / 1000).toFixed(1)}s
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
-const nodeTypes: NodeTypes = { step: StepNode }
+const nodeTypes: NodeTypes = {
+  step: StepNode,
+}
 
 /* ------------------------------------------------------------------ */
-/* Component                                                           */
+/* Main component                                                      */
 /* ------------------------------------------------------------------ */
 
 export default function PipelineGraph({
@@ -302,152 +294,147 @@ export default function PipelineGraph({
   selectedNode,
   onSelect,
 }: PipelineGraphProps) {
-  const base = useMemo(layoutPositions, [])
+  const [revealedIds, setRevealedIds] = useState(new Set<string>())
 
-  /* Persisted manual overrides (React Flow drag) keyed per run. */
-  const initial = useMemo(() => {
-    const positions = { ...base }
-    try {
-      const raw = localStorage.getItem(`ds-pos-${runId}`)
-      if (raw) {
-        const saved = JSON.parse(raw) as Record<string, { x: number; y: number }>
-        if (STEPS.every((s) => saved[s.node])) Object.assign(positions, saved)
-      }
-    } catch {
-      /* storage unavailable — keep dagre layout */
-    }
-
-    const nodes: Node<StepData>[] = STEPS.map((s) => ({
-      id: s.node,
-      type: 'step',
-      position: positions[s.node] ?? { x: 0, y: 0 },
-      data: {
-        label: s.label,
-        kicker: s.kicker,
-        icon: s.icon,
-        status: statuses[s.node] ?? 'pending',
-        revealed: false,
-        selected: false,
-      } satisfies StepData,
-    }))
-    return { nodes, edges: buildBaseEdges() }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runId, base])
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges)
-  const [revealed, setRevealed] = useState<Set<string>>(new Set())
-
+  // Staggered reveal animation
   useEffect(() => {
-    const timers: number[] = []
-    REVEAL.forEach((item) => {
-      timers.push(
-        window.setTimeout(() => {
-          setRevealed((prev) => new Set(prev).add(item.id))
-        }, item.t),
-      )
-    })
+    const timers = REVEAL.map((r) =>
+      window.setTimeout(() => {
+        setRevealedIds((prev) => new Set([...prev, r.id]))
+      }, r.t)
+    )
     return () => timers.forEach(clearTimeout)
   }, [])
 
-  /* Keep node/edge appearance in sync with live stream state. */
+  const positions = useMemo(() => layoutPositions(), [])
+
+  const initialNodes: Node[] = useMemo(
+    () =>
+      STEPS.map((s) => ({
+        id: s.node,
+        type: 'step',
+        position: positions[s.node] || { x: 0, y: 0 },
+        data: {
+          label: s.label,
+          kicker: s.kicker,
+          icon: s.icon,
+          status: 'pending',
+          revealed: false,
+          selected: false,
+        },
+      })),
+    [positions]
+  )
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(buildBaseEdges())
+
+  // Update nodes based on statuses
   useEffect(() => {
     setNodes((nds) =>
-      nds.map((n) => ({
-        ...n,
-        data: {
-          ...(n.data as unknown as StepData),
-          status: statuses[n.id] ?? 'pending',
-          duration: durations[n.id],
-          result: results[n.id],
-          revealed: revealed.has(n.id),
-          selected: selectedNode === n.id,
-        } satisfies StepData,
-      })),
-    )
+      nds.map((node) => {
+        const status = statuses[node.id] || 'pending'
+        const duration = durations[node.id]
+        const result = results[node.id]
+        const revealed = revealedIds.has(node.id)
+        const selected = selectedNode === node.id
 
-    setEdges((eds) =>
-      eds.map((e) => {
-        const sourceStatus = statuses[e.source] ?? 'pending'
-        const color = STATUS_COLORS[sourceStatus]
-        const shown = revealed.has(e.id)
-        const animated = sourceStatus === 'running'
         return {
-          ...e,
+          ...node,
+          data: {
+            ...node.data,
+            status,
+            duration,
+            result,
+            revealed,
+            selected,
+          },
+        }
+      })
+    )
+  }, [statuses, durations, results, revealedIds, selectedNode, setNodes])
+
+  // Update edges based on source node status
+  useEffect(() => {
+    setEdges((eds) =>
+      eds.map((edge) => {
+        const sourceStatus = statuses[edge.source] || 'pending'
+        const revealed = revealedIds.has(edge.id)
+        const color = STATUS_COLORS[sourceStatus]
+        const animated = sourceStatus === 'running'
+
+        return {
+          ...edge,
           animated,
-          className: edgeClass(sourceStatus, shown, animated),
           style: {
-            ...e.style,
+            ...edge.style,
             stroke: color,
-            opacity: shown ? 1 : 0,
+            opacity: revealed ? 1 : 0,
           },
           markerEnd: {
-            ...(e.markerEnd as object),
+            ...edge.markerEnd,
             color,
-          } as Edge['markerEnd'],
+          },
         }
-      }),
+      })
     )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statuses, durations, results, revealed, selectedNode])
+  }, [statuses, revealedIds, setEdges])
 
-  const handleNodeClick = (_: unknown, node: Node) => onSelect(node.id)
-  const handlePaneClick = () => onSelect(null)
-  const handleDragStop = () => {
-    try {
-      localStorage.setItem(
-        `ds-pos-${runId}`,
-        JSON.stringify(Object.fromEntries(nodes.map((n) => [n.id, n.position]))),
-      )
-    } catch {
-      /* storage full/unavailable — positions stay session-only */
+  // Add retry edge if citation is being refined
+  useEffect(() => {
+    if (retry === 'active') {
+      const retryEdge: Edge = {
+        id: 'e-retry-citation',
+        source: 'critic_aggregator',
+        target: 'citation_tracer',
+        type: 'smoothstep',
+        animated: true,
+        style: {
+          stroke: STATUS_COLORS.running,
+          strokeWidth: 2,
+          strokeDasharray: '5,5',
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: STATUS_COLORS.running,
+        },
+      }
+      setEdges((eds) => {
+        if (eds.some((e) => e.id === 'e-retry-citation')) return eds
+        return [...eds, retryEdge]
+      })
     }
-  }
-
-  const retryEdge: Edge | null = useMemo(() => {
-    if (retry === 'none') return null
-    return {
-      id: 'e-retry',
-      source: 'critic_aggregator',
-      target: 'citation_tracer',
-      type: 'smoothstep',
-      animated: retry === 'active',
-      className: retry === 'active' ? 'edge-glow-cyan' : 'edge-glow-emerald',
-      style: {
-        stroke: retry === 'active' ? '#22d3ee' : '#34d399',
-        strokeWidth: 1.8,
-        strokeDasharray: retry === 'active' ? undefined : '5 5',
-        opacity: 0.9,
-      },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        width: 18,
-        height: 18,
-        color: retry === 'active' ? '#22d3ee' : '#34d399',
-      },
-    }
-  }, [retry])
+  }, [retry, setEdges])
 
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={retryEdge ? [...edges, retryEdge] : edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      nodeTypes={nodeTypes}
-      onNodeClick={handleNodeClick}
-      onPaneClick={handlePaneClick}
-      onNodeDragStop={handleDragStop}
-      fitView
-      fitViewOptions={{ padding: 0.2 }}
-      minZoom={0.4}
-      maxZoom={1.35}
-      nodesConnectable={false}
-      proOptions={{ hideAttribution: true }}
-      className="h-full w-full"
-    >
-      <Background color="rgba(148, 163, 184, 0.35)" gap={30} size={1.5} variant={BackgroundVariant.Dots} />
-      <Controls position="bottom-left" showInteractive={false} />
-    </ReactFlow>
+    <div className="h-full w-full" style={{ background: '#0d0f12' }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        onNodeClick={(_, node) => onSelect(node.id)}
+        onPaneClick={() => onSelect(null)}
+        fitView
+        minZoom={0.5}
+        maxZoom={1.5}
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1}
+          color="rgba(255, 255, 255, 0.05)"
+        />
+        <Controls
+          style={{
+            background: '#14171b',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '8px',
+          }}
+        />
+      </ReactFlow>
+    </div>
   )
 }

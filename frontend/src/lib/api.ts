@@ -39,11 +39,21 @@ export function openAuditStream(
   runId: string,
   onEvent: (event: SSEEvent) => void,
   onError: () => void,
+  onReconnecting?: () => void,
+  onReconnected?: () => void,
 ): () => void {
   const source = new EventSource(`${BASE}/audit/${runId}/stream`)
   const close = () => source.close()
+  let reconnecting = false
+
   source.addEventListener('progress', (e) => {
     try {
+      // If we were reconnecting and got data, we're back
+      if (reconnecting) {
+        reconnecting = false
+        onReconnected?.()
+      }
+
       const event = JSON.parse((e as MessageEvent).data) as SSEEvent
       onEvent(event)
       // Terminal events — the server closes the stream now, so stop here
@@ -53,13 +63,21 @@ export function openAuditStream(
       // ignore malformed frames
     }
   })
+
   source.onerror = () => {
-    // Transient drops auto-reconnect (the server replays buffered events),
-    // so stay quiet unless the connection is truly unrecoverable.
-    if (source.readyState === EventSource.CLOSED) {
+    // EventSource.CONNECTING means auto-reconnect is in progress
+    if (source.readyState === EventSource.CONNECTING) {
+      if (!reconnecting) {
+        reconnecting = true
+        onReconnecting?.()
+      }
+    }
+    // EventSource.CLOSED means the connection is permanently dead
+    else if (source.readyState === EventSource.CLOSED) {
       onError()
       close()
     }
   }
+
   return close
 }
