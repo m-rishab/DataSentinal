@@ -36,10 +36,21 @@ SENSITIVE_DATA_HINTS = [
     "geolocation", "health", "clinical",
 ]
 
-OPEN_LICENSES = {
-    "cc0", "public domain", "mit", "apache", "apache-2.0", "bsd",
-    "cc by 4.0", "cc-by-4.0", "cc by", "odc-by", "odc-pddl", "pddl",
-}
+OPEN_LICENSE_TOKENS = (
+    "cc0", "public domain", "mit", "apache", "bsd",
+    "cc by", "cc-by", "cc by-sa", "cc-by-sa", "cc0-1.0",
+    "open database", "odc-by", "odc-pddl", "pddl", "dbcl",
+)
+
+
+def _is_open_license(license_name: str) -> bool:
+    text = (license_name or "").strip().lower()
+    if not text or text in ("unknown", "other"):
+        return False
+    # Non-commercial / no-derivatives variants are NOT open for reuse.
+    if re.search(r"[\- ]nc(?:[\- ]|-?4\.0)?|non-?commercial|[\- ]nd(?:[\- ]|-?4\.0)?", text):
+        return False
+    return any(token in text for token in OPEN_LICENSE_TOKENS)
 
 JSON_ONLY = (
     "You are a data-provenance auditing agent. "
@@ -227,7 +238,7 @@ def _heuristic_consent_flags(meta: dict) -> list[dict]:
                             "reuse and redistribution terms are undefined.",
             }
         )
-    elif license_name.lower() not in OPEN_LICENSES:
+    elif not _is_open_license(license_name):
         flags.append(
             {
                 "finding": f"License '{license_name}' is not a standard open license",
@@ -557,6 +568,7 @@ async def duplication_agent(state: dict) -> dict:
         "description": (meta.get("description") or "")[:1500],
         "files": (meta.get("files") or [])[:30],
         "tags": meta.get("tags") or [],
+        "license": meta.get("license"),
     }
 
     try:
@@ -566,11 +578,16 @@ async def duplication_agent(state: dict) -> dict:
             system_prompt=(
                 JSON_ONLY
                 + ' Schema: {"flags": [{"finding": str, "severity": "info"|"low"|"medium"|"high"|"critical", "evidence": str}]}. '
-                "Assess whether this Kaggle dataset looks like an unoriginal copy: "
+                "Assess whether this dataset looks like an unoriginal copy: "
                 "(1) boilerplate or scraped-looking descriptions, (2) filenames that "
                 "resemble raw exports from another source, (3) signals it duplicates a "
-                "well-known existing dataset without attribution. Cite concrete textual "
-                "evidence for every flag. Return {\"flags\": []} if it looks original."
+                "well-known existing dataset. A mirror of a well-known benchmark is NOT "
+                "an originality violation when its declared license permits redistribution "
+                "(e.g. CC0, MIT, Apache-2.0, CC-BY-SA) and it is hosted by the standard "
+                "organization account. Only flag duplication when attribution is missing "
+                "or the declared license contradicts the copied source. Cite concrete "
+                "textual/removal evidence for every flag. Return {\"flags\": []} if it "
+                "looks original."
             ),
             user_prompt=json.dumps(payload, ensure_ascii=False),
             fallback=None,
@@ -618,37 +635,9 @@ async def related_work_agent(state: dict) -> dict:
         evidence.append("Related-paper lookup unavailable: Semantic Scholar API error.")
 
     if not papers:
-        # Guarantee papers is never 0 by providing realistic fallbacks if APIs are blocked/rate-limited
-        papers = [
-            {
-                "title": "A GenAI-Based Adaptive Tutoring and Intelligent Assessment Framework for Personalized Learning",
-                "year": 2024,
-                "venue": "Int. J. AI in Education",
-                "citation_count": 8,
-                "url": "https://www.semanticscholar.org/paper/example-genai-tutoring/1",
-                "doi": "10.1007/s40593-024-00399-x",
-                "s2_id": "rec_example1",
-            },
-            {
-                "title": "Harnessing AI and chatbots to develop an interactive learning activity: student perceptions and outcomes",
-                "year": 2023,
-                "venue": "J. Computer Assisted Learning",
-                "citation_count": 15,
-                "url": "https://www.semanticscholar.org/paper/example-chatbots-interactive/2",
-                "doi": "10.1111/jcal.12888",
-                "s2_id": "rec_example2",
-            },
-            {
-                "title": "Deep Learning for Iris Recognition: A Survey",
-                "year": 2020,
-                "venue": "IEEE Access",
-                "citation_count": 112,
-                "url": "https://www.semanticscholar.org/paper/Deep-Learning-for-Iris-Recognition%3A-A-Survey/example4",
-                "doi": "10.1109/ACCESS.2020.example",
-                "s2_id": "rec_example3",
-            }
-        ]
-        evidence.append("Related papers set via local fallbacks.")
+        # NEVER fabricate papers when lookups fail or return nothing. An empty
+        # collection is honest evidence; the UI renders it as such.
+        evidence.append("No related papers retrieved (Semantic Scholar returned nothing for this dataset).")
 
     alternatives = await asyncio.to_thread(dataset_search.find_alternatives, domain_query, 5)
     evidence.append(

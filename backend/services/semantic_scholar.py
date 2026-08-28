@@ -160,37 +160,11 @@ def recommend_papers(seed_paper_id: str, limit: int = 6) -> list[dict[str, Any]]
                 "fields": "title,year,venue,citationCount,url,externalIds",
             },
         )
-    except SemanticScholarError as exc:
-        # Fallback to realistic/classic related papers if Semantic Scholar is down or rate-limited.
-        return [
-            {
-                "title": "A GenAI-Based Adaptive Tutoring and Intelligent Assessment Framework for Personalized Learning",
-                "year": 2024,
-                "venue": "Int. J. AI in Education",
-                "citation_count": 8,
-                "url": "https://www.semanticscholar.org/paper/example-genai-tutoring/1",
-                "doi": "10.1007/s40593-024-00399-x",
-                "s2_id": "rec_example1",
-            },
-            {
-                "title": "Harnessing AI and chatbots to develop an interactive learning activity: student perceptions and outcomes",
-                "year": 2023,
-                "venue": "J. Computer Assisted Learning",
-                "citation_count": 15,
-                "url": "https://www.semanticscholar.org/paper/example-chatbots-interactive/2",
-                "doi": "10.1111/jcal.12888",
-                "s2_id": "rec_example2",
-            },
-            {
-                "title": "Deep Learning for Iris Recognition: A Survey",
-                "year": 2020,
-                "venue": "IEEE Access",
-                "citation_count": 112,
-                "url": "https://www.semanticscholar.org/paper/Deep-Learning-for-Iris-Recognition%3A-A-Survey/example4",
-                "doi": "10.1109/ACCESS.2020.example",
-                "s2_id": "rec_example3",
-            }
-        ]
+    except SemanticScholarError:
+        # NEVER fabricate papers. When the Recommendations API is down or
+        # rate-limited, return an empty list so the caller can fall back to a
+        # keyword search or honestly report that no related papers were found.
+        return []
 
     papers: list[dict[str, Any]] = []
     for paper in data.get("recommendedPapers") or []:

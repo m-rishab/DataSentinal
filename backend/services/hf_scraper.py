@@ -82,8 +82,11 @@ def scrape_huggingface_dataset(url: str) -> dict[str, Any]:
 
     license_name = None
     card = hub.get("card_data") or hub.get("cardData") or {}
-    if isinstance(card.get("license"), str):
-        license_name = card["license"]
+    lic = card.get("license")
+    if isinstance(lic, str):
+        license_name = lic
+    elif isinstance(lic, list) and lic:
+        license_name = ", ".join(str(x) for x in lic[:2])
     elif isinstance(card.get("licenses"), list) and card["licenses"]:
         license_name = ", ".join(str(x) for x in card["licenses"][:2])
 
