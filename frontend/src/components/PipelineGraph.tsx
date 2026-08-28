@@ -178,7 +178,6 @@ function StepNode({ data }: NodeProps) {
   const running = status === 'running'
   const completed = status === 'completed'
   const failed = status === 'failed'
-  const pending = status === 'pending'
 
   // Background color from design system
   const bgColor = selected ? '#1a1e23' : '#14171b'
@@ -286,7 +285,6 @@ const nodeTypes: NodeTypes = {
 /* ------------------------------------------------------------------ */
 
 export default function PipelineGraph({
-  runId,
   statuses,
   durations,
   results,
@@ -371,10 +369,14 @@ export default function PipelineGraph({
             stroke: color,
             opacity: revealed ? 1 : 0,
           },
-          markerEnd: {
-            ...edge.markerEnd,
-            color,
-          },
+          markerEnd: edge.markerEnd
+            ? {
+                type: MarkerType.ArrowClosed,
+                width: 20,
+                height: 20,
+                color,
+              }
+            : undefined,
         }
       })
     )

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react'
+import type { DataProfile } from '../lib/types'
 
 interface ColumnInfo {
   name: string
@@ -15,22 +16,7 @@ interface ColumnInfo {
 
 interface SchemaTableProps {
   columns: string[]
-  dataProfile: {
-    rows_profiled?: number
-    columns_profiled?: string[]
-    numeric_summary?: Array<{
-      column: string
-      min: number
-      max: number
-      mean: number
-      missing_pct: number
-    }>
-    class_balance?: {
-      column: string
-      values: Array<{ value: string; count: number }>
-    }
-    missing_total_pct?: number
-  } | null
+  dataProfile: DataProfile | null
   isPartial?: boolean
 }
 

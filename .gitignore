@@ -1,6 +1,8 @@
 myenv/
 frontend/node_modules/
 frontend/dist/
+frontend/tsconfig.tsbuildinfo
+frontend/*.tsbuildinfo
 __pycache__/
 *.pyc
 .env

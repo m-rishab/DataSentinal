@@ -351,7 +351,7 @@ export default function ReportView({
             {effectiveColumns.length > 0 && (
               <SchemaTable
                 columns={effectiveColumns}
-                dataProfile={report.data_profile}
+                dataProfile={report.data_profile ?? null}
                 isPartial={
                   report.data_profile?.rows_profiled != null &&
                   report.data_profile.rows_profiled < 1000
