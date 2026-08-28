@@ -111,10 +111,24 @@ const NODE_W = 224
 const NODE_H = 118
 
 const STATUS_COLORS: Record<NodeStatus, string> = {
-  pending: '#cbd5e1',
-  running: '#06b6d4',
-  completed: '#10b981',
-  failed: '#f43f5e',
+  pending: '#475569',
+  running: '#22d3ee',
+  completed: '#34d399',
+  failed: '#fb7185',
+}
+
+/* Neon halo applied to edges once the flow reaches them. */
+function edgeClass(status: NodeStatus, revealed: boolean, animated: boolean) {
+  const glow =
+    status === 'running'
+      ? 'edge-glow-cyan'
+      : status === 'completed'
+        ? 'edge-glow-emerald'
+        : status === 'failed'
+          ? 'edge-glow-rose'
+          : ''
+  const draw = revealed && !animated ? 'edge-draw' : ''
+  return [glow, draw].filter(Boolean).join(' ')
 }
 
 function parseResult(result?: string): { text: string; amber: boolean } | null {
@@ -162,6 +176,7 @@ function buildBaseEdges(): Edge[] {
     target: c.to,
     type: 'smoothstep',
     animated: false,
+    className: '',
     style: {
       stroke: STATUS_COLORS.pending,
       strokeWidth: 2,
@@ -187,45 +202,47 @@ function StepNode({ data }: NodeProps) {
   const completed = status === 'completed'
   const failed = status === 'failed'
 
-  let border = 'border-slate-200 bg-white'
-  let kickerCls = 'text-slate-400'
-  let titleCls = 'text-slate-900'
+  let glow: string
+  let border = 'border-slate-700/60'
+  let kickerCls = 'text-slate-500'
   let iconCls = 'text-slate-400'
-  let dotCls = 'bg-slate-300'
+  let dotCls = 'bg-slate-500'
   if (running) {
-    border = 'border-cyan-400 bg-cyan-50'
-    kickerCls = 'text-cyan-600'
-    titleCls = 'text-cyan-900'
-    iconCls = 'text-cyan-600'
-    dotCls = 'bg-cyan-500'
+    glow = 'node-glow-running'
+    border = 'border-cyan-400/60'
+    kickerCls = 'text-cyan-300'
+    iconCls = 'text-cyan-300'
+    dotCls = 'bg-cyan-400'
   } else if (completed) {
-    border = 'border-emerald-300 bg-emerald-50'
-    kickerCls = 'text-emerald-600'
-    titleCls = 'text-emerald-900'
-    iconCls = 'text-emerald-600'
-    dotCls = 'bg-emerald-500'
+    glow = 'node-glow-completed'
+    border = 'border-emerald-400/40'
+    kickerCls = 'text-emerald-300'
+    iconCls = 'text-emerald-300'
+    dotCls = 'bg-emerald-400'
   } else if (failed) {
-    border = 'border-rose-300 bg-rose-50'
-    kickerCls = 'text-rose-500'
-    titleCls = 'text-rose-900'
-    iconCls = 'text-rose-500'
-    dotCls = 'bg-rose-500'
+    glow = 'node-glow-failed'
+    border = 'border-rose-400/50'
+    kickerCls = 'text-rose-300'
+    iconCls = 'text-rose-300'
+    dotCls = 'bg-rose-400'
+  } else {
+    glow = 'node-glow-pending'
   }
 
   const badge = parseResult(result)
 
   return (
     <div
-      className={`relative min-h-full rounded-[14px] border px-3.5 pb-2.5 pt-3 shadow-[0_4px_14px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_26px_rgba(15,23,42,0.14)] ${
+      className={`relative min-h-full rounded-[14px] border px-3.5 pb-2.5 pt-3 transition-all duration-300 hover:-translate-y-0.5 ${glow} ${
         running ? 'node-running' : ''
-      } ${selected ? 'ring-2 ring-cyan-500/40' : ''} ${border}`}
+      } ${selected ? 'ring-2 ring-cyan-400/50' : ''} ${border}`}
       style={{ opacity: revealed ? 1 : 0, transform: revealed ? undefined : 'scale(0.85)' }}
     >
       <Handle type="target" position={Position.Left} className="op-node-handle" />
 
       <div className="flex items-start gap-2.5">
         <span
-          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/70 shadow-sm ring-1 ring-slate-900/5 ${iconCls}`}
+          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/5 ring-1 ring-white/10 ${iconCls}`}
         >
           <Icon size={15} strokeWidth={2} />
         </span>
@@ -235,7 +252,7 @@ function StepNode({ data }: NodeProps) {
             {kicker}
             {duration ? ` · ${(Math.round(duration / 100) / 10).toFixed(1)}s` : ''}
           </span>
-          <span className={`mt-0.5 block truncate text-[13.5px] font-bold leading-tight ${titleCls}`}>
+          <span className="mt-0.5 block truncate text-[13.5px] font-bold leading-tight text-slate-50">
             {label}
           </span>
         </span>
@@ -246,14 +263,16 @@ function StepNode({ data }: NodeProps) {
             <span className={`relative inline-flex h-2 w-2 rounded-full ${dotCls}`} />
           </span>
         )}
-        {!running && <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${dotCls}`} />}
+        {!running && <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${dotCls}`} />}
       </div>
 
       {badge && !/^0\s*flag/i.test(badge.text) && (
-        <div className="mt-2 flex items-center gap-1.5 border-t border-slate-900/5 pt-1.5">
+        <div className="mt-2 flex items-center gap-1.5 border-t border-white/5 pt-1.5">
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold ${
-              badge.amber ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'
+              badge.amber
+                ? 'bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25'
+                : 'bg-slate-400/10 text-slate-300 ring-1 ring-white/10'
             }`}
           >
             {badge.text}
@@ -350,9 +369,11 @@ export default function PipelineGraph({
         const sourceStatus = statuses[e.source] ?? 'pending'
         const color = STATUS_COLORS[sourceStatus]
         const shown = revealed.has(e.id)
+        const animated = sourceStatus === 'running'
         return {
           ...e,
-          animated: sourceStatus === 'running',
+          animated,
+          className: edgeClass(sourceStatus, shown, animated),
           style: {
             ...e.style,
             stroke: color,
@@ -389,8 +410,9 @@ export default function PipelineGraph({
       target: 'citation_tracer',
       type: 'smoothstep',
       animated: retry === 'active',
+      className: retry === 'active' ? 'edge-glow-cyan' : 'edge-glow-emerald',
       style: {
-        stroke: retry === 'active' ? '#06b6d4' : '#34d399',
+        stroke: retry === 'active' ? '#22d3ee' : '#34d399',
         strokeWidth: 1.8,
         strokeDasharray: retry === 'active' ? undefined : '5 5',
         opacity: 0.9,
@@ -399,7 +421,7 @@ export default function PipelineGraph({
         type: MarkerType.ArrowClosed,
         width: 18,
         height: 18,
-        color: retry === 'active' ? '#06b6d4' : '#34d399',
+        color: retry === 'active' ? '#22d3ee' : '#34d399',
       },
     }
   }, [retry])
@@ -422,7 +444,7 @@ export default function PipelineGraph({
       proOptions={{ hideAttribution: true }}
       className="h-full w-full"
     >
-      <Background color="#cbd5e1" gap={30} size={1} variant={BackgroundVariant.Dots} />
+      <Background color="rgba(148, 163, 184, 0.35)" gap={30} size={1.5} variant={BackgroundVariant.Dots} />
       <Controls position="bottom-left" showInteractive={false} />
     </ReactFlow>
   )

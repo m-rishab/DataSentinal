@@ -11,10 +11,10 @@ function timeAgo(iso: string): string {
 }
 
 function scoreTone(score: number | null): { cls: string; text: string } {
-  if (score == null) return { cls: 'bg-slate-100 text-slate-400', text: '—' }
-  if (score < 40) return { cls: 'bg-rose-50 text-rose-600', text: String(score) }
-  if (score <= 70) return { cls: 'bg-amber-50 text-amber-600', text: String(score) }
-  return { cls: 'bg-emerald-50 text-emerald-600', text: String(score) }
+  if (score == null) return { cls: 'bg-slate-400/10 text-slate-400', text: '—' }
+  if (score < 40) return { cls: 'bg-rose-400/15 text-rose-300', text: String(score) }
+  if (score <= 70) return { cls: 'bg-amber-400/15 text-amber-300', text: String(score) }
+  return { cls: 'bg-emerald-400/15 text-emerald-300', text: String(score) }
 }
 
 export default function RunHistory({
@@ -34,15 +34,15 @@ export default function RunHistory({
         <h2 className="text-[13px] font-bold uppercase tracking-[0.14em] text-slate-500">
           Recent Audits
         </h2>
-        <span className="font-mono text-[11px] text-slate-400">{runs.length} stored</span>
+        <span className="font-mono text-[11px] text-slate-500">{runs.length} stored</span>
       </div>
 
       {runs.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-xs font-medium text-slate-400">
+        <p className="rounded-xl border border-dashed border-slate-700 px-4 py-6 text-center text-xs font-medium text-slate-500">
           No audits yet — run one above and it will appear here.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.05)]">
+        <div className="overflow-hidden rounded-xl border border-slate-800 bg-[#0c1320]/80 backdrop-blur shadow-[0_4px_18px_rgba(2,6,16,0.5)]">
           {runs.map((run, i) => {
             const tone = scoreTone(run.trust_score)
             return (
@@ -50,18 +50,18 @@ export default function RunHistory({
                 key={run.run_id}
                 type="button"
                 onClick={() => onOpen(run.run_id, run.url)}
-                className={`flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-slate-50 ${
-                  i > 0 ? 'border-t border-slate-100' : ''
+                className={`flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-white/[0.04] ${
+                  i > 0 ? 'border-t border-white/5' : ''
                 }`}
               >
                 <span className={`flex h-8 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-black ${tone.cls}`}>
                   {tone.text}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-semibold text-slate-800">
+                  <span className="block truncate text-[13px] font-semibold text-slate-100">
                     {run.title || run.url}
                   </span>
-                  <span className="block truncate font-mono text-[10.5px] text-slate-400">
+                  <span className="block truncate font-mono text-[10.5px] text-slate-500">
                     {run.url}
                   </span>
                 </span>
@@ -69,14 +69,14 @@ export default function RunHistory({
                   <span
                     className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
                       run.gate.passed
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-rose-200 bg-rose-50 text-rose-600'
+                        ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                        : 'border-rose-400/30 bg-rose-400/10 text-rose-300'
                     }`}
                   >
                     gate {run.gate.passed ? 'pass' : 'fail'}
                   </span>
                 )}
-                <span className="w-16 shrink-0 text-right font-mono text-[10.5px] text-slate-400">
+                <span className="w-16 shrink-0 text-right font-mono text-[10.5px] text-slate-500">
                   {timeAgo(run.created_at)}
                 </span>
               </button>

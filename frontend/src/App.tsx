@@ -60,7 +60,7 @@ export default function App() {
 
   return (
     <div
-      className={`flex flex-col bg-white ${
+      className={`flex flex-col bg-[#070b14] ${
         lockViewport ? 'h-screen overflow-hidden' : 'min-h-screen'
       }`}
     >

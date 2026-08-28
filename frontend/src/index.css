@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0e7490;
+  --color-primary: #22d3ee;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background: #ffffff;
-  color: #111827;
+  background: #070b14;
+  color: #cbd5e1;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -21,30 +21,44 @@ body {
 }
 
 .font-display {
-  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.01em;
 }
 
 ::selection {
-  background: rgba(14, 116, 144, 0.18);
+  background: rgba(34, 211, 238, 0.28);
 }
 
-/* Slim, unobtrusive scrollbars */
+/* autofill fix so the URL input doesn't flash yellow-on-dark */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e2e8f0;
+  -webkit-box-shadow: 0 0 0 1000px #0c1320 inset;
+  caret-color: #e2e8f0;
+  transition: background-color 9999s ease-out;
+}
+
+/* Slim scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+  scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.35);
+  background: rgba(100, 116, 139, 0.45);
   border-radius: 999px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -63,8 +77,6 @@ body {
   animation: nodePop 0.48s cubic-bezier(0.22, 1.2, 0.36, 1) both;
 }
 
-/* Draw each edge exactly once — the base path never changes after mount,
-   so status updates can't re-trigger this animation (no re-link flicker). */
 @keyframes drawEdge {
   from { stroke-dashoffset: 1; opacity: 0; }
   to { stroke-dashoffset: 0; opacity: 1; }
@@ -75,7 +87,6 @@ body {
   animation: drawEdge 0.6s ease-out forwards;
 }
 
-/* Continuous signal flow along active edges */
 @keyframes dashFlow {
   to { stroke-dashoffset: -28; }
 }
@@ -84,8 +95,6 @@ body {
   animation: dashFlow 0.9s linear infinite;
 }
 
-/* Retry-loop edge: gentle breathing pulse instead of marching dashes —
-   dashes racing around the long arc read as flicker/blinking. */
 @keyframes retryPulse {
   0%, 100% { opacity: 0.95; }
   50% { opacity: 0.4; }
@@ -94,10 +103,45 @@ body {
   animation: retryPulse 1.6s ease-in-out infinite;
 }
 
-/* Soft halo behind the currently-running nodes */
+/* Persistent neon halo on the graph nodes, keyed by status. The pulsing
+   runHalo below layers on top of the static glow for the active node. */
+.node-glow-pending {
+  box-shadow:
+    0 0 0 1px rgba(148, 163, 184, 0.14),
+    0 8px 24px rgba(2, 6, 16, 0.6);
+}
+.node-glow-running {
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.45),
+    0 0 18px rgba(34, 211, 238, 0.35),
+    0 0 46px rgba(34, 211, 238, 0.16);
+}
+.node-glow-completed {
+  box-shadow:
+    0 0 0 1px rgba(52, 211, 153, 0.32),
+    0 0 16px rgba(52, 211, 153, 0.30),
+    0 0 42px rgba(52, 211, 153, 0.13);
+}
+.node-glow-failed {
+  box-shadow:
+    0 0 0 1px rgba(251, 113, 133, 0.45),
+    0 0 16px rgba(251, 113, 133, 0.32),
+    0 0 34px rgba(251, 113, 133, 0.14);
+}
+
 @keyframes runHalo {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.16), 0 2px 12px rgba(6, 182, 212, 0.18); }
-  50% { box-shadow: 0 0 0 6px rgba(6, 182, 212, 0.26), 0 4px 20px rgba(6, 182, 212, 0.30); }
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(34, 211, 238, 0.45),
+      0 0 22px rgba(34, 211, 238, 0.42),
+      0 0 60px rgba(34, 211, 238, 0.20);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(34, 211, 238, 0.65),
+      0 0 34px rgba(34, 211, 238, 0.55),
+      0 0 90px rgba(34, 211, 238, 0.28);
+  }
 }
 .node-running {
   animation: runHalo 1.6s ease-in-out infinite;
@@ -111,19 +155,21 @@ body {
   animation: slideCardIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Light, minimalist canvas: white base + faint blueprint grid */
+/* ------------------------------------------------------------------ */
+/* Graph canvas — dark cockpit with a faint grid + aurora glows        */
+/* ------------------------------------------------------------------ */
+
 .graph-canvas {
-  background-color: #ffffff;
+  background-color: #070b14;
   background-image:
-    radial-gradient(ellipse 70% 55% at 18% 8%, rgba(6, 182, 212, 0.06), transparent 55%),
-    radial-gradient(ellipse 60% 50% at 92% 92%, rgba(99, 102, 241, 0.05), transparent 50%),
-    linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px);
-  background-size: auto, auto, 30px 30px, 30px 30px;
+    radial-gradient(ellipse 55% 45% at 22% 12%, rgba(34, 211, 238, 0.09), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 85% 88%, rgba(129, 140, 248, 0.08), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 60% 50%, rgba(45, 212, 191, 0.04), transparent 60%),
+    linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+  background-size: auto, auto, auto, 30px 30px, 30px 30px;
 }
 
-/* Hover previews fade in after a short delay, so sweeping the mouse
-   across the graph doesn't flash cards everywhere. */
 @keyframes previewIn {
   from { opacity: 0; transform: translate(0, calc(-50% + 4px)); }
   to { opacity: 1; transform: translate(0, -50%); }
@@ -133,12 +179,14 @@ body {
   animation: previewIn 0.16s ease-out 0.18s forwards;
 }
 
-/* ---- React Flow customisations ---- */
+/* ------------------------------------------------------------------ */
+/* React Flow dark customisations                                      */
+/* ------------------------------------------------------------------ */
+
 .react-flow {
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Our node cards own their chrome; RF wrapper stays transparent. */
 .react-flow__node {
   border: none;
   background: transparent;
@@ -150,7 +198,6 @@ body {
   cursor: grabbing;
 }
 
-/* Handles are invisible anchors pinned to each edge's midpoint. */
 .op-node-handle {
   position: absolute;
   top: 50%;
@@ -164,33 +211,75 @@ body {
   pointer-events: none;
 }
 
-/* Edges sit beneath nodes but stay clickable so the animated dash reads. */
 .react-flow__edge {
   cursor: default;
 }
 
-/* Slim, quiet zoom controls in the corner. */
+/* Neon halo on active/completed edges so the flow reads like a circuit. */
+.edge-glow-cyan path {
+  filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.85));
+}
+.edge-glow-emerald path {
+  filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.75));
+}
+.edge-glow-rose path {
+  filter: drop-shadow(0 0 4px rgba(251, 113, 133, 0.75));
+}
+
+/* Slim, quiet zoom controls tuned for the dark canvas. */
 .react-flow__controls {
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 18px rgba(2, 6, 16, 0.6);
 }
 .react-flow__controls-button {
   width: 26px;
   height: 26px;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
+  background: #0c1320;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
   box-sizing: content-box;
 }
 .react-flow__controls-button:hover {
-  background: #f8fafc;
+  background: #131c2c;
 }
 .react-flow__controls-button svg {
-  fill: #475569;
+  fill: #94a3b8;
 }
 
-/* Print / PDF: show only the report, cleanly on white. */
+/* Right-pane scrollbars inside graph detail drawer keep native styling. */
+
+/* ------------------------------------------------------------------ */
+/* Shared dark-surface utilities                                       */
+/* ------------------------------------------------------------------ */
+
+/* Frosted dark panel used across cards, headers and the legend. */
+.glass {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.09), rgba(148, 163, 184, 0.035));
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  backdrop-filter: blur(12px);
+}
+
+/* Gradient headline text (cyan → teal → violet). */
+.text-glow {
+  background: linear-gradient(92deg, #67e8f9 0%, #2dd4bf 45%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes orbDrift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(14px, -18px, 0) scale(1.08); }
+}
+.orb-drift {
+  animation: orbDrift 9s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Print / PDF: flatten the dark theme to clean white output.          */
+/* ------------------------------------------------------------------ */
+
 @media print {
   body * {
     visibility: hidden;
@@ -206,6 +295,13 @@ body {
     width: 100%;
     padding: 8px;
     animation: none !important;
+  }
+  .print-area,
+  .print-area * {
+    color: #0f172a !important;
+    background-color: transparent !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: none !important;
   }
   .no-print,
   header,

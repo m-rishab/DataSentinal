@@ -21,7 +21,7 @@ export default function AuditForm({ onStart }: { onStart: (url: string, runId: s
     <div id="audit" className="w-full">
       <form
         onSubmit={submit}
-        className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_14px_44px_rgba(15,23,42,0.08)] transition-shadow focus-within:border-cyan-400 focus-within:shadow-[0_14px_48px_rgba(6,182,212,0.16)] sm:flex-row sm:items-center"
+        className="flex flex-col gap-2 rounded-2xl border border-slate-800 bg-[#0a0f1a]/90 p-2 shadow-[0_14px_44px_rgba(2,6,16,0.5)] backdrop-blur transition-all focus-within:border-cyan-400/60 focus-within:shadow-[0_14px_48px_rgba(34,211,238,0.16)] sm:flex-row sm:items-center"
       >
         <input
           type="url"
@@ -29,25 +29,25 @@ export default function AuditForm({ onStart }: { onStart: (url: string, runId: s
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.kaggle.com/datasets/owner/dataset-slug"
-          className="min-w-0 flex-1 rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none"
+          className="min-w-0 flex-1 rounded-xl bg-transparent px-4 py-3 text-sm font-medium text-slate-100 placeholder:text-slate-500 outline-none"
         />
         <button
           type="submit"
           disabled={mutation.isPending}
-          className="shrink-0 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-500 px-6 py-3 text-sm font-bold text-white shadow-[0_6px_18px_rgba(6,182,212,0.30)] transition-all hover:brightness-110 hover:shadow-[0_8px_24px_rgba(6,182,212,0.40)] active:scale-[0.98] disabled:opacity-50 disabled:hover:brightness-100"
+          className="shrink-0 rounded-xl bg-gradient-to-r from-cyan-500 to-teal-400 px-6 py-3 text-sm font-bold text-[#04121c] shadow-[0_6px_18px_rgba(34,211,238,0.35)] transition-all hover:brightness-110 hover:shadow-[0_8px_26px_rgba(34,211,238,0.5)] active:scale-[0.98] disabled:opacity-50 disabled:hover:brightness-100"
         >
           {mutation.isPending ? 'Starting…' : 'Run Audit'}
         </button>
       </form>
 
       {mutation.isError && (
-        <p className="mt-2 text-sm font-semibold text-rose-700">{(mutation.error as Error).message}</p>
+        <p className="mt-2 text-sm font-semibold text-rose-300">{(mutation.error as Error).message}</p>
       )}
 
       <button
         type="button"
         onClick={() => setUrl(EXAMPLE)}
-        className="mt-2 text-[12px] font-semibold text-[#0e7490] underline decoration-dotted underline-offset-2 hover:text-[#0f5f75]"
+        className="mt-2 text-[12px] font-semibold text-cyan-300 underline decoration-dotted underline-offset-2 hover:text-cyan-200"
       >
         Use an example dataset URL
       </button>

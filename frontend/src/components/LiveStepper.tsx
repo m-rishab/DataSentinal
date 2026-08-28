@@ -290,35 +290,35 @@ export default function LiveStepper({
   const columnCount = meta?.columns?.length ?? 0
 
   return (
-    <div className="flex h-full min-h-0 bg-white">
+    <div className="flex h-full min-h-0 bg-[#070b14]">
       {/* Left: header + live dataset strip + graph canvas */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-2">
           <div className="flex items-center gap-3">
             <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-70" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-70" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-cyan-400" />
             </span>
             <div>
-              <p className="font-display text-[13px] font-semibold uppercase tracking-[0.14em] text-slate-800">
+              <p className="font-display text-[13px] font-semibold uppercase tracking-[0.14em] text-slate-100">
                 {graphReady ? 'Live audit' : 'Building workflow'}
               </p>
-              <p className="mt-0.5 font-mono text-[11px] text-slate-400">{runId}</p>
+              <p className="mt-0.5 font-mono text-[11px] text-slate-500">{runId}</p>
             </div>
-            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 shadow-sm">
+            <span className="rounded-full border border-slate-800 bg-[#0c1320] px-2.5 py-1 text-[11px] font-semibold text-slate-300">
               {doneCount}/{STEPS.length} steps
               {runningCount > 0 ? ` · ${runningCount} running` : ''}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <p className="hidden text-[12px] font-medium text-slate-400 md:block">
+            <p className="hidden text-[12px] font-medium text-slate-500 md:block">
               Drag nodes to rearrange · click for details
             </p>
             {onBack && (
               <button
                 type="button"
                 onClick={onBack}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-900"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-[#0c1320] px-2.5 py-1.5 text-[11px] font-bold text-slate-300 transition-colors hover:border-slate-500 hover:text-slate-100"
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -337,7 +337,7 @@ export default function LiveStepper({
                   runId,
                 )
               }
-              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-600 shadow-sm transition-colors hover:border-slate-300 hover:text-slate-900"
+              className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-[#0c1320] px-2.5 py-1.5 text-[11px] font-bold text-slate-300 transition-colors hover:border-slate-500 hover:text-slate-100"
               title="Download a PNG snapshot of this graph"
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -351,24 +351,24 @@ export default function LiveStepper({
         {/* Live dataset snapshot: title, license, files, columns */}
         {meta && (
           <div className="shrink-0 px-5 pb-2">
-            <div className="mx-auto flex max-w-[1000px] flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-[0_2px_12px_rgba(15,23,42,0.05)] fade-in-up">
-              <span className="font-display max-w-[240px] truncate text-[13.5px] font-bold text-slate-900">
+            <div className="mx-auto flex max-w-[1000px] flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-slate-800 bg-[#0c1320]/80 px-4 py-2.5 shadow-[0_2px_12px_rgba(2,6,16,0.5)] fade-in-up">
+              <span className="font-display max-w-[240px] truncate text-[13.5px] font-bold text-slate-50">
                 {meta.title || 'Unknown dataset'}
               </span>
 
               <Metric label="License" value={meta.license || 'Not stated'} tone={meta.license ? 'ok' : 'warn'} />
 
               <span className="group relative flex items-center gap-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Files</span>
-                <span className={`text-[12px] font-bold ${fileCount > 0 ? 'text-slate-800' : 'text-amber-600'}`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Files</span>
+                <span className={`text-[12px] font-bold ${fileCount > 0 ? 'text-slate-200' : 'text-amber-400'}`}>
                   {fileCount} listed
                 </span>
                 {fileCount === 0 && (
                   <>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.2" className="cursor-help">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" strokeWidth="2.2" className="cursor-help">
                       <circle cx="12" cy="12" r="9" /><path d="M12 8h.01M12 11v5" strokeLinecap="round" />
                     </svg>
-                    <span className="normal-case tracking-normal pointer-events-none absolute bottom-full left-0 z-30 mb-1.5 hidden w-60 rounded-lg bg-slate-900 px-3 py-2 text-[11px] font-medium leading-snug text-white shadow-xl group-hover:block">
+                    <span className="normal-case tracking-normal pointer-events-none absolute bottom-full left-0 z-30 mb-1.5 hidden w-60 rounded-lg border border-slate-700 bg-[#0a0f1a] px-3 py-2 text-[11px] font-medium leading-snug text-slate-200 shadow-xl group-hover:block">
                       Kaggle did not expose a file list for this page (usually bot protection). The audit still runs on all public metadata.
                     </span>
                   </>
@@ -377,20 +377,20 @@ export default function LiveStepper({
 
               {columnCount > 0 && (
                 <span className="flex min-w-0 items-center gap-2">
-                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     Columns ({columnCount})
                   </span>
                   <span className="flex max-w-full items-center gap-1 overflow-x-auto whitespace-nowrap pb-0.5">
                     {meta.columns!.slice(0, 12).map((col) => (
                       <span
                         key={col}
-                        className="shrink-0 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-slate-600"
+                        className="shrink-0 rounded-md border border-slate-700 bg-white/[0.04] px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-slate-300"
                       >
                         {col}
                       </span>
                     ))}
                     {columnCount > 12 && (
-                      <span className="shrink-0 text-[10.5px] font-medium text-slate-400">
+                      <span className="shrink-0 text-[10.5px] font-medium text-slate-500">
                         +{columnCount - 12} more
                       </span>
                     )}
@@ -401,7 +401,7 @@ export default function LiveStepper({
           </div>
         )}
 
-        <div className="graph-canvas relative min-h-0 flex-1 border-t border-slate-100">
+        <div className="graph-canvas relative min-h-0 flex-1 border-t border-white/5">
           <PipelineGraph
             runId={runId}
             statuses={statuses}
@@ -413,18 +413,18 @@ export default function LiveStepper({
           />
 
           {/* Minimal legend */}
-          <div className="pointer-events-none absolute bottom-3 right-4 z-10 flex items-center gap-4 rounded-full border border-slate-200 bg-white/85 px-3.5 py-1.5 shadow-sm backdrop-blur">
-            <LegendDot cls="bg-slate-300" text="Waiting" />
-            <LegendDot cls="bg-cyan-500" text="Running" />
-            <LegendDot cls="bg-emerald-500" text="Completed" />
+          <div className="pointer-events-none absolute bottom-3 right-4 z-10 flex items-center gap-4 rounded-full border border-slate-800 bg-[#0a0f1a]/85 px-3.5 py-1.5 shadow-sm backdrop-blur">
+            <LegendDot cls="bg-slate-500" text="Waiting" />
+            <LegendDot cls="bg-cyan-400" text="Running" />
+            <LegendDot cls="bg-emerald-400" text="Completed" />
           </div>
 
           {failed && (
-            <div className="absolute bottom-4 left-1/2 z-20 w-[min(92%,420px)] -translate-x-1/2 rounded-xl border border-rose-200 bg-rose-50 p-4 shadow-xl">
-              <p className="text-sm font-semibold text-rose-800">{failed}</p>
+            <div className="absolute bottom-4 left-1/2 z-20 w-[min(92%,420px)] -translate-x-1/2 rounded-xl border border-rose-400/30 bg-rose-400/10 p-4 shadow-xl backdrop-blur">
+              <p className="text-sm font-semibold text-rose-200">{failed}</p>
               <button
                 onClick={onReset}
-                className="mt-3 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100"
+                className="mt-3 rounded-lg border border-rose-400/40 bg-rose-400/15 px-3 py-1.5 text-xs font-bold text-rose-200 hover:bg-rose-400/25"
               >
                 Start over
               </button>
@@ -435,30 +435,30 @@ export default function LiveStepper({
 
       {/* Right: detail drawer */}
       <div
-        className={`relative h-full shrink-0 overflow-hidden border-l border-slate-200 bg-white transition-[width] duration-500 ease-out max-md:absolute max-md:right-0 max-md:top-0 max-md:z-30 max-md:h-full max-md:shadow-2xl ${
+        className={`relative h-full shrink-0 overflow-hidden border-l border-slate-800 bg-[#0a0f1a] transition-[width] duration-500 ease-out max-md:absolute max-md:right-0 max-md:top-0 max-md:z-30 max-md:h-full max-md:shadow-2xl ${
           selected ? 'w-[min(100%,380px)]' : 'w-0'
         }`}
       >
         {selected && (
           <aside
             key={selected.node}
-            className="slide-card-in flex h-full w-[min(100%,380px)] flex-col bg-white text-slate-900"
+            className="slide-card-in flex h-full w-[min(100%,380px)] flex-col bg-[#0a0f1a] text-slate-100"
           >
-            <div className="h-1 w-full shrink-0 bg-gradient-to-r from-cyan-500 via-teal-500 to-indigo-500" />
+            <div className="h-1 w-full shrink-0 bg-gradient-to-r from-cyan-400 via-teal-400 to-indigo-400 shadow-[0_0_18px_rgba(34,211,238,0.5)]" />
 
-            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-5 py-4">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-white/5 px-5 py-4">
               <div>
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-700">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-cyan-300">
                   {selected.kicker}
                 </p>
-                <h3 className="font-display mt-1 text-[20px] font-bold leading-tight tracking-tight text-slate-900">
+                <h3 className="font-display mt-1 text-[20px] font-bold leading-tight tracking-tight text-slate-50">
                   {selected.label}
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedNode(null)}
-                className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-white/5 hover:text-slate-200"
                 aria-label="Close details"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -471,23 +471,23 @@ export default function LiveStepper({
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold ${
                   selectedStatus === 'completed'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    ? 'bg-emerald-400/10 text-emerald-300 border border-emerald-400/30'
                     : selectedStatus === 'running'
-                      ? 'bg-cyan-50 text-cyan-700 border border-cyan-200'
+                      ? 'bg-cyan-400/10 text-cyan-300 border border-cyan-400/30'
                       : selectedStatus === 'failed'
-                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                        : 'bg-slate-50 text-slate-500 border border-slate-200'
+                        ? 'bg-rose-400/10 text-rose-300 border border-rose-400/30'
+                        : 'bg-white/[0.04] text-slate-400 border border-white/10'
                 }`}
               >
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
                     selectedStatus === 'completed'
-                      ? 'bg-emerald-500'
+                      ? 'bg-emerald-400'
                       : selectedStatus === 'running'
-                        ? 'animate-pulse bg-cyan-500'
+                        ? 'animate-pulse bg-cyan-400'
                         : selectedStatus === 'failed'
-                          ? 'bg-rose-500'
-                          : 'bg-slate-300'
+                          ? 'bg-rose-400'
+                          : 'bg-slate-500'
                   }`}
                 />
                 {statusLabel(selectedStatus)}
@@ -495,7 +495,7 @@ export default function LiveStepper({
 
               <p className="mt-3 text-[12px] leading-relaxed text-slate-500">{STATUS_MEANING[selectedStatus]}</p>
 
-              <p className="mt-4 text-[14px] leading-relaxed text-slate-700">{selected.description}</p>
+              <p className="mt-4 text-[14px] leading-relaxed text-slate-300">{selected.description}</p>
 
               <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                 What this node does
@@ -504,7 +504,7 @@ export default function LiveStepper({
                 {selected.bullets.map((b) => (
                   <li
                     key={b}
-                    className="flex items-start gap-2.5 rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2 text-[13px] font-medium leading-snug text-slate-600"
+                    className="flex items-start gap-2.5 rounded-lg border border-white/5 bg-white/[0.04] px-3 py-2 text-[13px] font-medium leading-snug text-slate-300"
                   >
                     <svg
                       className="mt-0.5 shrink-0"
@@ -512,7 +512,7 @@ export default function LiveStepper({
                       height="13"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#0891b2"
+                      stroke="#22d3ee"
                       strokeWidth="3"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -533,7 +533,7 @@ export default function LiveStepper({
                     {meta.columns.map((col) => (
                       <span
                         key={col}
-                        className="rounded-md border border-slate-200 bg-white px-2 py-0.5 font-mono text-[11px] font-medium text-slate-600"
+                        className="rounded-md border border-slate-700 bg-white/[0.04] px-2 py-0.5 font-mono text-[11px] font-medium text-slate-300"
                       >
                         {col}
                       </span>
@@ -543,8 +543,8 @@ export default function LiveStepper({
               )}
 
               <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Live log</p>
-              <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="font-mono text-[12px] leading-relaxed text-slate-700">
+              <div className="mt-2 rounded-xl border border-slate-800 bg-[#05080f] p-3">
+                <p className="font-mono text-[12px] leading-relaxed text-slate-300">
                   {selectedMsg || 'Waiting for this node to run…'}
                 </p>
               </div>
@@ -560,7 +560,7 @@ function LegendDot({ cls, text }: { cls: string; text: string }) {
   return (
     <span className="flex items-center gap-1.5">
       <span className={`h-1.5 w-1.5 rounded-full ${cls}`} />
-      <span className="text-[10.5px] font-semibold text-slate-500">{text}</span>
+      <span className="text-[10.5px] font-semibold text-slate-400">{text}</span>
     </span>
   )
 }
@@ -568,10 +568,10 @@ function LegendDot({ cls, text }: { cls: string; text: string }) {
 function Metric({ label, value, tone }: { label: string; value: string; tone?: 'ok' | 'warn' }) {
   return (
     <span className="flex items-center gap-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</span>
+      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</span>
       <span
         className={`max-w-[180px] truncate text-[12px] font-bold ${
-          tone === 'warn' ? 'text-amber-600' : 'text-slate-800'
+          tone === 'warn' ? 'text-amber-400' : 'text-slate-200'
         }`}
       >
         {value}
