@@ -27,6 +27,34 @@ import requests
 
 OPENALEX = "https://api.openalex.org"
 
+
+def _load_dotenv() -> None:
+    """Load a simple project .env file without overriding real env values."""
+    candidates = (
+        os.getcwd(),
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+    )
+    for candidate in candidates:
+        path = os.path.join(candidate, ".env")
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(
+                        key.strip(), value.strip().strip('"').strip("'"),
+                    )
+        except OSError:
+            pass
+        break
+
+
+_load_dotenv()
+
 _MAILTO = (os.getenv("OPENALEX_MAILTO") or "").strip()
 
 # OpenAlex semantics are ASCII whitespace-insensitive on ?search=; avoid
