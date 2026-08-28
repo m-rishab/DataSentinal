@@ -81,6 +81,7 @@ export default function App() {
         phase={phase}
         onHome={goHome}
         onViewGraph={phase === 'report' && runId ? () => setPhase('graph') : undefined}
+        onReport={runId ? () => setPhase('report') : undefined}
       />
 
       {phase === 'landing' && (

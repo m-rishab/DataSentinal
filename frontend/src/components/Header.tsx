@@ -8,20 +8,21 @@ interface HeaderProps {
   phase: ShellPhase
   onHome: () => void
   onViewGraph?: () => void
+  onReport?: () => void
 }
 
 /* Minimal product navigation. Landing: subtle anchor links + GitHub.
    Shell (live/report): contextual Audit Graph / Report / Audits. */
-export default function Header({ compact, phase, onHome, onViewGraph }: HeaderProps) {
+export default function Header({ compact, phase, onHome, onViewGraph, onReport }: HeaderProps) {
   const inShell = compact
 
   const shellNav = useMemo(() => {
     return [
       { key: 'audits', label: 'Audits', onClick: onHome, enabled: true, active: false },
       { key: 'graph', label: 'Audit Graph', onClick: onViewGraph, enabled: !!onViewGraph, active: phase === 'graph' },
-      { key: 'report', label: 'Report', onClick: onHome, enabled: phase === 'report', active: phase === 'report' },
+      { key: 'report', label: 'Report', onClick: onReport, enabled: !!onReport, active: phase === 'report' },
     ]
-  }, [phase, onHome, onViewGraph])
+  }, [phase, onHome, onViewGraph, onReport])
 
   const landingNav = [
     { key: 'product', label: 'Product', anchor: '#top' },
