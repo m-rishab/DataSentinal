@@ -47,7 +47,7 @@ NVIDIA_BASE_URL = os.getenv(
     "NVIDIA_BASE_URL",
     "https://integrate.api.nvidia.com/v1",
 )
-NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "meta/llama-3.1-8b-instruct")
+NVIDIA_MODEL = os.getenv("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct")
 NVIDIA_TIMEOUT = float(os.getenv("NVIDIA_TIMEOUT", "60"))
 
 
