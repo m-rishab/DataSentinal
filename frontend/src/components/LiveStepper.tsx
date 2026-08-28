@@ -42,9 +42,9 @@ const STEPS: StepDef[] = [
     node: 'citation_tracer',
     label: 'Citation Tracer',
     kicker: '03 · Papers',
-    description: 'Finds citing papers through Semantic Scholar, then cross-checks every DOI against Crossref retraction records.',
+    description: 'Finds citing papers through OpenAlex, then cross-checks every DOI against Crossref retraction records.',
     bullets: [
-      'Searches Semantic Scholar for citations',
+      'Searches OpenAlex for citations',
       'Resolves DOIs via Crossref',
       'Marks retracted or disputed papers',
     ],

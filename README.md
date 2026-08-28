@@ -12,7 +12,7 @@ with an evidence-backed report.
 - **Ingest** — scrapes Kaggle/HF page metadata (title, license, tags, files, columns)
 - **Real data profiling** — downloads sample rows, computes missing %, duplicates, class imbalance, PII-shaped columns
 - **Consent & license agent** — flags missing/vague licenses, consent language
-- **Citation tracer** — finds citing papers (Semantic Scholar), checks retractions (Crossref)
+- **Citation tracer** — finds citing papers (OpenAlex), checks retractions (Crossref)
 - **Duplication agent** — flags copy-paste descriptions, re-upload patterns
 - **Critic aggregator** — deterministic score + LLM-written rationale (LLM never sets the number)
 
@@ -72,6 +72,9 @@ Or skip the setup and just try the [live demo](https://dataasentinal.onrender.co
 ## Known limits
 
 - Kaggle profiling capped at ~8 MB / 100 rows, needs API credentials
+- Paper searches use the free OpenAlex API (no key). Set `OPENALEX_MAILTO` in `.env`
+  to your email for the high-rate polite pool; without it the anonymous pool is
+  ~100 requests/day, which is plenty for casual use
 - Retraction checks depend on Crossref coverage
 - Single-process in-memory registry (SQLite persists reports)
 

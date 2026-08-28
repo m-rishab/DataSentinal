@@ -156,7 +156,7 @@ async def publish(run: RunRecord, event: dict) -> None:
 NODE_MESSAGES: dict[str, str] = {
     NODE_INGEST: "Scraping Kaggle dataset page...",
     NODE_CONSENT: "Checking license & consent signals...",
-    NODE_CITATION: "Tracing citations via Semantic Scholar & Crossref...",
+    NODE_CITATION: "Tracing citations via OpenAlex & Crossref...",
     NODE_DUPLICATION: "Analyzing description for duplication...",
     NODE_RELATED: "Finding related papers & alternative datasets...",
     NODE_CRITIC: "Aggregating findings & computing trust score...",

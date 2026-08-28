@@ -15,7 +15,7 @@ import logging
 import re
 from typing import Any
 
-from backend.services import crossref, dataset_search, semantic_scholar
+from backend.services import crossref, dataset_search, openalex
 from backend.services.file_inspector import inspect_dataset
 from backend.services.hf_scraper import HFDatasetError, is_huggingface_url, scrape_huggingface_dataset
 from backend.services.kaggle_scraper import KaggleScrapeError, scrape_kaggle_dataset
@@ -360,7 +360,7 @@ def _citation_search_queries(title: str, dataset_url: str, meta: dict, refined: 
         core = re.sub(r"\s*[\(\[][^\)\]]*[\)\]]\s*", " ", clean_title).strip()
 
         # 1. Bare title with no "dataset"/tag suffix — the suffix can over-constrain
-        #    Semantic Scholar's ranking for short, common dataset names.
+        #    OpenAlex's ranking for short, common dataset names.
         if core:
             queries.append(core[:300])
 
@@ -439,9 +439,9 @@ async def citation_tracer_agent(state: dict) -> dict:
     seen_keys: set[str] = set()
     for query in queries:
         try:
-            papers = await asyncio.to_thread(semantic_scholar.search_papers, query, MAX_CITATIONS)
-        except semantic_scholar.SemanticScholarError as exc:
-            errors.append(f"Semantic Scholar search failed for '{query}': {exc}")
+            papers = await asyncio.to_thread(openalex.search_papers, query, MAX_CITATIONS)
+        except openalex.OpenAlexError as exc:
+            errors.append(f"OpenAlex search failed for '{query}': {exc}")
             continue
 
         for paper in papers:
@@ -621,23 +621,23 @@ async def related_work_agent(state: dict) -> dict:
 
     papers: list[dict] = []
     try:
-        seed = await asyncio.to_thread(semantic_scholar.find_seed_paper, title)
-        if seed and seed.get("s2_id"):
-            papers = await asyncio.to_thread(semantic_scholar.recommend_papers, seed["s2_id"], 6)
+        seed = await asyncio.to_thread(openalex.find_seed_paper, title)
+        if seed and seed.get("work_id"):
+            papers = await asyncio.to_thread(openalex.recommend_papers, seed["work_id"], 6)
             evidence.append(
-                f"Related papers via Semantic Scholar Recommendations API (seed: '{seed['title']}')."
+                f"Related papers via OpenAlex citation search (seed: '{seed['title']}')."
             )
         if not papers:
-            papers = await asyncio.to_thread(semantic_scholar.search_papers, domain_query, 6)
-            evidence.append(f"Related papers via Semantic Scholar keyword search: '{domain_query}'.")
-    except semantic_scholar.SemanticScholarError as exc:
+            papers = await asyncio.to_thread(openalex.search_papers, domain_query, 6)
+            evidence.append(f"Related papers via OpenAlex full-text search: '{domain_query}'.")
+    except openalex.OpenAlexError as exc:
         errors.append(f"Related-paper lookup failed: {exc}")
-        evidence.append("Related-paper lookup unavailable: Semantic Scholar API error.")
+        evidence.append("Related-paper lookup unavailable: OpenAlex API error.")
 
     if not papers:
         # NEVER fabricate papers when lookups fail or return nothing. An empty
         # collection is honest evidence; the UI renders it as such.
-        evidence.append("No related papers retrieved (Semantic Scholar returned nothing for this dataset).")
+        evidence.append("No related papers retrieved (OpenAlex returned nothing for this dataset).")
 
     alternatives = await asyncio.to_thread(dataset_search.find_alternatives, domain_query, 5)
     evidence.append(

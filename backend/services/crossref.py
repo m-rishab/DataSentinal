@@ -13,6 +13,13 @@ import requests
 
 CROSSREF_WORKS = "https://api.crossref.org/works"
 
+# DOIs registered with other registrars (DataCite/Crossref alternatives) that
+# Crossref cannot resolve. Checking them would 404; treat as no-signal.
+NON_CROSSREF_PREFIXES = (
+    "10.48550/",  # arXiv (DataCite)
+    "10.5281/",  # Zenodo (DataCite)
+)
+
 RETRACT_RELATIONS = {
     "is-retraction-of",
     "is-retracted-by",
@@ -67,6 +74,13 @@ def check_retraction(doi: str) -> dict[str, Any]:
     Returns {"status": "retracted"|"possibly_retracted"|"not_retracted",
              "detail": str}
     """
+    for pfx in NON_CROSSREF_PREFIXES:
+        if str(doi or "").lower().startswith(pfx):
+            return {
+                "status": "not_retracted",
+                "detail": f"DOI {doi} is registered outside Crossref "
+                          "(arXiv/Zenodo) — no retraction signal on record.",
+            }
     data = _get(f"{CROSSREF_WORKS}/{doi}")
     message = data.get("message") or {}
     title_parts = message.get("title") or []
