@@ -98,7 +98,7 @@ export default function InvestigationScene() {
   const score = Math.round(80 * (1 - Math.pow(1 - finalProgress, 3)))
 
   return (
-    <section id="investigation" className="relative overflow-hidden" aria-label="Scroll-driven investigation of a dataset">
+    <section id="investigation" className="relative" aria-label="Scroll-driven investigation of a dataset">
       {/* tall pinned track makes the scroll story long without empty gaps */}
       <div ref={ref} className="relative" style={{ height: '260vh' }}>
         <div className="sticky top-0 flex h-screen flex-col bg-page">
