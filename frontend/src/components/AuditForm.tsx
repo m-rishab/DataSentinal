@@ -40,9 +40,9 @@ export default function AuditForm({
     <div id={id} className="w-full">
       <form
         onSubmit={submit}
-        className="flex flex-col rounded-xl border p-1.5 shadow-[0_14px_44px_rgba(2,6,16,0.5)] sm:flex-row sm:items-center"
+        className="flex flex-col rounded-xl border bg-white p-1.5 shadow-[0_14px_40px_-18px_rgba(28,38,52,0.35)] sm:flex-row sm:items-center"
         style={{
-          background: 'var(--color-panel)',
+          background: 'var(--color-surface)',
           borderColor: mutation.isError ? 'color-mix(in srgb, var(--color-error) 60%, transparent)' : 'var(--color-line)',
           transition: 'border-color 160ms cubic-bezier(0.4,0,0.2,1)',
         }}
@@ -77,7 +77,7 @@ export default function AuditForm({
           style={{
             background: 'var(--color-accent)',
             borderColor: 'var(--color-accent)',
-            color: '#06201d',
+            color: '#ffffff',
             fontSize: size === 'lg' ? '0.9375rem' : '0.875rem',
             padding: size === 'lg' ? '0.875rem 1.75rem' : '0.7rem 1.4rem',
           }}

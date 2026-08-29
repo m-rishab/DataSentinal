@@ -36,7 +36,6 @@ const PII_PATTERNS = {
 function detectPII(columnName: string): 'high' | 'medium' | 'low' {
   const name = columnName.toLowerCase()
 
-  // High risk patterns
   if (
     PII_PATTERNS.email.test(name) ||
     PII_PATTERNS.phone.test(name) ||
@@ -48,7 +47,6 @@ function detectPII(columnName: string): 'high' | 'medium' | 'low' {
     return 'high'
   }
 
-  // Medium risk patterns
   if (
     PII_PATTERNS.name.test(name) ||
     PII_PATTERNS.address.test(name) ||
@@ -150,16 +148,16 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-heading" style={{ color: '#e4e6eb' }}>
+        <h3 className="font-display text-[0.9375rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
           Dataset Schema
         </h3>
         {isPartial && (
           <div
-            className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-tiny"
+            className="flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[0.75rem] font-medium"
             style={{
-              background: 'color-mix(in srgb, #c4645f 10%, transparent)',
-              borderColor: 'color-mix(in srgb, #c4645f 25%, transparent)',
-              color: '#c4645f',
+              background: 'color-mix(in srgb, var(--color-error) 7%, transparent)',
+              borderColor: 'color-mix(in srgb, var(--color-error) 25%, transparent)',
+              color: 'var(--color-error)',
             }}
           >
             <AlertTriangle size={14} />
@@ -174,22 +172,18 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
         placeholder="Filter columns..."
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        className="w-full rounded-lg border px-3 py-2 text-small transition-colors"
-        style={{
-          background: '#14171b',
-          borderColor: 'rgba(255, 255, 255, 0.08)',
-          color: '#e4e6eb',
-        }}
+        className="input !w-full"
+        style={{ maxWidth: 260 }}
       />
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border" style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}>
-        <table className="w-full text-small" style={{ tableLayout: 'fixed', minWidth: '700px' }}>
-          <thead style={{ background: '#14171b', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+      <div className="overflow-x-auto rounded-xl border" style={{ borderColor: 'var(--color-line)' }}>
+        <table className="w-full text-[0.875rem]" style={{ tableLayout: 'fixed', minWidth: '700px' }}>
+          <thead style={{ background: 'var(--color-panel-2)', borderBottom: '1px solid var(--color-line)' }}>
             <tr>
               <th
-                className="cursor-pointer px-4 py-3 text-left font-medium transition-colors hover:bg-opacity-80"
-                style={{ color: '#8b9099', width: '30%' }}
+                className="cursor-pointer px-4 py-3 text-left font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-page)_60%,white)]"
+                style={{ color: 'var(--color-secondary)', width: '30%' }}
                 onClick={() => toggleSort('name')}
               >
                 <div className="flex items-center gap-2">
@@ -197,12 +191,12 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
                   <SortIcon active={sortKey === 'name'} dir={sortDir} />
                 </div>
               </th>
-              <th className="px-4 py-3 text-left font-medium" style={{ color: '#8b9099', width: '15%' }}>
+              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-secondary)', width: '15%' }}>
                 Type
               </th>
               <th
-                className="cursor-pointer px-4 py-3 text-left font-medium transition-colors hover:bg-opacity-80"
-                style={{ color: '#8b9099', width: '15%' }}
+                className="cursor-pointer px-4 py-3 text-left font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-page)_60%,white)]"
+                style={{ color: 'var(--color-secondary)', width: '15%' }}
                 onClick={() => toggleSort('missing')}
               >
                 <div className="flex items-center gap-2">
@@ -210,7 +204,7 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
                   <SortIcon active={sortKey === 'missing'} dir={sortDir} />
                 </div>
               </th>
-              <th className="px-4 py-3 text-left font-medium" style={{ color: '#8b9099', width: '40%' }}>
+              <th className="px-4 py-3 text-left font-semibold" style={{ color: 'var(--color-secondary)', width: '40%' }}>
                 Summary
               </th>
             </tr>
@@ -219,25 +213,23 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
             {filtered.map((col, idx) => (
               <tr
                 key={col.name}
+                className="transition-colors hover:bg-[color-mix(in_srgb,var(--color-page)_55%,white)]"
                 style={{
-                  borderBottom: idx < filtered.length - 1 ? '1px solid rgba(255, 255, 255, 0.05)' : 'none',
+                  borderBottom: idx < filtered.length - 1 ? '1px solid var(--color-line)' : 'none',
                 }}
               >
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="truncate font-mono" style={{ color: '#e4e6eb' }}>
+                    <span className="truncate font-mono" style={{ color: 'var(--color-primary)' }}>
                       {col.name}
                     </span>
                     {(col.pii_risk === 'high' || col.pii_risk === 'medium') && (
                       <span
-                        className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-tiny font-medium"
+                        className="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[0.75rem] font-medium"
                         style={{
-                          background:
-                            col.pii_risk === 'high'
-                              ? 'color-mix(in srgb, #c4645f 15%, transparent)'
-                              : 'color-mix(in srgb, #c4645f 10%, transparent)',
-                          color: '#c4645f',
-                          border: `1px solid color-mix(in srgb, #c4645f ${col.pii_risk === 'high' ? '30' : '20'}%, transparent)`,
+                          background: 'color-mix(in srgb, var(--color-error) 8%, transparent)',
+                          color: 'var(--color-error)',
+                          border: `1px solid color-mix(in srgb, var(--color-error) ${col.pii_risk === 'high' ? '30' : '20'}%, transparent)`,
                         }}
                       >
                         <AlertTriangle size={11} />
@@ -248,19 +240,19 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className="inline-block rounded px-2 py-0.5 text-tiny font-medium"
+                    className="inline-block rounded px-2 py-0.5 text-[0.75rem] font-medium"
                     style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      color: '#8b9099',
+                      background: 'rgba(31,42,57,0.05)',
+                      color: 'var(--color-secondary)',
                     }}
                   >
                     {col.type}
                   </span>
                 </td>
-                <td className="px-4 py-3" style={{ color: '#8b9099' }}>
+                <td className="px-4 py-3" style={{ color: 'var(--color-secondary)' }}>
                   {col.missing_pct != null ? `${col.missing_pct}%` : '—'}
                 </td>
-                <td className="px-4 py-3 text-tiny" style={{ color: '#8b9099' }}>
+                <td className="px-4 py-3 text-[0.8125rem]" style={{ color: 'var(--color-secondary)' }}>
                   {col.type === 'numeric' && col.min != null && col.max != null && (
                     <span>
                       Range: {col.min.toFixed(2)} – {col.max.toFixed(2)}
@@ -272,7 +264,7 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
                       Top: {col.top_values.map((v) => `${v.value} (${v.count})`).join(', ')}
                     </span>
                   )}
-                  {col.type === 'unknown' && <span style={{ color: '#5a5f68' }}>No profile data</span>}
+                  {col.type === 'unknown' && <span style={{ color: 'var(--color-muted)' }}>No profile data</span>}
                 </td>
               </tr>
             ))}
@@ -282,7 +274,7 @@ export default function SchemaTable({ columns, dataProfile, isPartial }: SchemaT
 
       {/* Footer stats */}
       {dataProfile && (
-        <div className="flex flex-wrap gap-4 text-tiny" style={{ color: '#5a5f68' }}>
+        <div className="flex flex-wrap gap-4 text-[0.8125rem]" style={{ color: 'var(--color-muted)' }}>
           {dataProfile.rows_profiled && (
             <span>
               {dataProfile.rows_profiled.toLocaleString()} row{dataProfile.rows_profiled !== 1 ? 's' : ''} profiled

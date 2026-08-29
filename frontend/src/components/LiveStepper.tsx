@@ -327,7 +327,7 @@ export default function LiveStepper({
                   type="button"
                   onClick={() => setView(v)}
                   className={`rounded-full px-2.5 py-0.5 capitalize font-mono text-[0.6875rem] font-semibold transition-colors ${
-                    view === v ? 'text-[#0b0e13]' : 'text-muted hover:text-primary'
+                    view === v ? 'text-white' : 'text-muted hover:text-primary'
                   }`}
                   style={view === v ? { background: 'var(--color-accent)' } : undefined}
                   aria-pressed={view === v}
@@ -443,7 +443,7 @@ export default function LiveStepper({
                   type="button"
                   onClick={() => setFilter(f)}
                   className={`rounded-full px-2 py-0.5 capitalize font-mono text-[0.6875rem] font-semibold transition-colors ${
-                    filter === f ? 'text-[#0b0e13]' : 'text-muted hover:text-primary'
+                    filter === f ? 'text-white' : 'text-muted hover:text-primary'
                   }`}
                   style={filter === f ? { background: 'var(--color-primary)' } : undefined}
                   aria-pressed={filter === f}
@@ -457,10 +457,10 @@ export default function LiveStepper({
 
           {failed && (
             <div
-              className="absolute bottom-4 left-1/2 z-20 w-[min(92%,420px)] -translate-x-1/2 rounded-xl border p-4 shadow-[0_18px_50px_rgba(2,6,16,0.55)]"
-              style={{ background: 'color-mix(in srgb, var(--color-error) 10%, var(--color-panel))', borderColor: 'color-mix(in srgb, var(--color-error) 35%, transparent)' }}
+              className="absolute bottom-4 left-1/2 z-20 w-[min(92%,420px)] -translate-x-1/2 rounded-xl border p-4 shadow-[0_18px_50px_-18px_rgba(28,38,52,0.4)]"
+              style={{ background: 'color-mix(in srgb, var(--color-error) 6%, var(--color-surface))', borderColor: 'color-mix(in srgb, var(--color-error) 35%, transparent)' }}
             >
-              <p className="text-[0.9375rem] font-semibold" style={{ color: '#e0b3b0' }}>
+              <p className="text-[0.9375rem] font-semibold" style={{ color: 'var(--color-error)' }}>
                 {failed}
               </p>
               <button type="button" onClick={onReset} className="btn btn-danger mt-3 px-3 py-1.5 !text-[0.8125rem]">
@@ -622,7 +622,7 @@ export default function LiveStepper({
               )}
 
               <p className="mt-6 font-mono text-[0.6875rem] font-bold uppercase tracking-[0.16em] text-muted">Live log</p>
-              <div className="mt-2.5 rounded-lg border p-3.5" style={{ background: '#070a10', borderColor: 'var(--color-line)' }}>
+              <div className="mt-2.5 rounded-lg border p-3.5" style={{ background: '#f4f4ef', borderColor: 'var(--color-line)' }}>
                 <p className="font-mono text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
                   {selectedMsg || 'Waiting for this node to run…'}
                 </p>

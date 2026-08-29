@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import Header from './components/Header'
 import Landing from './components/Landing'
 import LiveStepper from './components/LiveStepper'
 import ReportView from './components/ReportView'
 import Footer from './components/Footer'
-import { fetchRuns } from './lib/api'
 
 type Phase = 'landing' | 'running' | 'graph' | 'report'
 
@@ -27,13 +25,6 @@ export default function App() {
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [phase])
-
-  const runsQuery = useQuery({
-    queryKey: ['runs'],
-    queryFn: () => fetchRuns(12),
-    enabled: phase === 'landing',
-    refetchInterval: 15000,
-  })
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -60,13 +51,6 @@ export default function App() {
   const goHome = () => {
     setPhase('landing')
     setRunId(null)
-    void runsQuery.refetch()
-  }
-
-  const openRun = (id: string, url: string) => {
-    setDatasetUrl(url)
-    setRunId(id)
-    setPhase('report')
   }
 
   const lockViewport = phase === 'running' || phase === 'graph'
@@ -92,9 +76,6 @@ export default function App() {
         {phase === 'landing' && (
           <Landing
             onStart={startRun}
-            runs={runsQuery.data ?? []}
-            runsLoading={runsQuery.isLoading}
-            onOpenReport={openRun}
           />
         )}
 

@@ -65,10 +65,10 @@ const NODE_W = 240
 const NODE_H = 118
 
 const COLOR = {
-  pending: '#3a414d',
-  running: '#6b96c4',
-  completed: '#4a9d7f',
-  failed: '#c4645f',
+  pending: '#98a3ad',
+  running: '#5b7ea6',
+  completed: '#2f9e74',
+  failed: '#cf4f4c',
 }
 
 const REVEAL: { t: number; id: string }[] = [
@@ -141,7 +141,7 @@ function FlowEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targ
           strokeWidth={2.6}
           opacity={0.9}
           className="edge-flow"
-          style={{ filter: 'drop-shadow(0 0 4px rgba(107,150,196,0.55))', strokeLinecap: 'round' }}
+          style={{ filter: 'drop-shadow(0 0 4px rgba(91,126,166,0.35))', strokeLinecap: 'round' }}
         />
       )}
     </>
@@ -193,12 +193,13 @@ function StepNode(props: NodeProps) {
     <div
       data-node-id={id}
       className={`relative rounded-xl border transition-all duration-300 ${
-        selected ? 'ring-2 ring-offset-2 ring-offset-[#10141a]' : ''
+        selected ? 'ring-2 ring-offset-2' : ''
       }`}
       style={{
         width: NODE_W,
         height: NODE_H,
-        background: 'var(--color-panel)',
+        background: 'var(--color-surface)',
+        ['--tw-ring-offset-color' as string]: 'var(--color-page)',
         borderColor: failed ? color : running ? 'color-mix(in srgb, ' + color + ' 70%, transparent)' : completed ? 'color-mix(in srgb, ' + color + ' 45%, transparent)' : 'var(--color-line)',
         boxShadow: selected ? 'var(--shadow-lift)' : 'none',
         opacity: revealed ? (dimmed ? 0.3 : 1) : 0,
@@ -417,7 +418,7 @@ export default function PipelineGraph({ statuses, durations, results, retry, sel
       <div
         id="graph-host"
         className="relative h-full w-full"
-        style={{ background: 'var(--color-page)' }}
+        style={{ background: 'var(--color-canvas)' }}
         aria-label="Audit pipeline graph: seven agents investigating the dataset. Use the controls to zoom and pan."
       >
         <ReactFlow
@@ -436,7 +437,7 @@ export default function PipelineGraph({ statuses, durations, results, retry, sel
           maxZoom={1.6}
           proOptions={{ hideAttribution: true }}
         >
-          <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="rgba(141,155,178,0.08)" />
+          <Background variant={BackgroundVariant.Dots} gap={22} size={1.4} color="rgba(31,42,57,0.10)" />
           <MiniMap
             pannable
             zoomable
@@ -445,8 +446,8 @@ export default function PipelineGraph({ statuses, durations, results, retry, sel
               const s = (statuses[n.id] ?? 'pending') as NodeStatus
               return COLOR[s]
             }}
-            nodeStrokeWidth={0}
-            maskColor="rgba(11,14,19,0.72)"
+            nodeStrokeWidth={0.5}
+            maskColor="rgba(250,249,245,0.82)"
           />
           <Controls
             showInteractive={false}

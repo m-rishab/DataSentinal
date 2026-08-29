@@ -125,17 +125,17 @@ export default function ReportView({
         <div
           className="flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3"
           style={{
-            background: `color-mix(in srgb, ${gate.passed ? '#4a9d7f' : '#c4645f'} 10%, transparent)`,
-            borderColor: `color-mix(in srgb, ${gate.passed ? '#4a9d7f' : '#c4645f'} 35%, transparent)`,
+            background: `color-mix(in srgb, ${gate.passed ? 'var(--color-success)' : 'var(--color-error)'} 7%, transparent)`,
+            borderColor: `color-mix(in srgb, ${gate.passed ? 'var(--color-success)' : 'var(--color-error)'} 32%, transparent)`,
           }}
         >
           <span
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.875rem] font-black text-white"
-            style={{ background: gate.passed ? '#4a9d7f' : '#c4645f' }}
+            style={{ background: gate.passed ? 'var(--color-success)' : 'var(--color-error)' }}
           >
             {gate.passed ? '✓' : '✕'}
           </span>
-          <p className="text-[0.875rem] font-bold" style={{ color: gate.passed ? '#9bd0b9' : '#e0b3b0' }}>
+          <p className="text-[0.875rem] font-bold" style={{ color: gate.passed ? 'var(--color-success)' : 'var(--color-error)' }}>
             {gate.passed ? 'Gate passed' : 'Gate failed'} — trust score {report.trust_score} vs required {gate.fail_under}
           </p>
           <code className="chip ml-auto font-mono !text-[0.875rem]">
@@ -211,7 +211,7 @@ export default function ReportView({
           <p className="text-[0.6875rem] font-bold uppercase" style={{ letterSpacing: '0.18em', color: 'var(--color-muted)' }}>
             Auditor Summary
           </p>
-          <p className="mt-2 font-editorial text-[1.125rem] leading-[1.75]" style={{ color: 'var(--color-primary)' }}>
+          <p className="mt-2 font-display text-[1.125rem] font-medium leading-[1.6]" style={{ color: 'var(--color-primary)' }}>
             {report.rationale || 'No summary was generated.'}
           </p>
 
@@ -287,7 +287,7 @@ export default function ReportView({
                   {report.citation_trail.map((citation, i) => {
                     const retraction = RETRACTION_LABEL[citation.retraction_status] ?? RETRACTION_LABEL.unknown
                     return (
-                      <div key={i} className="card flex items-center justify-between gap-4 p-4 transition-colors hover:bg-white/[0.02]">
+                      <div key={i} className="card flex items-center justify-between gap-4 p-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-page)_60%,white)]">
                         <div className="min-w-0">
                           <p className="truncate text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
                             {citation.paper_title}
@@ -401,7 +401,7 @@ export default function ReportView({
                 {gate && gate.fail_under != null ? (
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg text-[0.9375rem] font-black"
-                      style={{ background: `color-mix(in srgb, ${gate.passed ? '#4a9d7f' : '#c4645f'} 14%, transparent)`, color: gate.passed ? '#4a9d7f' : '#c4645f' }}>
+                      style={{ background: `color-mix(in srgb, ${gate.passed ? 'var(--color-success)' : 'var(--color-error)'} 12%, transparent)`, color: gate.passed ? 'var(--color-success)' : 'var(--color-error)' }}>
                       {gate.passed ? '✓' : '✕'}
                     </span>
                     <p className="text-[0.875rem] font-semibold" style={{ color: 'var(--color-primary)' }}>
@@ -427,7 +427,7 @@ export default function ReportView({
           <div className="space-y-6">
             <div>
               <SectionTitle title="Audit Trace Logs" />
-              <div className="max-h-96 overflow-y-auto rounded-xl border p-4 font-mono text-[0.875rem] leading-relaxed" style={{ background: '#070a10', borderColor: 'var(--color-line)', color: 'var(--color-secondary)' }}>
+              <div className="max-h-96 overflow-y-auto rounded-xl border p-4 font-mono text-[0.875rem] leading-relaxed" style={{ background: '#f4f4ef', borderColor: 'var(--color-line)', color: 'var(--color-secondary)' }}>
                 {report.evidence_log.length === 0 ? (
                   <Empty text="No trace lines recorded." />
                 ) : (
@@ -449,7 +449,7 @@ export default function ReportView({
               ) : (
                 <ul className="space-y-2">
                   {report.errors.map((err, i) => (
-                    <li key={i} className="rounded-lg border px-3 py-2 font-mono text-[0.875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', background: 'color-mix(in srgb, var(--color-error) 8%, transparent)', color: '#e0b3b0' }}>
+                    <li key={i} className="rounded-lg border px-3 py-2 font-mono text-[0.875rem]" style={{ borderColor: 'color-mix(in srgb, var(--color-error) 30%, transparent)', background: 'color-mix(in srgb, var(--color-error) 6%, transparent)', color: 'var(--color-error)' }}>
                       {err}
                     </li>
                   ))}
@@ -775,7 +775,7 @@ function DataPanel({ report, effectiveColumns }: { report: AuditReport; effectiv
                     return (
                       <div key={v.value} className="flex items-center gap-2">
                         <span className="w-32 shrink-0 truncate text-right font-mono text-[0.875rem] text-secondary">{v.value}</span>
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(31,42,57,0.08)' }}>
                           <div className="h-full rounded-full" style={{ width: `${(v.count / maxCount) * 100}%`, background: 'var(--color-accent)' }} />
                         </div>
                         <span className="w-10 shrink-0 font-mono text-[0.875rem] text-muted">{v.count}</span>
@@ -991,7 +991,7 @@ function CompletenessRow({ label, ok, detail }: { label: string; ok: boolean; de
     <div className="card flex items-center gap-3 p-3.5">
       <span
         className="grid h-5 w-5 shrink-0 place-items-center rounded-full text-[0.875rem] font-black"
-        style={{ background: `color-mix(in srgb, ${ok ? '#4a9d7f' : '#c9a14a'} 12%, transparent)`, color: ok ? 'var(--color-success)' : 'var(--color-warning)' }}
+        style={{ background: `color-mix(in srgb, ${ok ? 'var(--color-success)' : 'var(--color-warning)'} 10%, transparent)`, color: ok ? 'var(--color-success)' : 'var(--color-warning)' }}
       >
         {ok ? '✓' : '!'}
       </span>
@@ -1019,8 +1019,8 @@ function StatBox({ label, value, sub, tone }: { label: string; value: string; su
       className="rounded-lg border px-3 py-2"
       style={
         tone === 'ok'
-          ? { borderColor: 'var(--color-line)', background: 'rgba(255,255,255,0.03)' }
-          : { borderColor: 'color-mix(in srgb, var(--color-warning) 35%, transparent)', background: 'color-mix(in srgb, var(--color-warning) 8%, transparent)' }
+          ? { borderColor: 'var(--color-line)', background: 'rgba(31,42,57,0.03)' }
+          : { borderColor: 'color-mix(in srgb, var(--color-warning) 35%, transparent)', background: 'color-mix(in srgb, var(--color-warning) 7%, transparent)' }
       }
     >
       <p className="truncate text-[0.625rem] font-bold uppercase tracking-wider text-muted" title={label}>{label}</p>

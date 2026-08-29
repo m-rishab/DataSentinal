@@ -28,7 +28,6 @@ export default function Header({ compact, phase, onHome, onViewGraph, onReport }
     { key: 'product', label: 'Product', anchor: '#top' },
     { key: 'how', label: 'How it Works', anchor: '#how-it-works' },
     { key: 'reports', label: 'Reports', anchor: '#reports' },
-    { key: 'api', label: 'API', anchor: '#api' },
   ]
 
   return (

@@ -75,7 +75,7 @@ export default function TimelineView({
                   {/* Rail dot */}
                   <span
                     className={`absolute -left-5 top-1.5 grid h-3.5 w-3.5 place-items-center rounded-full border ${status === 'running' ? 'pulse-soft' : ''}`}
-                    style={{ borderColor: `color-mix(in srgb, ${tone} 55%, transparent)`, background: status === 'running' ? tone : 'var(--color-page)' }}
+                    style={{ borderColor: `color-mix(in srgb, ${tone} 55%, transparent)`, background: status === 'running' ? tone : 'var(--color-surface)' }}
                     aria-hidden="true"
                   >
                     {(status === 'completed' || status === 'failed') && (

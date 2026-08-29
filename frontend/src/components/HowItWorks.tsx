@@ -1,20 +1,38 @@
+import { useReveal } from '../hooks'
+
 const steps = [
-  { n: '01', title: 'Paste a dataset URL', desc: 'Drop any Kaggle, Hugging Face, or public dataset URL into the form.' },
-  { n: '02', title: 'Agents run in parallel', desc: 'LangGraph orchestrates consent, citation, duplication, and related-work agents.' },
-  { n: '03', title: 'Get a trust score', desc: 'A 0–100 trust score with flags, citations, and an auditor rationale.' },
+  { n: '01', title: 'Paste a dataset URL', desc: 'Any Kaggle or Hugging Face dataset page.' },
+  { n: '02', title: 'Seven agents investigate', desc: 'License, citations, originality, quality & more run in parallel.' },
+  { n: '03', title: 'Get an evidence-backed score', desc: 'A 0–100 trust score with flags, citations and a rationale.' },
 ]
 
 export default function HowItWorks() {
+  const { ref, visible } = useReveal<HTMLDivElement>(0.25)
   return (
-    <section id="how-it-works" className="px-6 py-8">
-      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-3">
-        {steps.map((s) => (
-          <div key={s.n} className="rounded-xl border border-slate-800 bg-[#0c1320]/80 px-4 py-3">
-            <p className="font-display text-lg font-semibold italic text-cyan-300">{s.n}</p>
-            <h3 className="mt-1 text-[13px] font-bold text-slate-100">{s.title}</h3>
-            <p className="mt-1 text-[12px] leading-snug text-slate-500">{s.desc}</p>
-          </div>
-        ))}
+    <section id="how-it-works" className="px-6 py-16">
+      <div className="rule-fade mx-auto mb-10 max-w-6xl" />
+      <div ref={ref} className={`mx-auto max-w-5xl ${visible ? '' : 'opacity-0'}`} style={{ transition: 'opacity 0.7s var(--ease-out)' }}>
+        <div className="mb-8 text-center">
+          <p className="eyebrow justify-center">✦ how it works</p>
+          <h2 className={`mt-3 font-display text-[clamp(1.6rem,3.8vw,2.4rem)] font-semibold tracking-tight ${visible ? 'fade-in-up' : ''}`} style={{ color: 'var(--color-primary)' }}>
+            From URL to verdict in three steps.
+          </h2>
+        </div>
+        <div className={`grid gap-4 sm:grid-cols-3 ${visible ? 'stagger is-visible' : 'stagger'}`}>
+          {steps.map((s) => (
+            <div key={s.n} className="card p-5">
+              <p className="font-display text-lg font-semibold tabular-nums" style={{ color: 'var(--color-accent)' }}>
+                {s.n}
+              </p>
+              <h3 className="mt-2 text-[0.9375rem] font-bold tracking-tight" style={{ color: 'var(--color-primary)' }}>
+                {s.title}
+              </h3>
+              <p className="mt-1.5 text-[0.8125rem] leading-relaxed" style={{ color: 'var(--color-secondary)' }}>
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

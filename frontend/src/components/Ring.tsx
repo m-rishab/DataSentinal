@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from 'react'
 import { usePrefersReducedMotion } from '../hooks'
 
 export function scoreTone(score: number): { color: string; label: string } {
-  if (score < 40) return { color: '#c4645f', label: 'High Risk' }
-  if (score <= 70) return { color: '#c9a14a', label: 'Caution' }
-  return { color: '#4a9d7f', label: 'Trustworthy' }
+  if (score < 40) return { color: '#cf4f4c', label: 'High Risk' }
+  if (score <= 70) return { color: '#c9892b', label: 'Caution' }
+  return { color: '#2f9e74', label: 'Trustworthy' }
 }
 
 export default function Ring({
@@ -60,7 +60,7 @@ export default function Ring({
       aria-label={`Trust score ${score} of 100 — ${label ?? tone.label}`}
     >
       <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full -rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={R} fill="none" strokeWidth={strokeWidth} stroke="rgba(255,255,255,0.06)" />
+        <circle cx={size / 2} cy={size / 2} r={R} fill="none" strokeWidth={strokeWidth} stroke="rgba(31,42,57,0.08)" />
         <circle
           cx={size / 2}
           cy={size / 2}

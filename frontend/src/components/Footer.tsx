@@ -2,8 +2,7 @@ import Logo from './Logo'
 
 export default function Footer() {
   return (
-    <footer style={{ background: 'var(--color-surface)' }}>
-      <div className="rule-fade" />
+    <footer style={{ background: 'var(--color-surface)', borderTop: '1px solid var(--color-line)' }}>
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6">
         <div className="flex items-center gap-2.5">
           <Logo size={22} />
@@ -16,8 +15,8 @@ export default function Footer() {
         </div>
 
         <nav className="flex flex-wrap items-center gap-5" aria-label="Footer">
-          <a href="#api" className="text-[0.8125rem] font-medium text-secondary transition-colors hover:text-primary">
-            API & CI gate
+          <a href="#how-it-works" className="text-[0.8125rem] font-medium text-secondary transition-colors hover:text-primary">
+            How it works
           </a>
           <a href="#top" className="text-[0.8125rem] font-medium text-secondary transition-colors hover:text-primary">
             Top

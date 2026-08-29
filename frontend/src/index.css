@@ -2,8 +2,10 @@
 
 /* ==========================================================================
    DataSentinel — Design System (Tailwind v4, CSS-first)
-   Deep charcoal surfaces · blue-gray hairlines · single teal accent ·
-   muted status colors. Technical, calm, evidence-driven. No neon.
+   Warm off-white page · white surfaces · charcoal typography · subtle
+   cool-gray hairline borders · DataSentinel teal accent.
+   Clean technical aesthetic inspired by Linear, DataHub, OpenMetadata.
+   Single light theme — no dark mode.
    ========================================================================== */
 
 @theme {
@@ -12,36 +14,39 @@
   --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-editorial: 'Fraunces', Georgia, serif;
+  --font-display-2: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 
-  /* Surfaces (charcoal scale — never pure black) */
-  --color-page: #0b0e13;
-  --color-surface: #10141b;
-  --color-panel: #141a24;
-  --color-panel-2: #182030;
-  --color-elevated: #1b2333;
+  /* Surfaces — warm off-white + white */
+  --color-page: #faf9f5;
+  --color-surface: #ffffff;
+  --color-panel: #ffffff;
+  --color-panel-2: #f6f5f1;
+  --color-elevated: #ffffff;
+  --color-canvas: #fbfaf7;
 
-  /* Text */
-  --color-primary: #e8ecf3;
-  --color-secondary: #9aa3b2;
-  --color-muted: #5f6a7a;
+  /* Text — near-black / charcoal */
+  --color-primary: #1a2027;
+  --color-secondary: #55606d;
+  --color-muted: #8a94a1;
 
-  /* Hairlines (blue-gray, alpha) */
-  --color-line: rgba(141, 155, 178, 0.14);
-  --color-line-strong: rgba(141, 155, 178, 0.28);
+  /* Hairlines — cool gray, alpha (subtle) */
+  --color-line: rgba(31, 42, 57, 0.09);
+  --color-line-strong: rgba(31, 42, 57, 0.16);
 
   /* Status */
-  --color-accent: #35c2b3; /* DataSentinel cyan-teal, used sparingly */
-  --color-info: #6b96c4; /* running / neutral info */
-  --color-success: #4a9d7f; /* verified / completed */
-  --color-warning: #c9a14a; /* caution */
-  --color-error: #c4645f; /* failed / critical */
+  --color-accent: #0e9a8b; /* DataSentinel teal */
+  --color-accent-strong: #0b8377;
+  --color-info: #5b7ea6; /* running / neutral */
+  --color-success: #2f9e74; /* verified / completed */
+  --color-warning: #c9892b; /* caution / amber */
+  --color-error: #cf4f4c; /* failed / critical */
 
-  --shadow-lift: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 30px rgba(2, 6, 16, 0.35);
-  --shadow-float: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 18px 50px rgba(2, 6, 16, 0.55);
+  --shadow-lift: 0 1px 2px rgba(28, 38, 52, 0.05), 0 10px 30px -12px rgba(28, 38, 52, 0.18);
+  --shadow-float: 0 1px 2px rgba(28, 38, 52, 0.05), 0 24px 50px -16px rgba(28, 38, 52, 0.28);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -69,28 +74,28 @@ body {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
-  color: #fff;
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+  color: #0b3c34;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--color-page); }
-::-webkit-scrollbar-thumb { background: var(--color-elevated); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-line-strong); }
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(31, 42, 57, 0.16); border-radius: 8px; border: 2px solid var(--color-page); }
+::-webkit-scrollbar-thumb:hover { background: rgba(31, 42, 57, 0.28); }
 
 /* Focus — visible everywhere */
 :focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--color-accent) 70%, white);
+  outline: 2px solid color-mix(in srgb, var(--color-accent) 65%, white);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 /* ==========================================================================
    Motion
    ========================================================================== */
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes fade-in {
@@ -99,7 +104,7 @@ body {
 }
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+  50% { opacity: 0.5; }
 }
 @keyframes line-grow {
   from { transform: scaleX(0); }
@@ -114,7 +119,7 @@ body {
 /* Scroll-reveal (driven by IntersectionObserver adding .is-visible) */
 .reveal {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(14px);
   transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
   will-change: opacity, transform;
 }
@@ -134,7 +139,7 @@ body {
 }
 
 /* ==========================================================================
-   Motion for scenes (provenance viz, pinned sequences, evidence flows)
+   Motion for scenes (investigation, cards, evidence flows)
    ========================================================================== */
 
 /* Masked line reveal for editorial headings (two nested chips + inner). */
@@ -161,92 +166,83 @@ body {
   stroke-dashoffset: var(--dash, 600);
 }
 .draw-line.is-visible {
-  animation: draw var(--draw-dur, 1.4s) var(--ease-out) forwards;
+  animation: draw var(--draw-dur, 1.3s) var(--ease-out) forwards;
 }
 
 /* Data particles flowing along an edge (dash marching-ants reads as flow). */
 @keyframes edge-flow {
-  from { stroke-dashoffset: 28; }
+  from { stroke-dashoffset: 26; }
   to { stroke-dashoffset: 0; }
 }
 .edge-flow {
   stroke-dasharray: 4 9;
-  animation: edge-flow 0.9s linear infinite;
+  animation: edge-flow 0.8s linear infinite;
 }
 
 /* Soft radial glow emitted by an active node. */
 @keyframes node-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.14); opacity: 0.9; }
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50% { transform: scale(1.16); opacity: 0.65; }
 }
 .node-glow {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 150%;
+  width: 140%;
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle, color-mix(in srgb, var(--glow, var(--color-info)) 26%, transparent) 0%, transparent 65%);
-  animation: node-breathe 2.4s ease-in-out infinite;
-}
-@keyframes node-glow-fast {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
-  50% { transform: translate(-50%, -50%) scale(1.28); opacity: 0.85; }
-}
-.node-glow.warn { animation: node-glow-fast 1.2s ease-in-out infinite; background: radial-gradient(circle, color-mix(in srgb, var(--color-warning) 24%, transparent) 0%, transparent 65%); }
-.node-glow.fail { animation: node-glow-fast 0.8s ease-in-out infinite; background: radial-gradient(circle, color-mix(in srgb, var(--color-error) 22%, transparent) 0%, transparent 62%); }
-
-/* Tiny signal pulse traveling along a connector (used in pinned scenes). */
-@keyframes signal-pulse {
-  0% { offset-distance: 0%; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { offset-distance: 100%; opacity: 0; }
-}
-.signal-pulse {
-  animation: signal-pulse 1.8s var(--ease) infinite;
-  offset-path: path(var(--path));
+  background: radial-gradient(circle, color-mix(in srgb, var(--glow, var(--color-info)) 22%, transparent) 0%, transparent 62%);
+  animation: node-breathe 2.6s ease-in-out infinite;
 }
 
-/* Slow ambient drift for background networks. */
-@keyframes drift {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(0, -24px, 0); }
+/* Vertical scan beam (hero investigation scene). */
+@keyframes scan-beam {
+  0% { transform: translateY(-10%); opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(10%); opacity: 0; }
 }
-.bg-drift { animation: drift 26s linear infinite alternate; }
+.scan-beam {
+  animation: scan-beam 6.5s var(--ease-out) infinite;
+}
 
-/* Bloom: a single soft radial that periodically winks on (background nodes). */
-@keyframes bloom {
-  0%, 100% { opacity: 0; transform: scale(0.6); }
-  50% { opacity: 1; transform: scale(1); }
+/* Tiny evidence particle drifting along a path (SMIL via <animateMotion>). */
+@keyframes particle-blink {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.9; }
 }
-.bloom { animation: bloom 9s ease-in-out infinite; }
 
 /* Staggered fade-up for lists driven by .is-visible on the parent. */
 .stagger > * { opacity: 0; transform: translateY(10px); transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out); }
 .stagger.is-visible > * { opacity: 1; transform: translateY(0); }
 .stagger.is-visible > *:nth-child(1) { transition-delay: 0.02s; }
-.stagger.is-visible > *:nth-child(2) { transition-delay: 0.09s; }
-.stagger.is-visible > *:nth-child(3) { transition-delay: 0.16s; }
-.stagger.is-visible > *:nth-child(4) { transition-delay: 0.23s; }
-.stagger.is-visible > *:nth-child(5) { transition-delay: 0.3s; }
-.stagger.is-visible > *:nth-child(6) { transition-delay: 0.37s; }
-.stagger.is-visible > *:nth-child(7) { transition-delay: 0.44s; }
-.stagger.is-visible > *:nth-child(8) { transition-delay: 0.51s; }
+.stagger.is-visible > *:nth-child(2) { transition-delay: 0.08s; }
+.stagger.is-visible > *:nth-child(3) { transition-delay: 0.14s; }
+.stagger.is-visible > *:nth-child(4) { transition-delay: 0.2s; }
+.stagger.is-visible > *:nth-child(5) { transition-delay: 0.26s; }
+.stagger.is-visible > *:nth-child(6) { transition-delay: 0.32s; }
+.stagger.is-visible > *:nth-child(7) { transition-delay: 0.38s; }
+.stagger.is-visible > *:nth-child(8) { transition-delay: 0.44s; }
 
 /* Rect metric bar fill (width driven by inline style; animate when .is-visible). */
-.bar-fill { transition: width 1.1s var(--ease-out); }
+.bar-fill { transition: width 1s var(--ease-out); }
+
+/* Numeric trust score count-up caret */
+.count-caret {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Score ring resolving arc (stroke-dasharray driven inline). */
+.score-ring-arc { transition: stroke-dasharray 0.9s var(--ease-out); }
 
 /* ==========================================================================
    Shared primitives
    ========================================================================== */
 
 /* Editor-rule hairline used to separate landing sections */
-.rule-fade {
-  position: relative;
-}
+.rule-fade { position: relative; }
 .rule-fade::before {
   content: '';
   position: absolute;
@@ -260,23 +256,15 @@ body {
 .card {
   background: var(--color-panel);
   border: 1px solid var(--color-line);
-  border-radius: 12px;
-  transition: border-color 200ms var(--ease), background-color 200ms var(--ease);
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(28, 38, 52, 0.03);
+  transition: border-color 200ms var(--ease), box-shadow 200ms var(--ease);
 }
-.card:hover { border-color: var(--color-line-strong); }
-
-/* Micro-interaction: nudge the arrow on pipeline rows */
-.pipeline-row .pipeline-arrow-svg {
-  transition: transform 200ms var(--ease-out), color 200ms var(--ease);
+.card:hover {
+  border-color: var(--color-line-strong);
+  box-shadow: var(--shadow-lift);
 }
-.pipeline-row:hover .pipeline-arrow-svg {
-  transform: translateX(3px);
-  color: var(--color-accent);
-}
-.pipeline-row:hover .pipeline-arrow {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  color: var(--color-accent);
-}
+.card-hover { cursor: pointer; }
 
 /* Buttons */
 .btn {
@@ -292,10 +280,11 @@ body {
   background: var(--color-surface);
   color: var(--color-primary);
   cursor: pointer;
+  white-space: nowrap;
   transition: background-color 160ms var(--ease), border-color 160ms var(--ease),
-    transform 120ms var(--ease), color 160ms var(--ease);
+    transform 120ms var(--ease), color 160ms var(--ease), box-shadow 160ms var(--ease);
 }
-.btn:hover { background: var(--color-panel); border-color: var(--color-line-strong); }
+.btn:hover { background: var(--color-panel-2); border-color: var(--color-line-strong); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 
@@ -304,27 +293,29 @@ body {
   border-color: transparent;
   color: var(--color-secondary);
 }
-.btn-ghost:hover { background: var(--color-panel); color: var(--color-primary); border-color: var(--color-line); }
+.btn-ghost:hover { background: var(--color-panel-2); color: var(--color-primary); border-color: var(--color-line); }
 
 .btn-primary {
   background: var(--color-accent);
   border-color: var(--color-accent);
-  color: #06201d;
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(14, 154, 139, 0.2);
   font-weight: 700;
 }
 .btn-primary:hover {
-  background: color-mix(in srgb, var(--color-accent) 88%, white);
-  border-color: color-mix(in srgb, var(--color-accent) 88%, white);
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+  color: #fff;
 }
 
 .btn-danger {
   color: var(--color-error);
-  border-color: color-mix(in srgb, var(--color-error) 35%, transparent);
-  background: color-mix(in srgb, var(--color-error) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+  background: color-mix(in srgb, var(--color-error) 6%, transparent);
 }
 .btn-danger:hover {
-  background: color-mix(in srgb, var(--color-error) 18%, transparent);
-  border-color: color-mix(in srgb, var(--color-error) 55%, transparent);
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
+  border-color: color-mix(in srgb, var(--color-error) 50%, transparent);
 }
 
 /* Inputs */
@@ -334,7 +325,7 @@ body {
   border: 1px solid var(--color-line);
   border-radius: 10px;
   color: var(--color-primary);
-  padding: 0.75rem 1rem;
+  padding: 0.7rem 1rem;
   font-size: 0.9rem;
   outline: none;
   transition: border-color 160ms var(--ease), box-shadow 160ms var(--ease);
@@ -342,8 +333,8 @@ body {
 .input::placeholder { color: var(--color-muted); }
 .input:hover { border-color: var(--color-line-strong); }
 .input:focus {
-  border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 14%, transparent);
 }
 
 /* Kbd + chip */
@@ -363,7 +354,7 @@ body {
   border-radius: 999px;
   border: 1px solid var(--color-line);
   background: var(--color-surface);
-  padding: 0.22rem 0.7rem;
+  padding: 0.2rem 0.7rem;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--color-secondary);
@@ -396,15 +387,23 @@ body {
   transition: transform 0.1s linear;
 }
 
-/* Graph canvas chrome */
+/* React Flow graph chrome — light canvas */
 .graph-canvas .react-flow__controls {
   box-shadow: var(--shadow-lift);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  overflow: hidden;
 }
-.op-node-handle {
-  opacity: 0;
-  width: 8px;
-  height: 8px;
+.graph-canvas .react-flow__controls button {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-secondary);
 }
+.graph-canvas .react-flow__controls button:hover { background: var(--color-panel-2); }
+.graph-canvas .react-flow__minimap { border: 1px solid var(--color-line); border-radius: 10px; }
+.graph-canvas .react-flow__attribution { display: none; }
+.op-node-handle { opacity: 0; width: 8px; height: 8px; }
 
 /* Accessibility helpers */
 .sr-only {
@@ -419,18 +418,8 @@ body {
   border: 0;
 }
 
-/* Print: flatten the report to light so it exports cleanly */
+/* Print: the report is already light; keep it crisp for PDF export */
 @media print {
   .no-print { display: none !important; }
-  .print-area { background: #fff !important; color: #111 !important; }
-  .print-area, .print-area * {
-    background: #fff !important;
-    color: #111 !important;
-    border-color: #d3d9e2 !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
   body { background: #fff; }
 }
