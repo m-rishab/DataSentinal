@@ -91,15 +91,16 @@ export default function InvestigationScene() {
   const isCur = (i: number) => active === i
   const beamOn = shown
 
-  /* Final score: count 0 → 80 as the last stage resolves. */
+  /* Final score: count 0 → 80 across the whole last stage so it resolves
+     exactly at the end of the track (no dead pinned tail). */
   const finalAt = 7
-  const finalProgress = Math.max(0, Math.min(1, (progress * TOTAL - finalAt) / 0.7))
+  const finalProgress = Math.max(0, Math.min(1, (progress * TOTAL - finalAt) / (TOTAL - finalAt)))
   const score = Math.round(80 * (1 - Math.pow(1 - finalProgress, 3)))
 
   return (
     <section id="investigation" className="relative overflow-hidden" aria-label="Scroll-driven investigation of a dataset">
       {/* tall pinned track makes the scroll story long without empty gaps */}
-      <div ref={ref} className="relative" style={{ height: '360vh' }}>
+      <div ref={ref} className="relative" style={{ height: '260vh' }}>
         <div className="sticky top-0 flex h-screen flex-col bg-page">
           <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center px-4 py-6 sm:px-6">
             <div className="mb-2 text-center">
