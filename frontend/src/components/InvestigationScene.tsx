@@ -191,12 +191,7 @@ export default function InvestigationScene() {
                         {/* particles flowing along just-activated path */}
                         {!reduced && cur && (
                           <>
-                            <circle r="2.4" fill="var(--color-accent)">
-                              <animateMotion dur="1.6s" repeatCount="indefinite" begin="0.2s" path={d} />
-                            </circle>
-                            <circle r="1.6" fill="var(--color-accent)">
-                              <animateMotion dur="1.6s" repeatCount="indefinite" begin="0.5s" path={d} />
-                            </circle>
+                            {/* Particle elements removed — no floating dots beneath Evidence */}
                           </>
                         )}
                       </G>
@@ -206,41 +201,58 @@ export default function InvestigationScene() {
                   {/* nodes */}
                   {NODES.map((n, i) => {
                     const on = isOn(i)
-                    const cur = isCur(i)
                     if (!on) return null
                     const t = TONE[n.tone]
+                    const nodeIsActive = isCur(i)
+                    /* Trust Score hands off to the score ring once stage 7
+                       activates — the box fades out and the ring takes over. */
+                    if (n.accent && nodeIsActive) return null
                     return (
-                      <G key={n.id} opacity={1} style={{ transition: 'opacity 0.5s var(--ease)' }}>
-                        {cur && !n.accent && (
-                          <circle cx={n.x} cy={n.y} r="34" fill="none" stroke={`color-mix(in srgb, ${t.stroke} 40%, transparent)`} strokeWidth="1">
-                            <animate attributeName="r" values="30;42;30" dur="2.6s" repeatCount="indefinite" />
-                            <animate attributeName="opacity" values="0.7;1;0.7" dur="2.6s" repeatCount="indefinite" />
-                          </circle>
-                        )}
-                        <rect
-                          x={n.x - 66}
-                          y={n.y - 20}
-                          width="132"
-                          height="40"
-                          rx="13"
-                          fill="var(--color-surface)"
-                          stroke={t.stroke}
-                          strokeWidth={cur ? 1.8 : 1.2}
-                          style={{ boxShadow: cur ? '0 8px 24px -12px rgba(14,154,139,0.5)' : 'none', transition: 'stroke-width 0.3s var(--ease)' }}
-                        />
-                        <circle cx={n.x - 44} cy={n.y} r="3" fill={t.stroke} />
-                        <text
-                          x={n.x - 30}
-                          y={n.y + 4}
-                          textAnchor="middle"
-                          fontSize="13"
-                          fontWeight={700}
-                          fill={t.text}
-                          fontFamily="'Space Grotesk', 'Inter', system-ui, sans-serif"
+                      <g
+                        key={n.id}
+                        opacity={nodeIsActive ? 1 : 0.6}
+                        style={{
+                          transition: 'opacity 300ms var(--ease-out), transform 300ms var(--ease-out)',
+                          willChange: 'opacity, transform',
+                          transform: nodeIsActive ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.96)',
+                        }}
+                      >
+                        <g
+                          style={
+                            nodeIsActive
+                              ? { animation: 'isa-inhale 700ms var(--ease-out) forwards' }
+                              : undefined
+                          }
                         >
-                          {n.label}
-                        </text>
-                      </G>
+                          <rect
+                            x={n.x - 66}
+                            y={n.y - 22}
+                            width="132"
+                            height="44"
+                            rx="13"
+                            fill="var(--color-surface)"
+                            stroke={t.stroke}
+                            strokeWidth={nodeIsActive ? 2 : 1.2}
+                            style={{
+                              boxShadow: nodeIsActive ? '0 10px 26px -14px rgba(14,154,139,0.4)' : 'none',
+                              transition: 'stroke-width 200ms var(--ease-out), box-shadow 300ms var(--ease-out)',
+                            }}
+                          />
+                          <circle cx={n.x - 44} cy={n.y} r={nodeIsActive ? 3.4 : 3} fill={t.stroke} />
+                          <text
+                            x={n.x - 30}
+                            y={n.y + 4}
+                            textAnchor="middle"
+                            fontSize="13"
+                            fontWeight={nodeIsActive ? 700 : 600}
+                            fill={t.text}
+                            fontFamily="'Space Grotesk', 'Inter', system-ui, sans-serif"
+                            style={{ transition: 'font-weight 200ms var(--ease-out)' }}
+                          >
+                            {n.label}
+                          </text>
+                        </g>
+                      </g>
                     )
                   })}
 

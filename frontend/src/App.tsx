@@ -72,7 +72,7 @@ export default function App() {
         <div className="scroll-progress" style={{ transform: `scaleX(${scrollPct})` }} aria-hidden="true" />
       )}
 
-      <main className={`flex-1 ${phase === 'running' || phase === 'graph' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <main className={`flex-1 ${phase === 'running' || phase === 'graph' ? 'overflow-hidden' : ''}`}>
         {phase === 'landing' && (
           <Landing
             onStart={startRun}

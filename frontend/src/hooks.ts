@@ -71,9 +71,18 @@ export function usePrefersReducedMotion(): boolean {
 }
 
 /**
- * Fractional scroll progress (0..1) of `ref` through the viewport, driven by
- * a passive scroll listener + rAF. `pin` returns progress through the section's
- * pinned window when the top of the track crosses the viewport.
+ * Fractional scroll progress (0..1) of `ref` through a pinned section,
+ * driven by a passive scroll listener + rAF.
+ *
+ * Maps the element's rect.top to progress as follows:
+ *   rect.top = 0           → progress = 0   (element's top at viewport top)
+ *   rect.top = -scrollDist → progress = 1 (element scrolled past bottom)
+ *
+ * where scrollDistance = rect.height - window.innerHeight.
+ *
+ * This is designed for a pinned investigation scene with a fixed-height
+ * track (e.g. 260vh) where the inner sticky element stays in the viewport
+ * while the user scrolls through the full track height.
  */
 export function useScrollProgress<T extends HTMLElement = HTMLDivElement>() {
   const ref = useRef<T | null>(null)
@@ -87,15 +96,10 @@ export function useScrollProgress<T extends HTMLElement = HTMLDivElement>() {
       raf = 0
       const rect = el.getBoundingClientRect()
       const vh = window.innerHeight
-      if (rect.bottom <= 0) {
-        setProgress(1)
-        return
-      }
-      if (rect.top >= vh) {
-        setProgress(0)
-        return
-      }
-      setProgress(Math.min(1, Math.max(0, (vh - rect.top) / (rect.height + vh))))
+      const scrollDistance = rect.height - vh
+      // When rect.top = 0 → progress 0; rect.top = -scrollDist → progress 1
+      const next = -rect.top / scrollDistance
+      setProgress(Math.min(1, Math.max(0, next)))
     }
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update)

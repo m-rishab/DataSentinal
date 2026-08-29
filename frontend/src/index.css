@@ -179,6 +179,14 @@ body {
   animation: edge-flow 0.8s linear infinite;
 }
 
+/* InvestigationScene active node "inhale": small box breathes in, lifts,
+   settles to rest. Runs once on activation (440ms) then stays stable. */
+@keyframes isa-inhale {
+  0%   { transform: translateY(2px) scale(0.96); }
+  45%  { transform: translateY(-3px) scale(1.02); }
+  100% { transform: translateY(-2px) scale(1); }
+}
+
 /* Soft radial glow emitted by an active node. */
 @keyframes node-breathe {
   0%, 100% { transform: scale(1); opacity: 0.35; }
